@@ -9,38 +9,219 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AuthenticatedParticipantRouteImport } from './routes/_authenticated/participant'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedParticipantDashboardRouteImport } from './routes/_authenticated/participant/dashboard'
+import { Route as AuthenticatedAdminResultsRouteImport } from './routes/_authenticated/admin/results'
+import { Route as AuthenticatedAdminQuizzesRouteImport } from './routes/_authenticated/admin/quizzes'
+import { Route as AuthenticatedAdminParticipantsRouteImport } from './routes/_authenticated/admin/participants'
+import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
+import { Route as AuthenticatedParticipantResultAttemptIdRouteImport } from './routes/_authenticated/participant/result.$attemptId'
+import { Route as AuthenticatedParticipantQuizQuizIdRouteImport } from './routes/_authenticated/participant/quiz.$quizId'
+import { Route as AuthenticatedAdminQuestionsQuizIdRouteImport } from './routes/_authenticated/admin/questions.$quizId'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedParticipantRoute =
+  AuthenticatedParticipantRouteImport.update({
+    id: '/participant',
+    path: '/participant',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedParticipantDashboardRoute =
+  AuthenticatedParticipantDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedParticipantRoute,
+  } as any)
+const AuthenticatedAdminResultsRoute =
+  AuthenticatedAdminResultsRouteImport.update({
+    id: '/results',
+    path: '/results',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminQuizzesRoute =
+  AuthenticatedAdminQuizzesRouteImport.update({
+    id: '/quizzes',
+    path: '/quizzes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminParticipantsRoute =
+  AuthenticatedAdminParticipantsRouteImport.update({
+    id: '/participants',
+    path: '/participants',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDashboardRoute =
+  AuthenticatedAdminDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedParticipantResultAttemptIdRoute =
+  AuthenticatedParticipantResultAttemptIdRouteImport.update({
+    id: '/result/$attemptId',
+    path: '/result/$attemptId',
+    getParentRoute: () => AuthenticatedParticipantRoute,
+  } as any)
+const AuthenticatedParticipantQuizQuizIdRoute =
+  AuthenticatedParticipantQuizQuizIdRouteImport.update({
+    id: '/quiz/$quizId',
+    path: '/quiz/$quizId',
+    getParentRoute: () => AuthenticatedParticipantRoute,
+  } as any)
+const AuthenticatedAdminQuestionsQuizIdRoute =
+  AuthenticatedAdminQuestionsQuizIdRouteImport.update({
+    id: '/questions/$quizId',
+    path: '/questions/$quizId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/participant': typeof AuthenticatedParticipantRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/participants': typeof AuthenticatedAdminParticipantsRoute
+  '/admin/quizzes': typeof AuthenticatedAdminQuizzesRoute
+  '/admin/results': typeof AuthenticatedAdminResultsRoute
+  '/participant/dashboard': typeof AuthenticatedParticipantDashboardRoute
+  '/admin/questions/$quizId': typeof AuthenticatedAdminQuestionsQuizIdRoute
+  '/participant/quiz/$quizId': typeof AuthenticatedParticipantQuizQuizIdRoute
+  '/participant/result/$attemptId': typeof AuthenticatedParticipantResultAttemptIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/participant': typeof AuthenticatedParticipantRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/participants': typeof AuthenticatedAdminParticipantsRoute
+  '/admin/quizzes': typeof AuthenticatedAdminQuizzesRoute
+  '/admin/results': typeof AuthenticatedAdminResultsRoute
+  '/participant/dashboard': typeof AuthenticatedParticipantDashboardRoute
+  '/admin/questions/$quizId': typeof AuthenticatedAdminQuestionsQuizIdRoute
+  '/participant/quiz/$quizId': typeof AuthenticatedParticipantQuizQuizIdRoute
+  '/participant/result/$attemptId': typeof AuthenticatedParticipantResultAttemptIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/participant': typeof AuthenticatedParticipantRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin/participants': typeof AuthenticatedAdminParticipantsRoute
+  '/_authenticated/admin/quizzes': typeof AuthenticatedAdminQuizzesRoute
+  '/_authenticated/admin/results': typeof AuthenticatedAdminResultsRoute
+  '/_authenticated/participant/dashboard': typeof AuthenticatedParticipantDashboardRoute
+  '/_authenticated/admin/questions/$quizId': typeof AuthenticatedAdminQuestionsQuizIdRoute
+  '/_authenticated/participant/quiz/$quizId': typeof AuthenticatedParticipantQuizQuizIdRoute
+  '/_authenticated/participant/result/$attemptId': typeof AuthenticatedParticipantResultAttemptIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/admin'
+    | '/participant'
+    | '/admin/login'
+    | '/admin/dashboard'
+    | '/admin/participants'
+    | '/admin/quizzes'
+    | '/admin/results'
+    | '/participant/dashboard'
+    | '/admin/questions/$quizId'
+    | '/participant/quiz/$quizId'
+    | '/participant/result/$attemptId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/admin'
+    | '/participant'
+    | '/admin/login'
+    | '/admin/dashboard'
+    | '/admin/participants'
+    | '/admin/quizzes'
+    | '/admin/results'
+    | '/participant/dashboard'
+    | '/admin/questions/$quizId'
+    | '/participant/quiz/$quizId'
+    | '/participant/result/$attemptId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/login'
+    | '/_authenticated/admin'
+    | '/_authenticated/participant'
+    | '/admin/login'
+    | '/_authenticated/admin/dashboard'
+    | '/_authenticated/admin/participants'
+    | '/_authenticated/admin/quizzes'
+    | '/_authenticated/admin/results'
+    | '/_authenticated/participant/dashboard'
+    | '/_authenticated/admin/questions/$quizId'
+    | '/_authenticated/participant/quiz/$quizId'
+    | '/_authenticated/participant/result/$attemptId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +229,147 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/participant': {
+      id: '/_authenticated/participant'
+      path: '/participant'
+      fullPath: '/participant'
+      preLoaderRoute: typeof AuthenticatedParticipantRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/participant/dashboard': {
+      id: '/_authenticated/participant/dashboard'
+      path: '/dashboard'
+      fullPath: '/participant/dashboard'
+      preLoaderRoute: typeof AuthenticatedParticipantDashboardRouteImport
+      parentRoute: typeof AuthenticatedParticipantRoute
+    }
+    '/_authenticated/admin/results': {
+      id: '/_authenticated/admin/results'
+      path: '/results'
+      fullPath: '/admin/results'
+      preLoaderRoute: typeof AuthenticatedAdminResultsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/quizzes': {
+      id: '/_authenticated/admin/quizzes'
+      path: '/quizzes'
+      fullPath: '/admin/quizzes'
+      preLoaderRoute: typeof AuthenticatedAdminQuizzesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/participants': {
+      id: '/_authenticated/admin/participants'
+      path: '/participants'
+      fullPath: '/admin/participants'
+      preLoaderRoute: typeof AuthenticatedAdminParticipantsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/dashboard': {
+      id: '/_authenticated/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/participant/result/$attemptId': {
+      id: '/_authenticated/participant/result/$attemptId'
+      path: '/result/$attemptId'
+      fullPath: '/participant/result/$attemptId'
+      preLoaderRoute: typeof AuthenticatedParticipantResultAttemptIdRouteImport
+      parentRoute: typeof AuthenticatedParticipantRoute
+    }
+    '/_authenticated/participant/quiz/$quizId': {
+      id: '/_authenticated/participant/quiz/$quizId'
+      path: '/quiz/$quizId'
+      fullPath: '/participant/quiz/$quizId'
+      preLoaderRoute: typeof AuthenticatedParticipantQuizQuizIdRouteImport
+      parentRoute: typeof AuthenticatedParticipantRoute
+    }
+    '/_authenticated/admin/questions/$quizId': {
+      id: '/_authenticated/admin/questions/$quizId'
+      path: '/questions/$quizId'
+      fullPath: '/admin/questions/$quizId'
+      preLoaderRoute: typeof AuthenticatedAdminQuestionsQuizIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminParticipantsRoute: typeof AuthenticatedAdminParticipantsRoute
+  AuthenticatedAdminQuizzesRoute: typeof AuthenticatedAdminQuizzesRoute
+  AuthenticatedAdminResultsRoute: typeof AuthenticatedAdminResultsRoute
+  AuthenticatedAdminQuestionsQuizIdRoute: typeof AuthenticatedAdminQuestionsQuizIdRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminParticipantsRoute: AuthenticatedAdminParticipantsRoute,
+  AuthenticatedAdminQuizzesRoute: AuthenticatedAdminQuizzesRoute,
+  AuthenticatedAdminResultsRoute: AuthenticatedAdminResultsRoute,
+  AuthenticatedAdminQuestionsQuizIdRoute:
+    AuthenticatedAdminQuestionsQuizIdRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
+interface AuthenticatedParticipantRouteChildren {
+  AuthenticatedParticipantDashboardRoute: typeof AuthenticatedParticipantDashboardRoute
+  AuthenticatedParticipantQuizQuizIdRoute: typeof AuthenticatedParticipantQuizQuizIdRoute
+  AuthenticatedParticipantResultAttemptIdRoute: typeof AuthenticatedParticipantResultAttemptIdRoute
+}
+
+const AuthenticatedParticipantRouteChildren: AuthenticatedParticipantRouteChildren =
+  {
+    AuthenticatedParticipantDashboardRoute:
+      AuthenticatedParticipantDashboardRoute,
+    AuthenticatedParticipantQuizQuizIdRoute:
+      AuthenticatedParticipantQuizQuizIdRoute,
+    AuthenticatedParticipantResultAttemptIdRoute:
+      AuthenticatedParticipantResultAttemptIdRoute,
+  }
+
+const AuthenticatedParticipantRouteWithChildren =
+  AuthenticatedParticipantRoute._addFileChildren(
+    AuthenticatedParticipantRouteChildren,
+  )
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedParticipantRoute: typeof AuthenticatedParticipantRouteWithChildren
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedParticipantRoute: AuthenticatedParticipantRouteWithChildren,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
+  AdminLoginRoute: AdminLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
