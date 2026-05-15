@@ -15,10 +15,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedParticipantRouteImport } from './routes/_authenticated/participant'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedParticipantDashboardRouteImport } from './routes/_authenticated/participant/dashboard'
 import { Route as AuthenticatedAdminResultsRouteImport } from './routes/_authenticated/admin/results'
 import { Route as AuthenticatedAdminQuizzesRouteImport } from './routes/_authenticated/admin/quizzes'
 import { Route as AuthenticatedAdminParticipantsRouteImport } from './routes/_authenticated/admin/participants'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
+import { Route as AuthenticatedParticipantResultAttemptIdRouteImport } from './routes/_authenticated/participant/result.$attemptId'
+import { Route as AuthenticatedParticipantQuizQuizIdRouteImport } from './routes/_authenticated/participant/quiz.$quizId'
 import { Route as AuthenticatedAdminQuestionsQuizIdRouteImport } from './routes/_authenticated/admin/questions.$quizId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -51,6 +54,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedParticipantDashboardRoute =
+  AuthenticatedParticipantDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedParticipantRoute,
+  } as any)
 const AuthenticatedAdminResultsRoute =
   AuthenticatedAdminResultsRouteImport.update({
     id: '/results',
@@ -75,6 +84,18 @@ const AuthenticatedAdminDashboardRoute =
     path: '/dashboard',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedParticipantResultAttemptIdRoute =
+  AuthenticatedParticipantResultAttemptIdRouteImport.update({
+    id: '/result/$attemptId',
+    path: '/result/$attemptId',
+    getParentRoute: () => AuthenticatedParticipantRoute,
+  } as any)
+const AuthenticatedParticipantQuizQuizIdRoute =
+  AuthenticatedParticipantQuizQuizIdRouteImport.update({
+    id: '/quiz/$quizId',
+    path: '/quiz/$quizId',
+    getParentRoute: () => AuthenticatedParticipantRoute,
+  } as any)
 const AuthenticatedAdminQuestionsQuizIdRoute =
   AuthenticatedAdminQuestionsQuizIdRouteImport.update({
     id: '/questions/$quizId',
@@ -86,25 +107,31 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/participant': typeof AuthenticatedParticipantRoute
+  '/participant': typeof AuthenticatedParticipantRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/participants': typeof AuthenticatedAdminParticipantsRoute
   '/admin/quizzes': typeof AuthenticatedAdminQuizzesRoute
   '/admin/results': typeof AuthenticatedAdminResultsRoute
+  '/participant/dashboard': typeof AuthenticatedParticipantDashboardRoute
   '/admin/questions/$quizId': typeof AuthenticatedAdminQuestionsQuizIdRoute
+  '/participant/quiz/$quizId': typeof AuthenticatedParticipantQuizQuizIdRoute
+  '/participant/result/$attemptId': typeof AuthenticatedParticipantResultAttemptIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/participant': typeof AuthenticatedParticipantRoute
+  '/participant': typeof AuthenticatedParticipantRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/participants': typeof AuthenticatedAdminParticipantsRoute
   '/admin/quizzes': typeof AuthenticatedAdminQuizzesRoute
   '/admin/results': typeof AuthenticatedAdminResultsRoute
+  '/participant/dashboard': typeof AuthenticatedParticipantDashboardRoute
   '/admin/questions/$quizId': typeof AuthenticatedAdminQuestionsQuizIdRoute
+  '/participant/quiz/$quizId': typeof AuthenticatedParticipantQuizQuizIdRoute
+  '/participant/result/$attemptId': typeof AuthenticatedParticipantResultAttemptIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -112,13 +139,16 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/_authenticated/participant': typeof AuthenticatedParticipantRoute
+  '/_authenticated/participant': typeof AuthenticatedParticipantRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/participants': typeof AuthenticatedAdminParticipantsRoute
   '/_authenticated/admin/quizzes': typeof AuthenticatedAdminQuizzesRoute
   '/_authenticated/admin/results': typeof AuthenticatedAdminResultsRoute
+  '/_authenticated/participant/dashboard': typeof AuthenticatedParticipantDashboardRoute
   '/_authenticated/admin/questions/$quizId': typeof AuthenticatedAdminQuestionsQuizIdRoute
+  '/_authenticated/participant/quiz/$quizId': typeof AuthenticatedParticipantQuizQuizIdRoute
+  '/_authenticated/participant/result/$attemptId': typeof AuthenticatedParticipantResultAttemptIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -132,7 +162,10 @@ export interface FileRouteTypes {
     | '/admin/participants'
     | '/admin/quizzes'
     | '/admin/results'
+    | '/participant/dashboard'
     | '/admin/questions/$quizId'
+    | '/participant/quiz/$quizId'
+    | '/participant/result/$attemptId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,7 +177,10 @@ export interface FileRouteTypes {
     | '/admin/participants'
     | '/admin/quizzes'
     | '/admin/results'
+    | '/participant/dashboard'
     | '/admin/questions/$quizId'
+    | '/participant/quiz/$quizId'
+    | '/participant/result/$attemptId'
   id:
     | '__root__'
     | '/'
@@ -157,7 +193,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/participants'
     | '/_authenticated/admin/quizzes'
     | '/_authenticated/admin/results'
+    | '/_authenticated/participant/dashboard'
     | '/_authenticated/admin/questions/$quizId'
+    | '/_authenticated/participant/quiz/$quizId'
+    | '/_authenticated/participant/result/$attemptId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -211,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/participant/dashboard': {
+      id: '/_authenticated/participant/dashboard'
+      path: '/dashboard'
+      fullPath: '/participant/dashboard'
+      preLoaderRoute: typeof AuthenticatedParticipantDashboardRouteImport
+      parentRoute: typeof AuthenticatedParticipantRoute
+    }
     '/_authenticated/admin/results': {
       id: '/_authenticated/admin/results'
       path: '/results'
@@ -238,6 +284,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/participant/result/$attemptId': {
+      id: '/_authenticated/participant/result/$attemptId'
+      path: '/result/$attemptId'
+      fullPath: '/participant/result/$attemptId'
+      preLoaderRoute: typeof AuthenticatedParticipantResultAttemptIdRouteImport
+      parentRoute: typeof AuthenticatedParticipantRoute
+    }
+    '/_authenticated/participant/quiz/$quizId': {
+      id: '/_authenticated/participant/quiz/$quizId'
+      path: '/quiz/$quizId'
+      fullPath: '/participant/quiz/$quizId'
+      preLoaderRoute: typeof AuthenticatedParticipantQuizQuizIdRouteImport
+      parentRoute: typeof AuthenticatedParticipantRoute
     }
     '/_authenticated/admin/questions/$quizId': {
       id: '/_authenticated/admin/questions/$quizId'
@@ -269,14 +329,35 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedParticipantRouteChildren {
+  AuthenticatedParticipantDashboardRoute: typeof AuthenticatedParticipantDashboardRoute
+  AuthenticatedParticipantQuizQuizIdRoute: typeof AuthenticatedParticipantQuizQuizIdRoute
+  AuthenticatedParticipantResultAttemptIdRoute: typeof AuthenticatedParticipantResultAttemptIdRoute
+}
+
+const AuthenticatedParticipantRouteChildren: AuthenticatedParticipantRouteChildren =
+  {
+    AuthenticatedParticipantDashboardRoute:
+      AuthenticatedParticipantDashboardRoute,
+    AuthenticatedParticipantQuizQuizIdRoute:
+      AuthenticatedParticipantQuizQuizIdRoute,
+    AuthenticatedParticipantResultAttemptIdRoute:
+      AuthenticatedParticipantResultAttemptIdRoute,
+  }
+
+const AuthenticatedParticipantRouteWithChildren =
+  AuthenticatedParticipantRoute._addFileChildren(
+    AuthenticatedParticipantRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
-  AuthenticatedParticipantRoute: typeof AuthenticatedParticipantRoute
+  AuthenticatedParticipantRoute: typeof AuthenticatedParticipantRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
-  AuthenticatedParticipantRoute: AuthenticatedParticipantRoute,
+  AuthenticatedParticipantRoute: AuthenticatedParticipantRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
