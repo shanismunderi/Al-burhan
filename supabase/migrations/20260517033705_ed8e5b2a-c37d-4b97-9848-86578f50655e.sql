@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.email_for_access_code(text);

@@ -274,7 +274,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      email_for_access_code: { Args: { _code: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
