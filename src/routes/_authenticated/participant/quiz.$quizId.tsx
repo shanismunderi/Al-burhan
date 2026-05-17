@@ -102,7 +102,7 @@ function TakeQuiz() {
     // MCQ auto-grade. Descriptive deferred to admin.
     let correct = 0, score = 0;
     const negMarks = quiz?.negative_marks ?? 0;
-    const updates: Array<Promise<any>> = [];
+    const updates: Array<PromiseLike<any>> = [];
     questions.forEach((q) => {
       const sel = answers[q.id];
       if (q.question_type === "mcq") {
