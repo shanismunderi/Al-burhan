@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { AlertTriangle, Clock, Maximize, ShieldCheck } from "lucide-react";
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/participant/quiz/$quizId")
 });
 
 interface Quiz { id: string; title: string; instructions: string | null; duration_minutes: number; negative_marks: number; randomize: boolean; }
-interface Question { id: string; question_text: string; option_a: string; option_b: string; option_c: string; option_d: string; marks: number; correct_answer: string; }
+interface Question { id: string; question_text: string; question_type: "mcq" | "descriptive"; option_a: string | null; option_b: string | null; option_c: string | null; option_d: string | null; marks: number; correct_answer: string | null; }
 interface Attempt { id: string; ends_at: string; warnings: number; status: string; }
 
 const MAX_WARNINGS = 3;
@@ -33,8 +34,8 @@ function TakeQuiz() {
 
   const submittingRef = useRef(false);
   const warningsRef = useRef(0);
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-  // Load quiz + questions
   useEffect(() => {
     (async () => {
       const [{ data: q }, { data: qs }] = await Promise.all([
@@ -48,15 +49,12 @@ function TakeQuiz() {
     })();
   }, [quizId]);
 
-  // tick
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(t); }, []);
 
   const remaining = useMemo(() => attempt ? Math.max(0, new Date(attempt.ends_at).getTime() - now) : 0, [attempt, now]);
 
-  // Start attempt
   const beginAttempt = async () => {
     if (!user || !quiz) return;
-    // Reuse existing in-progress
     const { data: existing } = await supabase.from("quiz_attempts").select("*").eq("user_id", user.id).eq("quiz_id", quizId).eq("status", "in_progress").maybeSingle();
     let a = existing as Attempt | null;
     if (!a) {
@@ -68,7 +66,6 @@ function TakeQuiz() {
       if (error) return toast.error(error.message);
       a = data as Attempt;
     } else {
-      // Load saved answers
       const { data: saved } = await supabase.from("attempt_answers").select("*").eq("attempt_id", a.id);
       const map: Record<string, string> = {};
       (saved ?? []).forEach((s: any) => { if (s.selected_answer) map[s.question_id] = s.selected_answer; });
@@ -99,19 +96,41 @@ function TakeQuiz() {
     }
   }, [attempt, user]);
 
-  // Submission
   const autoSubmit = useCallback(async (status: "submitted" | "auto_submitted" = "submitted") => {
     if (submittingRef.current || !attempt) return;
     submittingRef.current = true;
-    // Compute score
+    // MCQ auto-grade. Descriptive deferred to admin.
     let correct = 0, score = 0;
     const negMarks = quiz?.negative_marks ?? 0;
+    const updates: Array<PromiseLike<any>> = [];
     questions.forEach((q) => {
       const sel = answers[q.id];
-      if (!sel) return;
-      if (sel === q.correct_answer) { correct += 1; score += Number(q.marks); }
-      else { score -= negMarks; }
+      if (q.question_type === "mcq") {
+        let isCorrect: boolean | null = null;
+        if (sel) {
+          isCorrect = sel === q.correct_answer;
+          if (isCorrect) { correct += 1; score += Number(q.marks); }
+          else { score -= negMarks; }
+        }
+        if (sel != null) {
+          updates.push(
+            supabase.from("attempt_answers").upsert({
+              attempt_id: attempt.id, question_id: q.id, selected_answer: sel, is_correct: isCorrect,
+            }, { onConflict: "attempt_id,question_id" })
+          );
+        }
+      } else {
+        // descriptive: ensure saved
+        if (sel != null) {
+          updates.push(
+            supabase.from("attempt_answers").upsert({
+              attempt_id: attempt.id, question_id: q.id, selected_answer: sel, is_correct: null,
+            }, { onConflict: "attempt_id,question_id" })
+          );
+        }
+      }
     });
+    await Promise.all(updates);
     score = Math.max(0, score);
     await supabase.from("quiz_attempts").update({
       status, submitted_at: new Date().toISOString(), score, correct_count: correct, total_questions: questions.length,
@@ -120,12 +139,10 @@ function TakeQuiz() {
     navigate({ to: "/participant/result/$attemptId", params: { attemptId: attempt.id } });
   }, [attempt, questions, answers, quiz, navigate]);
 
-  // Auto-submit on time-up
   useEffect(() => {
     if (started && attempt && remaining === 0) autoSubmit("auto_submitted");
   }, [started, attempt, remaining, autoSubmit]);
 
-  // Anti-cheat listeners
   useEffect(() => {
     if (!started) return;
     const onVis = () => { if (document.visibilityState === "hidden") recordCheat("tab_switch"); };
@@ -147,17 +164,26 @@ function TakeQuiz() {
     };
   }, [started, recordCheat]);
 
-  const selectAnswer = async (qid: string, value: string) => {
-    setAnswers((m) => ({ ...m, [qid]: value }));
+  const saveAnswer = async (qid: string, value: string) => {
     if (!attempt) return;
     await supabase.from("attempt_answers").upsert({
       attempt_id: attempt.id, question_id: qid, selected_answer: value,
     }, { onConflict: "attempt_id,question_id" });
   };
 
+  const selectMcq = (qid: string, value: string) => {
+    setAnswers((m) => ({ ...m, [qid]: value }));
+    saveAnswer(qid, value);
+  };
+
+  const typeText = (qid: string, value: string) => {
+    setAnswers((m) => ({ ...m, [qid]: value }));
+    if (saveTimers.current[qid]) clearTimeout(saveTimers.current[qid]);
+    saveTimers.current[qid] = setTimeout(() => saveAnswer(qid, value), 600);
+  };
+
   if (!quiz) return <div className="p-12 text-center text-muted-foreground">Loading quiz…</div>;
 
-  // Pre-start screen
   if (!started) {
     return (
       <div className="pt-6">
@@ -195,7 +221,6 @@ function TakeQuiz() {
 
   return (
     <div className="pt-2">
-      {/* Top bar */}
       <div className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border -mx-6 px-6 py-3 flex items-center justify-between">
         <div>
           <div className="text-xs text-muted-foreground">Question {current + 1} of {questions.length}</div>
@@ -214,23 +239,40 @@ function TakeQuiz() {
         <div>
           {q && (
             <motion.div key={q.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-card border border-border p-6">
-              <div className="text-xs uppercase tracking-widest text-primary font-medium">Q{current + 1} · {q.marks} mark{Number(q.marks) === 1 ? "" : "s"}</div>
-              <h2 className="text-xl font-semibold mt-2">{q.question_text}</h2>
-              <div className="mt-5 space-y-2">
-                {(["A","B","C","D"] as const).map((k) => {
-                  const text = (q as any)[`option_${k.toLowerCase()}`] as string;
-                  const sel = answers[q.id] === k;
-                  return (
-                    <button key={k} onClick={() => selectAnswer(q.id, k)}
-                      className={`w-full text-left px-4 py-3 rounded-xl border transition-all flex items-center gap-3 ${
-                        sel ? "border-primary bg-primary/10 text-foreground" : "border-border hover:border-primary/40 hover:bg-accent/40"
-                      }`}>
-                      <span className={`h-7 w-7 rounded-full border flex items-center justify-center font-mono text-sm ${sel ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>{k}</span>
-                      <span>{text}</span>
-                    </button>
-                  );
-                })}
+              <div className="text-xs uppercase tracking-widest text-primary font-medium">
+                Q{current + 1} · {q.question_type === "mcq" ? "Multiple choice" : "Descriptive"} · {q.marks} mark{Number(q.marks) === 1 ? "" : "s"}
               </div>
+              <h2 className="text-xl font-semibold mt-2 whitespace-pre-line">{q.question_text}</h2>
+
+              {q.question_type === "mcq" ? (
+                <div className="mt-5 space-y-2">
+                  {(["A","B","C","D"] as const).map((k) => {
+                    const text = (q as any)[`option_${k.toLowerCase()}`] as string | null;
+                    if (!text) return null;
+                    const sel = answers[q.id] === k;
+                    return (
+                      <button key={k} onClick={() => selectMcq(q.id, k)}
+                        className={`w-full text-left px-4 py-3 rounded-xl border transition-all flex items-center gap-3 ${
+                          sel ? "border-primary bg-primary/10 text-foreground" : "border-border hover:border-primary/40 hover:bg-accent/40"
+                        }`}>
+                        <span className={`h-7 w-7 rounded-full border flex items-center justify-center font-mono text-sm ${sel ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>{k}</span>
+                        <span>{text}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-5">
+                  <Textarea
+                    rows={8}
+                    placeholder="Type your answer here…"
+                    value={answers[q.id] ?? ""}
+                    onChange={(e) => typeText(q.id, e.target.value)}
+                  />
+                  <div className="text-xs text-muted-foreground mt-1">Auto-saved as you type.</div>
+                </div>
+              )}
+
               <div className="mt-6 flex items-center justify-between">
                 <Button variant="outline" disabled={current === 0} onClick={() => setCurrent((c) => c - 1)}>Previous</Button>
                 {current < questions.length - 1 ? (
@@ -243,7 +285,6 @@ function TakeQuiz() {
           )}
         </div>
 
-        {/* Navigator */}
         <aside className="rounded-2xl bg-card border border-border p-4 h-fit lg:sticky lg:top-24">
           <div className="text-xs uppercase tracking-widest text-muted-foreground font-medium">Question navigator</div>
           <div className="grid grid-cols-5 gap-2 mt-3">
@@ -268,7 +309,6 @@ function TakeQuiz() {
         </aside>
       </div>
 
-      {/* Warning overlay */}
       <AnimatePresence>
         {warningOpen && (
           <motion.div
