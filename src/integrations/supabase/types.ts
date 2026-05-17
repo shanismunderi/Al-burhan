@@ -19,6 +19,7 @@ export type Database = {
           attempt_id: string
           id: string
           is_correct: boolean | null
+          manual_score: number | null
           question_id: string
           selected_answer: string | null
           updated_at: string
@@ -27,6 +28,7 @@ export type Database = {
           attempt_id: string
           id?: string
           is_correct?: boolean | null
+          manual_score?: number | null
           question_id: string
           selected_answer?: string | null
           updated_at?: string
@@ -35,6 +37,7 @@ export type Database = {
           attempt_id?: string
           id?: string
           is_correct?: boolean | null
+          manual_score?: number | null
           question_id?: string
           selected_answer?: string | null
           updated_at?: string
@@ -90,18 +93,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_code: string | null
           created_at: string
           display_name: string | null
           id: string
           username: string
         }
         Insert: {
+          access_code?: string | null
           created_at?: string
           display_name?: string | null
           id: string
           username: string
         }
         Update: {
+          access_code?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
@@ -111,42 +117,45 @@ export type Database = {
       }
       questions: {
         Row: {
-          correct_answer: string
+          correct_answer: string | null
           created_at: string
           id: string
           marks: number
-          option_a: string
-          option_b: string
-          option_c: string
-          option_d: string
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
           position: number
           question_text: string
+          question_type: string
           quiz_id: string
         }
         Insert: {
-          correct_answer: string
+          correct_answer?: string | null
           created_at?: string
           id?: string
           marks?: number
-          option_a: string
-          option_b: string
-          option_c: string
-          option_d: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
           position?: number
           question_text: string
+          question_type?: string
           quiz_id: string
         }
         Update: {
-          correct_answer?: string
+          correct_answer?: string | null
           created_at?: string
           id?: string
           marks?: number
-          option_a?: string
-          option_b?: string
-          option_c?: string
-          option_d?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
           position?: number
           question_text?: string
+          question_type?: string
           quiz_id?: string
         }
         Relationships: [
@@ -265,6 +274,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      email_for_access_code: { Args: { _code: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
