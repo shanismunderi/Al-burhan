@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 
-// Map a free-form username (e.g. "admin@burhan" or "quiz101") to a synthetic email.
+// Admin uses username "admin@burhan" -> "admin@burhan.local"
 export function usernameToEmail(input: string): string {
   const u = input.trim().toLowerCase();
   if (u.includes("@")) {
@@ -18,6 +18,13 @@ export async function signInWithUsername(username: string, password: string) {
     email: usernameToEmail(username),
     password,
   });
+}
+
+// Candidate login by access code only
+export async function signInWithCode(code: string) {
+  const c = code.trim().toUpperCase();
+  const email = `code-${c.toLowerCase()}@quiz.local`;
+  return supabase.auth.signInWithPassword({ email, password: c });
 }
 
 export async function signOut() {
@@ -45,12 +52,12 @@ export function useAuth(): AuthState {
     const loadRole = async (uid: string) => {
       const [{ data: roles }, { data: profile }] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", uid),
-        supabase.from("profiles").select("username").eq("id", uid).maybeSingle(),
+        supabase.from("profiles").select("username, display_name").eq("id", uid).maybeSingle(),
       ]);
       if (!mounted) return;
       const r = roles?.find((x) => x.role === "admin") ? "admin" : roles?.[0]?.role ?? null;
       setRole((r as Role) ?? null);
-      setUsername(profile?.username ?? null);
+      setUsername(profile?.display_name ?? profile?.username ?? null);
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
