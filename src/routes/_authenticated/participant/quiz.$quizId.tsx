@@ -37,7 +37,15 @@ function TakeQuiz() {
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => {
+    if (!user) return;
     (async () => {
+      const { data: submitted } = await supabase
+        .from("quiz_attempts").select("id,status").eq("user_id", user.id).eq("quiz_id", quizId)
+        .neq("status", "in_progress").limit(1).maybeSingle();
+      if (submitted) {
+        navigate({ to: "/participant/dashboard" });
+        return;
+      }
       const [{ data: q }, { data: qs }] = await Promise.all([
         supabase.from("quizzes").select("*").eq("id", quizId).maybeSingle(),
         supabase.from("questions").select("*").eq("quiz_id", quizId).order("position"),
@@ -47,7 +55,7 @@ function TakeQuiz() {
       if (q?.randomize) list = [...list].sort(() => Math.random() - 0.5);
       setQuestions(list);
     })();
-  }, [quizId]);
+  }, [quizId, user, navigate]);
 
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(t); }, []);
 
