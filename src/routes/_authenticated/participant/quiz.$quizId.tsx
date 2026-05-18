@@ -55,6 +55,15 @@ function TakeQuiz() {
 
   const beginAttempt = async () => {
     if (!user || !quiz) return;
+    // Block if user already submitted this quiz
+    const { data: submitted } = await supabase
+      .from("quiz_attempts").select("id,status").eq("user_id", user.id).eq("quiz_id", quizId)
+      .neq("status", "in_progress").limit(1).maybeSingle();
+    if (submitted) {
+      toast.error("You have already submitted this exam. Only one attempt is allowed.");
+      navigate({ to: "/participant/dashboard" });
+      return;
+    }
     const { data: existing } = await supabase.from("quiz_attempts").select("*").eq("user_id", user.id).eq("quiz_id", quizId).eq("status", "in_progress").maybeSingle();
     let a = existing as Attempt | null;
     if (!a) {
