@@ -122,9 +122,12 @@ function TakeQuiz() {
   }, [attempt, user]);
 
   const autoSubmit = useCallback(async (status: "submitted" | "auto_submitted" = "submitted") => {
+    const attempt = attemptRef.current;
+    const quiz = quizRef.current;
+    const questions = questionsRef.current;
+    const answers = answersRef.current;
     if (submittingRef.current || !attempt) return;
     submittingRef.current = true;
-    // MCQ auto-grade. Descriptive deferred to admin.
     let correct = 0, score = 0;
     const negMarks = quiz?.negative_marks ?? 0;
     const updates: Array<PromiseLike<any>> = [];
@@ -145,7 +148,6 @@ function TakeQuiz() {
           );
         }
       } else {
-        // descriptive: ensure saved
         if (sel != null) {
           updates.push(
             supabase.from("attempt_answers").upsert({
@@ -162,10 +164,10 @@ function TakeQuiz() {
     }).eq("id", attempt.id);
     if (document.fullscreenElement) try { await document.exitFullscreen(); } catch {}
     navigate({ to: "/participant/result/$attemptId", params: { attemptId: attempt.id } });
-  }, [attempt, questions, answers, quiz, navigate]);
+  }, [navigate]);
 
   useEffect(() => {
-    if (started && attempt && remaining === 0) autoSubmit("auto_submitted");
+    if (started && attempt && remaining <= 0 && !submittingRef.current) autoSubmit("auto_submitted");
   }, [started, attempt, remaining, autoSubmit]);
 
   useEffect(() => {
