@@ -35,6 +35,14 @@ function TakeQuiz() {
   const submittingRef = useRef(false);
   const warningsRef = useRef(0);
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const answersRef = useRef<Record<string, string>>({});
+  const questionsRef = useRef<Question[]>([]);
+  const quizRef = useRef<Quiz | null>(null);
+  const attemptRef = useRef<Attempt | null>(null);
+  useEffect(() => { answersRef.current = answers; }, [answers]);
+  useEffect(() => { questionsRef.current = questions; }, [questions]);
+  useEffect(() => { quizRef.current = quiz; }, [quiz]);
+  useEffect(() => { attemptRef.current = attempt; }, [attempt]);
 
   useEffect(() => {
     if (!user) return;
