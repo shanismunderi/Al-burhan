@@ -35,6 +35,14 @@ function TakeQuiz() {
   const submittingRef = useRef(false);
   const warningsRef = useRef(0);
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const answersRef = useRef<Record<string, string>>({});
+  const questionsRef = useRef<Question[]>([]);
+  const quizRef = useRef<Quiz | null>(null);
+  const attemptRef = useRef<Attempt | null>(null);
+  useEffect(() => { answersRef.current = answers; }, [answers]);
+  useEffect(() => { questionsRef.current = questions; }, [questions]);
+  useEffect(() => { quizRef.current = quiz; }, [quiz]);
+  useEffect(() => { attemptRef.current = attempt; }, [attempt]);
 
   useEffect(() => {
     if (!user) return;
@@ -57,7 +65,7 @@ function TakeQuiz() {
     })();
   }, [quizId, user, navigate]);
 
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(t); }, []);
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(t); }, []);
 
   const remaining = useMemo(() => attempt ? Math.max(0, new Date(attempt.ends_at).getTime() - now) : 0, [attempt, now]);
 
@@ -114,9 +122,12 @@ function TakeQuiz() {
   }, [attempt, user]);
 
   const autoSubmit = useCallback(async (status: "submitted" | "auto_submitted" = "submitted") => {
+    const attempt = attemptRef.current;
+    const quiz = quizRef.current;
+    const questions = questionsRef.current;
+    const answers = answersRef.current;
     if (submittingRef.current || !attempt) return;
     submittingRef.current = true;
-    // MCQ auto-grade. Descriptive deferred to admin.
     let correct = 0, score = 0;
     const negMarks = quiz?.negative_marks ?? 0;
     const updates: Array<PromiseLike<any>> = [];
@@ -137,7 +148,6 @@ function TakeQuiz() {
           );
         }
       } else {
-        // descriptive: ensure saved
         if (sel != null) {
           updates.push(
             supabase.from("attempt_answers").upsert({
@@ -154,10 +164,10 @@ function TakeQuiz() {
     }).eq("id", attempt.id);
     if (document.fullscreenElement) try { await document.exitFullscreen(); } catch {}
     navigate({ to: "/participant/result/$attemptId", params: { attemptId: attempt.id } });
-  }, [attempt, questions, answers, quiz, navigate]);
+  }, [navigate]);
 
   useEffect(() => {
-    if (started && attempt && remaining === 0) autoSubmit("auto_submitted");
+    if (started && attempt && remaining <= 0 && !submittingRef.current) autoSubmit("auto_submitted");
   }, [started, attempt, remaining, autoSubmit]);
 
   useEffect(() => {
