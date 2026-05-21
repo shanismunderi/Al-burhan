@@ -29,7 +29,7 @@ function AdminLogin() {
   }, [seed]);
 
   useEffect(() => {
-    if (!loading && session) {
+    if (!loading && session && role) {
       navigate({ to: role === "admin" ? "/admin/dashboard" : "/participant/dashboard" });
     }
   }, [loading, session, role, navigate]);
