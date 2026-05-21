@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Trash2, Users as UsersIcon, Copy, KeyRound } from "lucide-react";
-import { createParticipant, deleteParticipant } from "@/lib/admin.functions";
+import { Plus, Trash2, Users as UsersIcon, Copy, KeyRound, Pencil, Check, X } from "lucide-react";
+import { createParticipant, deleteParticipant, updateAccessCode } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/participants")({
   component: ParticipantsPage,
@@ -18,10 +18,13 @@ interface Row { id: string; username: string; display_name: string | null; acces
 function ParticipantsPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [name, setName] = useState("");
+  const [customCode, setCustomCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [lastCode, setLastCode] = useState<{ name: string; code: string } | null>(null);
+  const [editing, setEditing] = useState<{ id: string; code: string } | null>(null);
   const create = useServerFn(createParticipant);
   const del = useServerFn(deleteParticipant);
+  const updateCode = useServerFn(updateAccessCode);
 
   const load = async () => {
     const [{ data: profiles }, { data: roles }] = await Promise.all([
@@ -38,10 +41,10 @@ function ParticipantsPage() {
     if (!name.trim()) return toast.error("Candidate name required");
     setBusy(true);
     try {
-      const res = await create({ data: { display_name: name.trim() } });
+      const res = await create({ data: { display_name: name.trim(), access_code: customCode.trim() || undefined } });
       setLastCode({ name: name.trim(), code: res.access_code });
       toast.success("Candidate created — share the access code");
-      setName("");
+      setName(""); setCustomCode("");
       load();
     } catch (e: any) { toast.error(e.message); }
     setBusy(false);
@@ -53,12 +56,21 @@ function ParticipantsPage() {
     catch (e: any) { toast.error(e.message); }
   };
 
+  const saveEdit = async () => {
+    if (!editing) return;
+    try {
+      await updateCode({ data: { user_id: editing.id, access_code: editing.code.trim().toUpperCase() } });
+      toast.success("Access code updated");
+      setEditing(null); load();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
   const copy = (text: string) => { navigator.clipboard.writeText(text); toast.success("Copied"); };
 
   return (
     <div className="p-8">
       <div className="flex items-center gap-2"><UsersIcon className="h-6 w-6 text-primary" /><h1 className="text-3xl font-bold">Candidates</h1></div>
-      <p className="text-muted-foreground mt-1">Generate access codes for exam takers. They sign in with the code only.</p>
+      <p className="text-muted-foreground mt-1">Generate or customize access codes for exam takers. They sign in with the code only.</p>
 
       {lastCode && (
         <div className="mt-5 rounded-2xl border-2 border-primary bg-primary/5 p-5 flex items-center justify-between gap-4">
@@ -71,7 +83,7 @@ function ParticipantsPage() {
         </div>
       )}
 
-      <div className="mt-6 grid lg:grid-cols-[1fr_320px] gap-6">
+      <div className="mt-6 grid lg:grid-cols-[1fr_340px] gap-6">
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-muted-foreground">
@@ -83,10 +95,29 @@ function ParticipantsPage() {
                 <tr key={r.id} className="border-t border-border">
                   <td className="px-4 py-3 font-medium">{r.display_name || r.username}</td>
                   <td className="px-4 py-3">
-                    {r.access_code ? (
-                      <button onClick={() => copy(r.access_code!)} className="font-mono font-semibold inline-flex items-center gap-2 hover:text-primary">
-                        <KeyRound className="h-3 w-3" /> {r.access_code}
-                      </button>
+                    {editing?.id === r.id ? (
+                      <div className="flex items-center gap-1">
+                        <Input
+                          value={editing.code}
+                          onChange={(e) => setEditing({ id: r.id, code: e.target.value.toUpperCase() })}
+                          className="h-8 w-40 font-mono"
+                          maxLength={16}
+                          autoFocus
+                        />
+                        <Button size="icon" variant="ghost" onClick={saveEdit}><Check className="h-4 w-4 text-success" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => setEditing(null)}><X className="h-4 w-4" /></Button>
+                      </div>
+                    ) : r.access_code ? (
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => copy(r.access_code!)} className="font-mono font-semibold inline-flex items-center gap-2 hover:text-primary">
+                          <KeyRound className="h-3 w-3" /> {r.access_code}
+                        </button>
+                        {r.role !== "admin" && (
+                          <Button size="icon" variant="ghost" onClick={() => setEditing({ id: r.id, code: r.access_code! })}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     ) : <span className="text-muted-foreground text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full ${r.role === "admin" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{r.role}</span></td>
@@ -106,8 +137,18 @@ function ParticipantsPage() {
               <Label>Candidate name</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Aisha Khan" />
             </div>
-            <Button onClick={add} disabled={busy} className="w-full">{busy ? "Generating…" : "Generate access code"}</Button>
-            <p className="text-xs text-muted-foreground">A unique 8-character code will be generated. Share it with the candidate.</p>
+            <div>
+              <Label>Custom access code <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input
+                value={customCode}
+                onChange={(e) => setCustomCode(e.target.value.toUpperCase())}
+                placeholder="Leave empty to auto-generate"
+                className="font-mono"
+                maxLength={16}
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">A–Z and 0–9 only, 4–16 characters.</p>
+            </div>
+            <Button onClick={add} disabled={busy} className="w-full">{busy ? "Saving…" : "Create candidate"}</Button>
           </div>
         </div>
       </div>
