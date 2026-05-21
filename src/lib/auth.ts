@@ -63,6 +63,9 @@ export function useAuth(): AuthState {
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
       setSession(s);
       if (s?.user) {
+        // Clear stale role/username so login redirects don't use previous values
+        setRole(null);
+        setUsername(null);
         setTimeout(() => loadRole(s.user.id), 0);
       } else {
         setRole(null);

@@ -52,23 +52,33 @@ export function emailForCode(code: string) {
   return `code-${code.toLowerCase()}@quiz.local`;
 }
 
+const accessCodeSchema = z.string().min(4).max(16).regex(/^[A-Z0-9]+$/, "Use A–Z and 0–9 only");
+
 const createParticipantSchema = z.object({
   display_name: z.string().min(1).max(120),
+  access_code: z.string().optional(),
 });
 
 export const createParticipant = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => createParticipantSchema.parse(d))
   .handler(async ({ data }) => {
-    // Generate a unique code (retry on collision)
-    let code = generateCode();
-    for (let i = 0; i < 5; i++) {
+    let code = (data.access_code ?? "").trim().toUpperCase();
+    if (code) {
+      accessCodeSchema.parse(code);
       const { data: clash } = await supabaseAdmin
         .from("profiles").select("id").eq("access_code", code).maybeSingle();
-      if (!clash) break;
+      if (clash) throw new Error("That access code is already in use — pick another.");
+    } else {
       code = generateCode();
+      for (let i = 0; i < 5; i++) {
+        const { data: clash } = await supabaseAdmin
+          .from("profiles").select("id").eq("access_code", code).maybeSingle();
+        if (!clash) break;
+        code = generateCode();
+      }
     }
     const email = emailForCode(code);
-    const password = code; // password == code
+    const password = code;
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -79,13 +89,39 @@ export const createParticipant = createServerFn({ method: "POST" })
     if (error || !created.user) {
       throw new Error(error?.message ?? "Failed to create candidate");
     }
-    // Profile is created by trigger; set access_code + display_name explicitly
     await supabaseAdmin
       .from("profiles")
       .update({ access_code: code, display_name: data.display_name, username: code })
       .eq("id", created.user.id);
 
     return { ok: true, user_id: created.user.id, access_code: code, display_name: data.display_name };
+  });
+
+export const updateAccessCode = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ user_id: z.string().uuid(), access_code: accessCodeSchema }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const code = data.access_code.toUpperCase();
+    const { data: clash } = await supabaseAdmin
+      .from("profiles").select("id").eq("access_code", code).maybeSingle();
+    if (clash && clash.id !== data.user_id) {
+      throw new Error("That access code is already in use.");
+    }
+    const newEmail = emailForCode(code);
+    const { error: authErr } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, {
+      email: newEmail,
+      password: code,
+      email_confirm: true,
+      user_metadata: { username: code },
+    });
+    if (authErr) throw new Error(authErr.message);
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ access_code: code, username: code })
+      .eq("id", data.user_id);
+    if (error) throw new Error(error.message);
+    return { ok: true, access_code: code };
   });
 
 export const deleteParticipant = createServerFn({ method: "POST" })

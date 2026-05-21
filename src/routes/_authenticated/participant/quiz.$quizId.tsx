@@ -244,23 +244,77 @@ function TakeQuiz() {
   const h = Math.floor(totalSec / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
   const s = totalSec % 60;
+  const totalDurationMs = quiz.duration_minutes * 60 * 1000;
+  const elapsedFrac = Math.min(1, Math.max(0, 1 - ms / totalDurationMs));
   const lowTime = ms < 60_000;
+  const criticalTime = ms < 30_000;
+
+  // Circular progress ring math
+  const RING_R = 26;
+  const RING_C = 2 * Math.PI * RING_R;
+  const dash = RING_C * (1 - elapsedFrac);
 
   return (
     <div className="pt-2">
-      <div className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border -mx-6 px-6 py-3 flex items-center justify-between">
-        <div>
+      <div className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border -mx-6 px-6 py-3 flex items-center justify-between gap-4">
+        <div className="min-w-0">
           <div className="text-xs text-muted-foreground">Question {current + 1} of {questions.length}</div>
-          <div className="font-semibold">{quiz.title}</div>
+          <div className="font-semibold truncate">{quiz.title}</div>
         </div>
-        <div className={`flex items-center gap-2 font-mono text-lg tabular-nums ${lowTime ? "text-destructive" : "text-foreground"}`}>
-          <Clock className="h-4 w-4" />
-          {h > 0 && `${String(h).padStart(2, "0")}:`}{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Warnings: <span className={attempt && attempt.warnings >= 2 ? "text-destructive font-bold" : "font-bold"}>{attempt?.warnings ?? 0}/{MAX_WARNINGS}</span>
+
+        {/* Animated timer */}
+        <motion.div
+          animate={criticalTime ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+          transition={criticalTime ? { duration: 0.8, repeat: Infinity } : { duration: 0.3 }}
+          className={`relative flex items-center gap-3 pl-3 pr-5 py-2 rounded-2xl border backdrop-blur-md shadow-lg ${
+            criticalTime
+              ? "border-destructive/60 bg-destructive/10 shadow-destructive/30"
+              : lowTime
+              ? "border-warning/60 bg-warning/15"
+              : "border-primary/30 bg-primary/5"
+          }`}
+        >
+          {/* Pulsing glow */}
+          {criticalTime && (
+            <span className="absolute inset-0 rounded-2xl bg-destructive/20 animate-ping -z-10" />
+          )}
+
+          {/* Circular ring progress */}
+          <div className="relative h-14 w-14 shrink-0">
+            <svg viewBox="0 0 60 60" className="h-14 w-14 -rotate-90">
+              <circle cx="30" cy="30" r={RING_R} className="fill-none stroke-foreground/10" strokeWidth="5" />
+              <circle
+                cx="30" cy="30" r={RING_R}
+                className={`fill-none transition-colors duration-300 ${
+                  criticalTime ? "stroke-destructive" : lowTime ? "stroke-warning" : "stroke-primary"
+                }`}
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeDasharray={RING_C}
+                strokeDashoffset={dash}
+                style={{ transition: "stroke-dashoffset 250ms linear" }}
+              />
+            </svg>
+            <Clock className={`h-5 w-5 absolute inset-0 m-auto ${criticalTime ? "text-destructive" : lowTime ? "text-warning" : "text-primary"}`} />
+          </div>
+
+          <div className="flex flex-col leading-none">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
+              Time {criticalTime ? "left!" : "remaining"}
+            </span>
+            <span className={`font-mono text-2xl font-bold tabular-nums mt-0.5 ${
+              criticalTime ? "text-destructive" : lowTime ? "text-warning" : "text-foreground"
+            }`}>
+              {h > 0 && `${String(h).padStart(2, "0")}:`}{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
+            </span>
+          </div>
+        </motion.div>
+
+        <div className="text-xs text-muted-foreground text-right shrink-0">
+          Warnings<br /><span className={attempt && attempt.warnings >= 2 ? "text-destructive font-bold text-base" : "font-bold text-base"}>{attempt?.warnings ?? 0}/{MAX_WARNINGS}</span>
         </div>
       </div>
+
 
       <div className="grid lg:grid-cols-[1fr_220px] gap-6 mt-6">
         <div>
