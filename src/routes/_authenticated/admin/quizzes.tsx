@@ -106,13 +106,13 @@ function QuizSettingsPage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl">
-      <div className="flex items-end justify-between gap-4">
+    <div className="p-4 md:p-8 max-w-3xl">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Quiz settings</h1>
-          <p className="text-muted-foreground mt-1">Configure the single exam available to all candidates.</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Quiz settings</h1>
+          <p className="text-sm text-muted-foreground mt-1">Configure the single exam available to all candidates.</p>
         </div>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" className="w-full sm:w-auto">
           <Link to="/admin/questions/$quizId" params={{ quizId: quiz.id }}>
             <ListChecks className="h-4 w-4 mr-2" /> Manage questions ({questionCount})
           </Link>
