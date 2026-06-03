@@ -55,13 +55,17 @@ export function emailForCode(code: string) {
 const accessCodeSchema = z.string().min(4).max(16).regex(/^[A-Z0-9]+$/, "Use A–Z and 0–9 only");
 
 const createParticipantSchema = z.object({
-  display_name: z.string().min(1).max(120),
+  member1_name: z.string().min(1).max(120),
+  member2_name: z.string().min(1).max(120),
   access_code: z.string().optional(),
 });
 
 export const createParticipant = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => createParticipantSchema.parse(d))
   .handler(async ({ data }) => {
+    const m1 = data.member1_name.trim();
+    const m2 = data.member2_name.trim();
+    const teamName = `${m1} & ${m2}`;
     let code = (data.access_code ?? "").trim().toUpperCase();
     if (code) {
       accessCodeSchema.parse(code);
@@ -84,17 +88,17 @@ export const createParticipant = createServerFn({ method: "POST" })
       email,
       password,
       email_confirm: true,
-      user_metadata: { username: code, display_name: data.display_name },
+      user_metadata: { username: code, display_name: teamName },
     });
     if (error || !created.user) {
-      throw new Error(error?.message ?? "Failed to create candidate");
+      throw new Error(error?.message ?? "Failed to create team");
     }
     await supabaseAdmin
       .from("profiles")
-      .update({ access_code: code, display_name: data.display_name, username: code })
+      .update({ access_code: code, display_name: teamName, username: code, member1_name: m1, member2_name: m2 })
       .eq("id", created.user.id);
 
-    return { ok: true, user_id: created.user.id, access_code: code, display_name: data.display_name };
+    return { ok: true, user_id: created.user.id, access_code: code, display_name: teamName };
   });
 
 export const updateAccessCode = createServerFn({ method: "POST" })

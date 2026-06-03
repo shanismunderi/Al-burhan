@@ -13,11 +13,12 @@ export const Route = createFileRoute("/_authenticated/admin/participants")({
   component: ParticipantsPage,
 });
 
-interface Row { id: string; username: string; display_name: string | null; access_code: string | null; role?: string }
+interface Row { id: string; username: string; display_name: string | null; access_code: string | null; member1_name?: string | null; member2_name?: string | null; role?: string }
 
 function ParticipantsPage() {
   const [rows, setRows] = useState<Row[]>([]);
-  const [name, setName] = useState("");
+  const [m1, setM1] = useState("");
+  const [m2, setM2] = useState("");
   const [customCode, setCustomCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [lastCode, setLastCode] = useState<{ name: string; code: string } | null>(null);
@@ -28,7 +29,7 @@ function ParticipantsPage() {
 
   const load = async () => {
     const [{ data: profiles }, { data: roles }] = await Promise.all([
-      supabase.from("profiles").select("id, username, display_name, access_code").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id, username, display_name, access_code, member1_name, member2_name").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id, role"),
     ]);
     const roleMap: Record<string, string> = {};
@@ -38,13 +39,13 @@ function ParticipantsPage() {
   useEffect(() => { load(); }, []);
 
   const add = async () => {
-    if (!name.trim()) return toast.error("Candidate name required");
+    if (!m1.trim() || !m2.trim()) return toast.error("Both team member names required");
     setBusy(true);
     try {
-      const res = await create({ data: { display_name: name.trim(), access_code: customCode.trim() || undefined } });
-      setLastCode({ name: name.trim(), code: res.access_code });
-      toast.success("Candidate created — share the access code");
-      setName(""); setCustomCode("");
+      const res = await create({ data: { member1_name: m1.trim(), member2_name: m2.trim(), access_code: customCode.trim() || undefined } });
+      setLastCode({ name: `${m1.trim()} & ${m2.trim()}`, code: res.access_code });
+      toast.success("Team created — share the access code");
+      setM1(""); setM2(""); setCustomCode("");
       load();
     } catch (e: any) { toast.error(e.message); }
     setBusy(false);
@@ -88,8 +89,12 @@ function ParticipantsPage() {
           <h2 className="font-semibold flex items-center gap-2"><Plus className="h-4 w-4" />Add candidate</h2>
           <div className="mt-3 space-y-3">
             <div>
-              <Label>Candidate name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Aisha Khan" />
+              <Label>Team member 1</Label>
+              <Input value={m1} onChange={(e) => setM1(e.target.value)} placeholder="e.g. Aisha Khan" />
+            </div>
+            <div>
+              <Label>Team member 2</Label>
+              <Input value={m2} onChange={(e) => setM2(e.target.value)} placeholder="e.g. Fatima Noor" />
             </div>
             <div>
               <Label>Custom access code <span className="text-muted-foreground font-normal">(optional)</span></Label>

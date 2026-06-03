@@ -38,6 +38,8 @@ export interface AuthState {
   user: User | null;
   role: Role;
   username: string | null;
+  member1: string | null;
+  member2: string | null;
   loading: boolean;
 }
 
@@ -45,6 +47,8 @@ export function useAuth(): AuthState {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [member1, setMember1] = useState<string | null>(null);
+  const [member2, setMember2] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,24 +56,30 @@ export function useAuth(): AuthState {
     const loadRole = async (uid: string) => {
       const [{ data: roles }, { data: profile }] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", uid),
-        supabase.from("profiles").select("username, display_name").eq("id", uid).maybeSingle(),
+        supabase.from("profiles").select("username, display_name, member1_name, member2_name").eq("id", uid).maybeSingle(),
       ]);
       if (!mounted) return;
       const r = roles?.find((x) => x.role === "admin") ? "admin" : roles?.[0]?.role ?? null;
       setRole((r as Role) ?? null);
-      setUsername(profile?.display_name ?? profile?.username ?? null);
+      const p: any = profile;
+      setUsername(p?.display_name ?? p?.username ?? null);
+      setMember1(p?.member1_name ?? null);
+      setMember2(p?.member2_name ?? null);
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
       setSession(s);
       if (s?.user) {
-        // Clear stale role/username so login redirects don't use previous values
         setRole(null);
         setUsername(null);
+        setMember1(null);
+        setMember2(null);
         setTimeout(() => loadRole(s.user.id), 0);
       } else {
         setRole(null);
         setUsername(null);
+        setMember1(null);
+        setMember2(null);
       }
     });
 
@@ -88,5 +98,5 @@ export function useAuth(): AuthState {
     };
   }, []);
 
-  return { session, user: session?.user ?? null, role, username, loading };
+  return { session, user: session?.user ?? null, role, username, member1, member2, loading };
 }
