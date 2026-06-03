@@ -13,7 +13,7 @@ interface Quiz { id: string; title: string; instructions: string | null; duratio
 interface Attempt { id: string; status: string; submitted_at: string | null; }
 
 function PDashboard() {
-  const { user, username } = useAuth();
+  const { user, username, member1, member2 } = useAuth();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
@@ -61,7 +61,7 @@ function PDashboard() {
             <CheckCircle2 className="h-10 w-10" />
           </div>
           <h1 className="mt-6 text-3xl font-bold">Exam submitted</h1>
-          <p className="text-muted-foreground mt-2">Hello <span className="font-semibold text-foreground">{username}</span>, your responses have been recorded.</p>
+          <p className="text-muted-foreground mt-2">Hello <span className="font-semibold text-foreground">{member1 && member2 ? `${member1} & ${member2}` : username}</span>, your responses have been recorded.</p>
           <div className="mt-6 rounded-xl bg-muted/50 border border-border p-4 text-sm text-muted-foreground">
             You've already completed <span className="font-semibold text-foreground">{quiz.title}</span>. Each candidate may attempt this exam only once.
             <br />Results will be reviewed by your administrator. Scores are not shown to candidates.
@@ -82,9 +82,16 @@ function PDashboard() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-8 max-w-3xl mx-auto">
       <div className="text-center mb-6">
         <div className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-primary font-semibold">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Welcome, {username}
+          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Welcome
         </div>
-        <h1 className="text-4xl font-bold mt-2">{quiz.title}</h1>
+        {member1 && member2 ? (
+          <h2 className="text-2xl md:text-3xl font-semibold mt-2 text-foreground">
+            {member1} <span className="text-primary">&</span> {member2}
+          </h2>
+        ) : (
+          <h2 className="text-2xl md:text-3xl font-semibold mt-2 text-foreground">{username}</h2>
+        )}
+        <h1 className="text-3xl md:text-4xl font-bold mt-3">{quiz.title}</h1>
       </div>
 
       <div className="rounded-3xl bg-card border border-border p-8 shadow-[var(--shadow-leaf)]">
