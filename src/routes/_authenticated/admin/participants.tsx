@@ -89,8 +89,12 @@ function ParticipantsPage() {
           <h2 className="font-semibold flex items-center gap-2"><Plus className="h-4 w-4" />Add candidate</h2>
           <div className="mt-3 space-y-3">
             <div>
-              <Label>Candidate name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Aisha Khan" />
+              <Label>Team member 1</Label>
+              <Input value={m1} onChange={(e) => setM1(e.target.value)} placeholder="e.g. Aisha Khan" />
+            </div>
+            <div>
+              <Label>Team member 2</Label>
+              <Input value={m2} onChange={(e) => setM2(e.target.value)} placeholder="e.g. Fatima Noor" />
             </div>
             <div>
               <Label>Custom access code <span className="text-muted-foreground font-normal">(optional)</span></Label>
