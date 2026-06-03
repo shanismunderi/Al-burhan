@@ -8,8 +8,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { useAuth } from "@/lib/auth";
@@ -26,7 +24,6 @@ import {
   ArrowRight,
   KeyRound,
   PlayCircle,
-  Star,
 } from "lucide-react";
 import logoHero from "@/assets/logo-hero.png";
 
@@ -50,43 +47,17 @@ export const Route = createFileRoute("/")({
 });
 
 const heroSlides = [
-  {
-    icon: Trophy,
-    eyebrow: "Cash Prize Pool",
-    title: "Win a share of ₹6,666",
-    desc: "Top three scorers receive ₹2,222, ₹3,333 and ₹1,111 in cash awards.",
-  },
-  {
-    icon: BookOpen,
-    eyebrow: "The Syllabus",
-    title: "Islamic Civilization & Ihsanul Iman",
-    desc: "Two reference books from Book Plus Publishers form the complete syllabus.",
-  },
-  {
-    icon: ScrollText,
-    eyebrow: "Exam Format",
-    title: "22 Questions · 100 Marks",
-    desc: "A balanced mix of MCQ and descriptive questions inside a secure fullscreen window.",
-  },
-  {
-    icon: Calendar,
-    eyebrow: "Result Day",
-    title: "June 15, 2026",
-    desc: "Results announced live. The exam runs with anti-cheat monitoring throughout.",
-  },
-  {
-    icon: ShieldCheck,
-    eyebrow: "Fair & Secure",
-    title: "Monitored Fullscreen Mode",
-    desc: "Tab-switch detection, blur tracking and auto-submit keep the contest fair for everyone.",
-  },
+  { icon: Trophy, eyebrow: "Prize Pool", title: "₹6,666 in cash awards", desc: "₹3,333 · ₹2,222 · ₹1,111 for the top three teams." },
+  { icon: BookOpen, eyebrow: "Syllabus", title: "Islamic Civilization & Ihsanul Iman", desc: "Two reference books from Book Plus Publishers." },
+  { icon: ScrollText, eyebrow: "Format", title: "22 Questions · 100 Marks", desc: "MCQ + descriptive in a secure fullscreen window." },
+  { icon: Calendar, eyebrow: "Result Day", title: "June 15, 2026", desc: "Results announced live with full transparency." },
 ];
 
 const howSteps = [
-  { icon: KeyRound, title: "Get your code", desc: "Receive a unique access code from the organisers." },
-  { icon: PlayCircle, title: "Enter & begin", desc: "Sign in with the code. The exam launches in fullscreen." },
-  { icon: ScrollText, title: "Answer 22 Qs", desc: "Mix of MCQ and descriptive. Auto-saved as you type." },
-  { icon: Trophy, title: "Win prizes", desc: "Top 3 scorers share the ₹6,666 prize pool." },
+  { icon: KeyRound, title: "Get your code", desc: "Receive a team access code from the organisers." },
+  { icon: PlayCircle, title: "Sign in", desc: "Enter the code. The exam launches in fullscreen." },
+  { icon: ScrollText, title: "Answer 22 Qs", desc: "MCQ + descriptive. Auto-saved as you type." },
+  { icon: Trophy, title: "Win prizes", desc: "Top 3 teams share the ₹6,666 prize pool." },
 ];
 
 function Landing() {
@@ -110,136 +81,121 @@ function Landing() {
   }, [api]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: "var(--gradient-arch)" }}>
-      {/* Decorative aurora blobs */}
-      <div aria-hidden className="pointer-events-none absolute -top-40 -left-32 h-[28rem] w-[28rem] rounded-full opacity-40 blur-3xl" style={{ background: "var(--gradient-aurora)" }} />
-      <div aria-hidden className="pointer-events-none absolute top-1/3 -right-32 h-[26rem] w-[26rem] rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-leaf)" }} />
-      <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/3 h-[22rem] w-[22rem] rounded-full opacity-25 blur-3xl" style={{ background: "var(--gradient-aurora)" }} />
+    <div className="min-h-screen bg-background">
+      {/* Soft single gradient backdrop — clean, no clutter */}
+      <div aria-hidden className="absolute inset-x-0 top-0 h-[520px] -z-10 opacity-60" style={{ background: "var(--gradient-soft)" }} />
 
-      <header className="relative max-w-6xl mx-auto px-6 py-5">
-        <div className="glass rounded-2xl px-4 py-3 flex items-center justify-between shadow-sm">
+      {/* Header */}
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/70 border-b border-border/60">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
           <Brand />
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link to="/admin/login">Admin</Link>
             </Button>
-            <Button asChild>
+            <Button asChild size="sm">
               <Link to="/login">Enter code <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="relative max-w-6xl mx-auto px-6 pt-8 pb-20">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-14 pb-16">
         {/* Hero */}
-        <section className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-10 lg:gap-14 items-center">
-          {/* Left — Logo card (glass) */}
+        <section className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-center">
+          {/* Logo */}
           <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7 }}
-            className="relative flex justify-center lg:justify-start"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="order-1 lg:order-1 flex justify-center"
           >
-            <div className="absolute inset-0 -z-10 rounded-[3rem] blur-3xl opacity-50" style={{ background: "var(--gradient-leaf)" }} />
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              className="relative rounded-[2.5rem] p-8 md:p-12 w-full max-w-md shadow-[var(--shadow-glow)]"
-              style={{ background: "var(--gradient-leaf)" }}
-            >
-              <img src={logoHero} alt="Al-Burhan National Grand Quiz Competition 2.0" className="w-full h-auto object-contain mx-auto drop-shadow-2xl" />
-              <div className="mt-6 text-center text-primary-foreground">
-                <div className="text-xs uppercase tracking-[0.3em] opacity-80">Edition 2.0</div>
-                <div className="font-display text-2xl font-bold mt-1">Al-Burhan</div>
-                <div className="text-xs opacity-80 mt-1">National Grand Quiz Competition</div>
+            <div className="relative rounded-3xl p-6 sm:p-10 w-full max-w-sm shadow-[var(--shadow-leaf)]" style={{ background: "var(--gradient-leaf)" }}>
+              <img src={logoHero} alt="Al-Burhan National Grand Quiz Competition 2.0" className="w-full h-auto object-contain" />
+              <div className="mt-4 text-center text-primary-foreground">
+                <div className="text-[10px] uppercase tracking-[0.3em] opacity-80">Edition 2.0</div>
+                <div className="font-display text-xl sm:text-2xl font-bold mt-1">Al-Burhan</div>
+                <div className="text-[11px] opacity-80">National Grand Quiz Competition</div>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
 
-          {/* Right — Details + Glass carousel */}
+          {/* Details */}
           <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="order-2 lg:order-2 space-y-5"
           >
-            <div>
-              <span className="inline-flex items-center gap-2 glass rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-primary">
-                <Sparkles className="h-3 w-3" /> Darul Hasanath Islamic College
-              </span>
-              <h1 className="mt-4 text-4xl md:text-5xl font-bold text-foreground leading-tight">
-                National Grand Quiz on{" "}
-                <span className="bg-gradient-to-r from-primary to-[oklch(0.45_0.13_45)] bg-clip-text text-transparent">
-                  Islamic Civilization & Ihsan
-                </span>
-              </h1>
-              <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-                Organised by the Department of Civilizational Studies in association with{" "}
-                <b className="text-foreground">Book Plus Publishers</b>, Malabar.
-              </p>
-            </div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em]">
+              <Sparkles className="h-3 w-3" /> Darul Hasanath Islamic College
+            </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
+              National Grand Quiz on{" "}
+              <span className="text-primary">Islamic Civilization & Ihsan</span>
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+              Organised by the Department of Civilizational Studies in association with{" "}
+              <b className="text-foreground">Book Plus Publishers</b>, Malabar. Compete as a team of two.
+            </p>
 
-            {/* Glass auto-slider with arrows + dots */}
-            <div className="relative">
+            {/* Slider */}
+            <div>
               <Carousel
                 setApi={setApi}
                 opts={{ loop: true, align: "start" }}
-                plugins={[Autoplay({ delay: 3800, stopOnInteraction: false })]}
-                className="glass-strong rounded-2xl shadow-[var(--shadow-leaf)] overflow-hidden"
+                plugins={[Autoplay({ delay: 4000, stopOnInteraction: false })]}
+                className="rounded-2xl bg-card border border-border overflow-hidden"
               >
                 <CarouselContent>
                   {heroSlides.map((s) => (
                     <CarouselItem key={s.title}>
-                      <div className="p-6 md:p-7 flex gap-4 items-start min-h-[160px]">
-                        <div className="h-14 w-14 shrink-0 rounded-2xl flex items-center justify-center text-primary-foreground shadow-lg" style={{ background: "var(--gradient-leaf)" }}>
-                          <s.icon className="h-7 w-7" />
+                      <div className="p-5 sm:p-6 flex gap-4 items-start min-h-[140px]">
+                        <div className="h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl flex items-center justify-center text-primary-foreground" style={{ background: "var(--gradient-leaf)" }}>
+                          <s.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-[10px] uppercase tracking-[0.22em] text-primary font-semibold">{s.eyebrow}</div>
-                          <h3 className="mt-1 text-xl font-bold text-foreground">{s.title}</h3>
-                          <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-primary font-semibold">{s.eyebrow}</div>
+                          <h3 className="mt-1 text-base sm:text-lg font-bold text-foreground">{s.title}</h3>
+                          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
                         </div>
                       </div>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious className="left-2 glass border-none" />
-                <CarouselNext className="right-2 glass border-none" />
               </Carousel>
-
-              {/* Dots */}
               <div className="mt-3 flex justify-center gap-1.5">
                 {heroSlides.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => api?.scrollTo(i)}
                     aria-label={`Slide ${i + 1}`}
-                    className={`h-1.5 rounded-full transition-all ${selected === i ? "w-6 bg-primary" : "w-1.5 bg-primary/30"}`}
+                    className={`h-1.5 rounded-full transition-all ${selected === i ? "w-6 bg-primary" : "w-1.5 bg-primary/25"}`}
                   />
                 ))}
               </div>
             </div>
 
-            {/* Glass stats */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
                 { icon: ScrollText, label: "Questions", value: "22" },
-                { icon: Award, label: "Total Marks", value: "100" },
-                { icon: Clock, label: "Duration", value: "30 min" },
+                { icon: Award, label: "Marks", value: "100" },
+                { icon: Clock, label: "Duration", value: "30m" },
               ].map((stat) => (
-                <div key={stat.label} className="glass rounded-xl p-4 text-center transition-transform hover:-translate-y-0.5">
+                <div key={stat.label} className="rounded-xl bg-card border border-border p-3 sm:p-4 text-center">
                   <stat.icon className="h-4 w-4 mx-auto text-primary" />
-                  <div className="mt-1.5 text-xl font-bold text-foreground">{stat.value}</div>
+                  <div className="mt-1 text-lg sm:text-xl font-bold text-foreground">{stat.value}</div>
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{stat.label}</div>
                 </div>
               ))}
             </div>
 
-            <div className="flex flex-wrap gap-3 pt-1">
-              <Button asChild size="lg" className="text-base shadow-[var(--shadow-glow)]">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-1">
+              <Button asChild size="lg" className="w-full sm:w-auto">
                 <Link to="/login">Start your exam <ArrowRight className="ml-1 h-4 w-4" /></Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="text-base glass border-primary/30">
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
                 <Link to="/admin/login">Admin login</Link>
               </Button>
             </div>
@@ -247,109 +203,104 @@ function Landing() {
         </section>
 
         {/* How it works */}
-        <section className="mt-24">
-          <div className="text-center mb-10">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">How it works</span>
-            <h2 className="text-3xl font-bold mt-2">Four simple steps</h2>
+        <section className="mt-16 sm:mt-24">
+          <div className="text-center mb-8 sm:mb-10">
+            <span className="text-[11px] uppercase tracking-widest text-primary font-semibold">How it works</span>
+            <h2 className="text-2xl sm:text-3xl font-bold mt-2">Four simple steps</h2>
           </div>
-          <div className="grid md:grid-cols-4 gap-4 relative">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {howSteps.map((step, i) => (
               <motion.div
                 key={step.title}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="glass rounded-2xl p-6 relative overflow-hidden group hover:shadow-[var(--shadow-leaf)] transition-shadow"
+                transition={{ delay: i * 0.06 }}
+                className="rounded-2xl bg-card border border-border p-4 sm:p-5"
               >
-                <span className="absolute -right-4 -top-4 text-7xl font-display font-bold text-primary/10 select-none">{i + 1}</span>
-                <div className="h-11 w-11 rounded-xl flex items-center justify-center text-primary-foreground shadow-md" style={{ background: "var(--gradient-leaf)" }}>
-                  <step.icon className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center text-primary-foreground" style={{ background: "var(--gradient-leaf)" }}>
+                  <step.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <h3 className="mt-4 font-semibold">{step.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{step.desc}</p>
+                <div className="mt-3 text-[10px] uppercase tracking-widest text-primary/70 font-semibold">Step {i + 1}</div>
+                <h3 className="mt-0.5 font-semibold text-sm sm:text-base">{step.title}</h3>
+                <p className="mt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
               </motion.div>
             ))}
           </div>
         </section>
 
         {/* Prizes */}
-        <section className="mt-24">
-          <div className="text-center mb-8">
-            <span className="text-xs uppercase tracking-widest text-primary font-semibold">Cash Prizes</span>
-            <h2 className="text-3xl font-bold mt-2">Win a share of ₹6,666</h2>
+        <section className="mt-16 sm:mt-24">
+          <div className="text-center mb-6 sm:mb-8">
+            <span className="text-[11px] uppercase tracking-widest text-primary font-semibold">Cash Prizes</span>
+            <h2 className="text-2xl sm:text-3xl font-bold mt-2">Win a share of ₹6,666</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
             {[
-              { rank: "1st Prize", amount: "₹2,222", tone: "from-[oklch(0.78_0.12_75)] to-[oklch(0.6_0.13_55)]", scale: "md:scale-100" },
-              { rank: "2nd Prize", amount: "₹3,333", tone: "from-[oklch(0.72_0.1_60)] to-[oklch(0.5_0.11_50)]", scale: "md:scale-105 md:-translate-y-2" },
-              { rank: "3rd Prize", amount: "₹1,111", tone: "from-[oklch(0.68_0.09_55)] to-[oklch(0.45_0.1_45)]", scale: "md:scale-100" },
+              { rank: "2nd Prize", amount: "₹2,222", order: "sm:order-1" },
+              { rank: "1st Prize", amount: "₹3,333", order: "sm:order-2 sm:scale-105" },
+              { rank: "3rd Prize", amount: "₹1,111", order: "sm:order-3" },
             ].map((p, i) => (
               <motion.div
                 key={p.rank}
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.1 + i * 0.08 }}
-                className={`rounded-2xl p-8 text-center text-primary-foreground bg-gradient-to-br ${p.tone} shadow-[var(--shadow-glow)] ${p.scale} transition-transform`}
+                transition={{ delay: 0.05 + i * 0.06 }}
+                className={`rounded-2xl p-6 sm:p-7 text-center text-primary-foreground shadow-[var(--shadow-leaf)] ${p.order} transition-transform`}
+                style={{ background: "var(--gradient-leaf)" }}
               >
-                <Trophy className="h-9 w-9 mx-auto opacity-95" />
-                <div className="text-xs uppercase tracking-[0.2em] mt-3 opacity-90">{p.rank}</div>
-                <div className="text-4xl font-bold mt-1">{p.amount}</div>
-                <div className="mt-3 flex justify-center gap-0.5">
-                  {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-3 w-3 fill-current opacity-80" />)}
-                </div>
+                <Trophy className="h-7 w-7 mx-auto opacity-95" />
+                <div className="text-[10px] uppercase tracking-[0.2em] mt-3 opacity-90">{p.rank}</div>
+                <div className="text-3xl sm:text-4xl font-bold mt-1">{p.amount}</div>
               </motion.div>
             ))}
           </div>
         </section>
 
-        {/* Details — glass */}
-        <section className="mt-20 grid md:grid-cols-2 gap-5">
+        {/* Details */}
+        <section className="mt-16 sm:mt-20 grid sm:grid-cols-2 gap-3 sm:gap-4">
           {[
-            { icon: ScrollText, title: "22 Questions", desc: "Each question is unique. A balanced mix of MCQ and descriptive questions." },
-            { icon: BookOpen, title: "Two Reference Books", desc: '"Islamic Civilization" and "Ehsanul Iman" by Book Plus Publishers form the syllabus.' },
-            { icon: Sparkles, title: "100 Marks", desc: "Total marks for the competition. Negative marks may apply for wrong answers." },
-            { icon: Users, title: "Open to All", desc: "Students, scholars and enthusiasts across the nation are invited to participate." },
-            { icon: Trophy, title: "Top 3 Cash Prizes", desc: "1st: ₹2,222 · 2nd: ₹3,333 · 3rd: ₹1,111 awarded to the highest scorers." },
-            { icon: Calendar, title: "June 15, 2026", desc: "Result announcement on June 15. Exam runs in secure fullscreen mode with live monitoring." },
+            { icon: ScrollText, title: "22 Questions", desc: "Balanced mix of MCQ and descriptive questions." },
+            { icon: BookOpen, title: "Two Reference Books", desc: '"Islamic Civilization" and "Ehsanul Iman" form the syllabus.' },
+            { icon: Sparkles, title: "100 Marks", desc: "Total marks. Negative marks may apply." },
+            { icon: Users, title: "Team of Two", desc: "Each account hosts a team of two members." },
+            { icon: ShieldCheck, title: "Secure & Fair", desc: "Tab-switch detection, blur tracking, auto-submit." },
+            { icon: Calendar, title: "June 15, 2026", desc: "Results announced live on result day." },
           ].map((f, i) => (
             <motion.div
               key={f.title}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.05 + i * 0.04 }}
-              className="glass rounded-2xl p-6 hover:shadow-[var(--shadow-leaf)] hover:-translate-y-0.5 transition-all flex gap-4"
+              transition={{ delay: 0.04 + i * 0.04 }}
+              className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex gap-3 sm:gap-4"
             >
-              <div className="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center text-primary-foreground shadow-md" style={{ background: "var(--gradient-leaf)" }}>
-                <f.icon className="h-5 w-5" />
+              <div className="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center text-primary-foreground" style={{ background: "var(--gradient-leaf)" }}>
+                <f.icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{f.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-foreground text-sm sm:text-base">{f.title}</h3>
+                <p className="mt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
               </div>
             </motion.div>
           ))}
         </section>
 
         {/* CTA */}
-        <section className="mt-20 relative rounded-3xl overflow-hidden p-10 text-center" style={{ background: "var(--gradient-leaf)" }}>
-          <div aria-hidden className="absolute inset-0 opacity-30" style={{ background: "var(--gradient-aurora)" }} />
-          <div className="relative">
-            <h3 className="text-3xl md:text-4xl font-bold text-primary-foreground">Ready to compete?</h3>
-            <p className="text-primary-foreground/85 mt-3 max-w-xl mx-auto">
-              Get your access code from the organisers, then sign in to begin your exam.
-            </p>
-            <Button asChild size="lg" variant="secondary" className="mt-6 shadow-xl">
-              <Link to="/login">Enter access code <ArrowRight className="ml-1 h-4 w-4" /></Link>
-            </Button>
-          </div>
+        <section className="mt-16 sm:mt-20 relative rounded-3xl overflow-hidden p-8 sm:p-10 text-center" style={{ background: "var(--gradient-leaf)" }}>
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-foreground">Ready to compete?</h3>
+          <p className="text-primary-foreground/85 mt-3 max-w-xl mx-auto text-sm sm:text-base">
+            Get your team access code from the organisers, then sign in to begin.
+          </p>
+          <Button asChild size="lg" variant="secondary" className="mt-6">
+            <Link to="/login">Enter access code <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          </Button>
         </section>
       </main>
 
-      <footer className="relative border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © Al-Burhan 2.0 · Darul Hasanath Islamic College · Book Plus · Civilization Hasanath
+      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground px-4">
+        © Al-Burhan 2.0 · Darul Hasanath Islamic College · Book Plus
       </footer>
     </div>
   );
