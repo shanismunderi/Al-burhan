@@ -97,6 +97,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          member1_name: string | null
+          member2_name: string | null
           username: string
         }
         Insert: {
@@ -104,6 +106,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          member1_name?: string | null
+          member2_name?: string | null
           username: string
         }
         Update: {
@@ -111,6 +115,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          member1_name?: string | null
+          member2_name?: string | null
           username?: string
         }
         Relationships: []
