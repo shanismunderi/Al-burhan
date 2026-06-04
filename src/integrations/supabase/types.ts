@@ -280,12 +280,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_questions: {
+        Args: { _quiz_id: string }
+        Returns: {
+          correct_answer: string | null
+          created_at: string
+          id: string
+          marks: number
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          position: number
+          question_text: string
+          question_type: string
+          quiz_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "questions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      submit_quiz_attempt: {
+        Args: { _answers: Json; _attempt_id: string; _auto?: boolean }
+        Returns: string
       }
     }
     Enums: {

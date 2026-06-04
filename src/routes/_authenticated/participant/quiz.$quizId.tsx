@@ -123,45 +123,19 @@ function TakeQuiz() {
 
   const autoSubmit = useCallback(async (status: "submitted" | "auto_submitted" = "submitted") => {
     const attempt = attemptRef.current;
-    const quiz = quizRef.current;
-    const questions = questionsRef.current;
     const answers = answersRef.current;
     if (submittingRef.current || !attempt) return;
     submittingRef.current = true;
-    let correct = 0, score = 0;
-    const negMarks = quiz?.negative_marks ?? 0;
-    const updates: Array<PromiseLike<any>> = [];
-    questions.forEach((q) => {
-      const sel = answers[q.id];
-      if (q.question_type === "mcq") {
-        let isCorrect: boolean | null = null;
-        if (sel) {
-          isCorrect = sel === q.correct_answer;
-          if (isCorrect) { correct += 1; score += Number(q.marks); }
-          else { score -= negMarks; }
-        }
-        if (sel != null) {
-          updates.push(
-            supabase.from("attempt_answers").upsert({
-              attempt_id: attempt.id, question_id: q.id, selected_answer: sel, is_correct: isCorrect,
-            }, { onConflict: "attempt_id,question_id" })
-          );
-        }
-      } else {
-        if (sel != null) {
-          updates.push(
-            supabase.from("attempt_answers").upsert({
-              attempt_id: attempt.id, question_id: q.id, selected_answer: sel, is_correct: null,
-            }, { onConflict: "attempt_id,question_id" })
-          );
-        }
-      }
+    const { error } = await supabase.rpc("submit_quiz_attempt", {
+      _attempt_id: attempt.id,
+      _answers: answers as any,
+      _auto: status === "auto_submitted",
     });
-    await Promise.all(updates);
-    score = Math.max(0, score);
-    await supabase.from("quiz_attempts").update({
-      status, submitted_at: new Date().toISOString(), score, correct_count: correct, total_questions: questions.length,
-    }).eq("id", attempt.id);
+    if (error) {
+      submittingRef.current = false;
+      toast.error(error.message);
+      return;
+    }
     if (document.fullscreenElement) try { await document.exitFullscreen(); } catch {}
     navigate({ to: "/participant/result/$attemptId", params: { attemptId: attempt.id } });
   }, [navigate]);
