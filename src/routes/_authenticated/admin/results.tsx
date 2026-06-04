@@ -140,7 +140,7 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
     const [{ data: prof }, { data: quiz }, { data: qs }, { data: ans }] = await Promise.all([
       supabase.from("profiles").select("username, display_name").eq("id", a.user_id).maybeSingle(),
       supabase.from("quizzes").select("title").eq("id", a.quiz_id).maybeSingle(),
-      supabase.from("questions").select("*").eq("quiz_id", a.quiz_id).order("position"),
+      supabase.rpc("admin_get_questions", { _quiz_id: a.quiz_id }),
       supabase.from("attempt_answers").select("*").eq("attempt_id", attemptId),
     ]);
     setCandidate((prof as any)?.display_name || (prof as any)?.username || "");
