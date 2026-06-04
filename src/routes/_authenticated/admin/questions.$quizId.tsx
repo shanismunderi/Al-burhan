@@ -46,7 +46,7 @@ function QuestionsPage() {
   const load = async () => {
     const [{ data: quiz }, { data: qs }] = await Promise.all([
       supabase.from("quizzes").select("title").eq("id", quizId).maybeSingle(),
-      supabase.from("questions").select("*").eq("quiz_id", quizId).order("position"),
+      supabase.rpc("admin_get_questions", { _quiz_id: quizId }),
     ]);
     setQuizTitle(quiz?.title ?? "");
     const items = (qs as Q[]) ?? [];
