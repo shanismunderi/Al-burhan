@@ -57,13 +57,6 @@ export type Database = {
             referencedRelation: "questions"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "attempt_answers_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       cheat_events: {
@@ -284,58 +277,32 @@ export type Database = {
       }
     }
     Views: {
-      questions_public: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          marks: number | null
+      [_ in never]: never
+    }
+    Functions: {
+      admin_get_questions: {
+        Args: { _quiz_id: string }
+        Returns: {
+          correct_answer: string | null
+          created_at: string
+          id: string
+          marks: number
           option_a: string | null
           option_b: string | null
           option_c: string | null
           option_d: string | null
-          position: number | null
-          question_text: string | null
-          question_type: string | null
-          quiz_id: string | null
+          position: number
+          question_text: string
+          question_type: string
+          quiz_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "questions"
+          isOneToOne: false
+          isSetofReturn: true
         }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          marks?: number | null
-          option_a?: string | null
-          option_b?: string | null
-          option_c?: string | null
-          option_d?: string | null
-          position?: number | null
-          question_text?: string | null
-          question_type?: string | null
-          quiz_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          marks?: number | null
-          option_a?: string | null
-          option_b?: string | null
-          option_c?: string | null
-          option_d?: string | null
-          position?: number | null
-          question_text?: string | null
-          question_type?: string | null
-          quiz_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "questions_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "quizzes"
-            referencedColumns: ["id"]
-          },
-        ]
       }
-    }
-    Functions: {
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
