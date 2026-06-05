@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { signOut, useAuth } from "@/lib/auth";
 import { LayoutDashboard, ListChecks, Users, Trophy, LogOut, Menu } from "lucide-react";
 
@@ -53,9 +54,12 @@ function AdminLayout() {
       <div className="border-t border-border pt-3 mt-3">
         <div className="text-xs text-muted-foreground px-3">Signed in as</div>
         <div className="text-sm font-semibold px-3 truncate">{username}</div>
-        <Button variant="ghost" className="w-full justify-start mt-2" onClick={() => { signOut().then(() => navigate({ to: "/" })); }}>
-          <LogOut className="h-4 w-4 mr-2" /> Sign out
-        </Button>
+        <div className="flex items-center gap-1 mt-2">
+          <Button variant="ghost" className="flex-1 justify-start" onClick={() => { signOut().then(() => navigate({ to: "/" })); }}>
+            <LogOut className="h-4 w-4 mr-2" /> Sign out
+          </Button>
+          <ThemeToggle />
+        </div>
       </div>
     </>
   );
@@ -65,16 +69,19 @@ function AdminLayout() {
       {/* Mobile top bar */}
       <header className="md:hidden sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-border bg-background/80 backdrop-blur px-4 py-3">
         <Brand to="/admin/dashboard" />
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Open menu">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-4 flex flex-col bg-sidebar">
-            {NavContent}
-          </SheetContent>
-        </Sheet>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-4 flex flex-col bg-sidebar">
+              {NavContent}
+            </SheetContent>
+          </Sheet>
+        </div>
       </header>
 
       {/* Desktop sidebar */}

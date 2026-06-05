@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { signOut, useAuth } from "@/lib/auth";
 import { LogOut } from "lucide-react";
 
@@ -20,8 +21,9 @@ function ParticipantLayout() {
     <div className="min-h-screen" style={{ background: "var(--gradient-soft)" }}>
       <header className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
         <Brand to="/participant/dashboard" />
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">{username}</span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="hidden sm:inline text-sm text-muted-foreground">{username}</span>
+          <ThemeToggle />
           <Button variant="ghost" size="sm" onClick={() => { signOut().then(() => navigate({ to: "/" })); }}>
             <LogOut className="h-4 w-4 mr-1" /> Sign out
           </Button>
