@@ -95,7 +95,12 @@ function ResultsPage() {
                   <td className="px-4 py-3 font-semibold">{r.score}</td>
                   <td className="px-4 py-3">{r.correct_count}/{r.total_questions}</td>
                   <td className="px-4 py-3">{r.warnings}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{r.submitted_at ? new Date(r.submitted_at).toLocaleString() : "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    <div className="font-mono text-xs text-foreground">{fmtExact(r.submitted_at)}</div>
+                    {fmtDuration(r.started_at, r.submitted_at) && (
+                      <div className="text-[10px] mt-0.5">Took {fmtDuration(r.started_at, r.submitted_at)}</div>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <Button size="sm" variant="outline" onClick={() => setOpenId(r.id)}><Eye className="h-4 w-4 mr-1" />View</Button>
                   </td>
