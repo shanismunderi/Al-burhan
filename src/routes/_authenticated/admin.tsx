@@ -54,9 +54,12 @@ function AdminLayout() {
       <div className="border-t border-border pt-3 mt-3">
         <div className="text-xs text-muted-foreground px-3">Signed in as</div>
         <div className="text-sm font-semibold px-3 truncate">{username}</div>
-        <Button variant="ghost" className="w-full justify-start mt-2" onClick={() => { signOut().then(() => navigate({ to: "/" })); }}>
-          <LogOut className="h-4 w-4 mr-2" /> Sign out
-        </Button>
+        <div className="flex items-center gap-1 mt-2">
+          <Button variant="ghost" className="flex-1 justify-start" onClick={() => { signOut().then(() => navigate({ to: "/" })); }}>
+            <LogOut className="h-4 w-4 mr-2" /> Sign out
+          </Button>
+          <ThemeToggle />
+        </div>
       </div>
     </>
   );
