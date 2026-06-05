@@ -129,7 +129,15 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground px-4">
-        © Al-Burhan 2.0 · Darul Hasanath Islamic College · Book Plus
+        Powered by{" "}
+        <a
+          href="https://instagram.com/flow.core__"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-foreground hover:text-primary transition-colors"
+        >
+          Flowcore
+        </a>
       </footer>
     </div>
   );
