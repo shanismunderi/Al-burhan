@@ -213,30 +213,7 @@ function TakeQuiz() {
   if (!quiz) return <div className="p-12 text-center text-muted-foreground">Loading quiz…</div>;
 
   if (!started) {
-    return (
-      <div className="pt-6">
-        <div className="rounded-2xl bg-card border border-border p-8 max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold">{quiz.title}</h1>
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            <Pill label="Questions" value={String(questions.length)} />
-            <Pill label="Duration" value={`${quiz.duration_minutes} min`} />
-            <Pill label="Negative" value={String(quiz.negative_marks)} />
-          </div>
-          {quiz.instructions && <div className="mt-5 text-sm text-muted-foreground whitespace-pre-line border-l-2 border-primary/40 pl-4">{quiz.instructions}</div>}
-          <div className="mt-6 rounded-xl bg-warning/10 border border-warning/30 p-4 text-sm">
-            <div className="font-semibold flex items-center gap-2 text-warning-foreground"><ShieldCheck className="h-4 w-4" />Anti-cheating is enabled</div>
-            <ul className="mt-2 space-y-1 text-muted-foreground list-disc list-inside">
-              <li>The exam runs in <b>fullscreen</b>.</li>
-              <li>Switching tabs, losing focus, or pressing back will trigger warnings.</li>
-              <li>After {MAX_WARNINGS} warnings the exam is auto-submitted.</li>
-            </ul>
-          </div>
-          <Button className="mt-6 w-full" size="lg" onClick={beginAttempt} disabled={questions.length === 0}>
-            <Maximize className="h-4 w-4 mr-2" /> Enter fullscreen & begin
-          </Button>
-        </div>
-      </div>
-    );
+    return <div className="p-12 text-center text-muted-foreground">Starting exam…</div>;
   }
 
   const q = questions[current];
