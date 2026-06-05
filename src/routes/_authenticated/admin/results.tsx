@@ -14,8 +14,27 @@ export const Route = createFileRoute("/_authenticated/admin/results")({
 
 interface AttemptRow {
   id: string; user_id: string; quiz_id: string; status: string; warnings: number;
-  score: number; correct_count: number; total_questions: number; submitted_at: string | null;
+  score: number; correct_count: number; total_questions: number;
+  started_at: string | null; submitted_at: string | null;
   username?: string; quiz_title?: string;
+}
+
+function fmtExact(iso: string | null) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const date = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+  return `${date} · ${time}`;
+}
+
+function fmtDuration(startIso: string | null, endIso: string | null) {
+  if (!startIso || !endIso) return null;
+  const ms = new Date(endIso).getTime() - new Date(startIso).getTime();
+  if (ms < 0) return null;
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}m ${sec}s`;
 }
 
 function ResultsPage() {
