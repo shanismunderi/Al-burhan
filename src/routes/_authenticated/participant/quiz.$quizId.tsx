@@ -59,8 +59,39 @@ function TakeQuiz() {
         supabase.from("questions").select("*").eq("quiz_id", quizId).order("position"),
       ]);
       setQuiz(q as Quiz);
+      setQuiz(q as Quiz);
       let list = (qs as Question[]) ?? [];
       if (q?.randomize) list = [...list].sort(() => Math.random() - 0.5);
+      setQuestions(list);
+      // Auto-begin attempt immediately — no intro screen
+      void beginAttemptAuto(q as Quiz, list);
+    })();
+  }, [quizId, user, navigate]);
+
+  const beginAttemptAuto = async (qz: Quiz, list: Question[]) => {
+    if (!user) return;
+    const { data: existing } = await supabase.from("quiz_attempts").select("*").eq("user_id", user.id).eq("quiz_id", quizId).eq("status", "in_progress").maybeSingle();
+    let a = existing as Attempt | null;
+    if (!a) {
+      const ends_at = new Date(Date.now() + qz.duration_minutes * 60 * 1000).toISOString();
+      const { data, error } = await supabase.from("quiz_attempts").insert({
+        user_id: user.id, quiz_id: quizId, ends_at, status: "in_progress",
+        total_questions: list.length,
+      }).select().single();
+      if (error) return toast.error(error.message);
+      a = data as Attempt;
+    } else {
+      const { data: saved } = await supabase.from("attempt_answers").select("*").eq("attempt_id", a.id);
+      const map: Record<string, string> = {};
+      (saved ?? []).forEach((s: any) => { if (s.selected_answer) map[s.question_id] = s.selected_answer; });
+      setAnswers(map);
+    }
+    setAttempt(a);
+    warningsRef.current = a.warnings;
+    setStarted(true);
+    try { await document.documentElement.requestFullscreen(); } catch {}
+    history.pushState(null, "", location.href);
+  };
       setQuestions(list);
     })();
   }, [quizId, user, navigate]);
