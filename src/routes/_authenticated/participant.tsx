@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { signOut, useAuth } from "@/lib/auth";
 import { LogOut } from "lucide-react";
 
