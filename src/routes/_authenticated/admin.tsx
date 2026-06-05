@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { signOut, useAuth } from "@/lib/auth";
 import { LayoutDashboard, ListChecks, Users, Trophy, LogOut, Menu } from "lucide-react";
 
