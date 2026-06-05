@@ -132,7 +132,10 @@ function ResultsPage() {
                 <div><div className="text-muted-foreground">Warn</div><div className="font-semibold">{r.warnings}</div></div>
               </div>
               {r.submitted_at && (
-                <div className="text-[11px] text-muted-foreground">{new Date(r.submitted_at).toLocaleString()}</div>
+                <div className="text-[11px] text-muted-foreground font-mono">
+                  {fmtExact(r.submitted_at)}
+                  {fmtDuration(r.started_at, r.submitted_at) && ` · Took ${fmtDuration(r.started_at, r.submitted_at)}`}
+                </div>
               )}
             </div>
           ))}
