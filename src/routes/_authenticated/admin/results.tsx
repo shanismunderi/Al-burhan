@@ -14,8 +14,27 @@ export const Route = createFileRoute("/_authenticated/admin/results")({
 
 interface AttemptRow {
   id: string; user_id: string; quiz_id: string; status: string; warnings: number;
-  score: number; correct_count: number; total_questions: number; submitted_at: string | null;
+  score: number; correct_count: number; total_questions: number;
+  started_at: string | null; submitted_at: string | null;
   username?: string; quiz_title?: string;
+}
+
+function fmtExact(iso: string | null) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const date = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+  return `${date} · ${time}`;
+}
+
+function fmtDuration(startIso: string | null, endIso: string | null) {
+  if (!startIso || !endIso) return null;
+  const ms = new Date(endIso).getTime() - new Date(startIso).getTime();
+  if (ms < 0) return null;
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}m ${sec}s`;
 }
 
 function ResultsPage() {
@@ -76,7 +95,12 @@ function ResultsPage() {
                   <td className="px-4 py-3 font-semibold">{r.score}</td>
                   <td className="px-4 py-3">{r.correct_count}/{r.total_questions}</td>
                   <td className="px-4 py-3">{r.warnings}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{r.submitted_at ? new Date(r.submitted_at).toLocaleString() : "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    <div className="font-mono text-xs text-foreground">{fmtExact(r.submitted_at)}</div>
+                    {fmtDuration(r.started_at, r.submitted_at) && (
+                      <div className="text-[10px] mt-0.5">Took {fmtDuration(r.started_at, r.submitted_at)}</div>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <Button size="sm" variant="outline" onClick={() => setOpenId(r.id)}><Eye className="h-4 w-4 mr-1" />View</Button>
                   </td>
@@ -108,7 +132,10 @@ function ResultsPage() {
                 <div><div className="text-muted-foreground">Warn</div><div className="font-semibold">{r.warnings}</div></div>
               </div>
               {r.submitted_at && (
-                <div className="text-[11px] text-muted-foreground">{new Date(r.submitted_at).toLocaleString()}</div>
+                <div className="text-[11px] text-muted-foreground font-mono">
+                  {fmtExact(r.submitted_at)}
+                  {fmtDuration(r.started_at, r.submitted_at) && ` · Took ${fmtDuration(r.started_at, r.submitted_at)}`}
+                </div>
               )}
             </div>
           ))}
@@ -173,6 +200,10 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
             <h2 className="text-xl font-bold">{candidate} · {quizTitle}</h2>
             <div className="text-xs text-muted-foreground mt-1">
               Score {attempt.score} · {attempt.correct_count}/{attempt.total_questions} correct · {attempt.warnings} warning{attempt.warnings === 1 ? "" : "s"} · {attempt.status.replace("_", " ")}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1 font-mono">
+              Submitted: {fmtExact(attempt.submitted_at)}
+              {fmtDuration(attempt.started_at, attempt.submitted_at) && ` · Time taken: ${fmtDuration(attempt.started_at, attempt.submitted_at)}`}
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}><X className="h-4 w-4" /></Button>
