@@ -59,7 +59,6 @@ function TakeQuiz() {
         supabase.from("questions").select("*").eq("quiz_id", quizId).order("position"),
       ]);
       setQuiz(q as Quiz);
-      setQuiz(q as Quiz);
       let list = (qs as Question[]) ?? [];
       if (q?.randomize) list = [...list].sort(() => Math.random() - 0.5);
       setQuestions(list);
@@ -92,9 +91,6 @@ function TakeQuiz() {
     try { await document.documentElement.requestFullscreen(); } catch {}
     history.pushState(null, "", location.href);
   };
-      setQuestions(list);
-    })();
-  }, [quizId, user, navigate]);
 
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(t); }, []);
 
