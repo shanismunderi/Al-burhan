@@ -201,6 +201,10 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
             <div className="text-xs text-muted-foreground mt-1">
               Score {attempt.score} · {attempt.correct_count}/{attempt.total_questions} correct · {attempt.warnings} warning{attempt.warnings === 1 ? "" : "s"} · {attempt.status.replace("_", " ")}
             </div>
+            <div className="text-xs text-muted-foreground mt-1 font-mono">
+              Submitted: {fmtExact(attempt.submitted_at)}
+              {fmtDuration(attempt.started_at, attempt.submitted_at) && ` · Time taken: ${fmtDuration(attempt.started_at, attempt.submitted_at)}`}
+            </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}><X className="h-4 w-4" /></Button>
         </div>
