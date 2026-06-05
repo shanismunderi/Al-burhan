@@ -38,7 +38,8 @@ function Landing() {
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur border-b border-border/60">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <Brand />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <ThemeToggle />
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link to="/admin/login">Admin</Link>
             </Button>
