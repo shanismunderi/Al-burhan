@@ -317,11 +317,11 @@ function TakeQuiz() {
                     const sel = answers[q.id] === k;
                     return (
                       <button key={k} onClick={() => selectMcq(q.id, k)}
-                        className={`w-full text-left px-4 py-3 rounded-xl border transition-all flex items-center gap-3 ${
-                          sel ? "border-primary bg-primary/10 text-foreground" : "border-border hover:border-primary/40 hover:bg-accent/40"
+                        className={`group w-full text-left px-3 sm:px-4 py-3 rounded-xl border transition-all flex items-center gap-3 active:scale-[0.99] ${
+                          sel ? "border-primary bg-primary/10 text-foreground shadow-sm shadow-primary/10" : "border-border hover:border-primary/40 hover:bg-accent/40"
                         }`}>
-                        <span className={`h-7 w-7 rounded-full border flex items-center justify-center font-mono text-sm ${sel ? "bg-primary text-primary-foreground border-primary" : "border-border"}`}>{k}</span>
-                        <span>{text}</span>
+                        <span className={`h-8 w-8 sm:h-7 sm:w-7 shrink-0 rounded-full border flex items-center justify-center font-mono text-sm transition-colors ${sel ? "bg-primary text-primary-foreground border-primary" : "border-border group-hover:border-primary/40"}`}>{k}</span>
+                        <span className="text-sm sm:text-base">{text}</span>
                       </button>
                     );
                   })}
@@ -333,39 +333,41 @@ function TakeQuiz() {
                     placeholder="Type your answer here…"
                     value={answers[q.id] ?? ""}
                     onChange={(e) => typeText(q.id, e.target.value)}
+                    className="text-sm sm:text-base"
                   />
                   <div className="text-xs text-muted-foreground mt-1">Auto-saved as you type.</div>
                 </div>
               )}
 
-              <div className="mt-6 flex items-center justify-between">
-                <Button variant="outline" disabled={current === 0} onClick={() => setCurrent((c) => c - 1)}>Previous</Button>
+              <div className="mt-6 flex items-center justify-between gap-2">
+                <Button variant="outline" size="sm" className="sm:h-10 sm:px-4" disabled={current === 0} onClick={() => setCurrent((c) => c - 1)}>Previous</Button>
                 {current < questions.length - 1 ? (
-                  <Button onClick={() => setCurrent((c) => c + 1)}>Next</Button>
+                  <Button size="sm" className="sm:h-10 sm:px-6" onClick={() => setCurrent((c) => c + 1)}>Next</Button>
                 ) : (
-                  <Button onClick={() => { if (confirm("Submit your exam now?")) autoSubmit("submitted"); }}>Submit exam</Button>
+                  <Button size="sm" className="sm:h-10 sm:px-6 bg-gradient-to-r from-primary to-primary/80" onClick={() => { if (confirm("Submit your exam now?")) autoSubmit("submitted"); }}>Submit exam</Button>
                 )}
               </div>
             </motion.div>
           )}
         </div>
 
-        <aside className="rounded-2xl bg-card border border-border p-4 h-fit lg:sticky lg:top-24">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground font-medium">Question navigator</div>
-          <div className="grid grid-cols-5 gap-2 mt-3">
+        <aside className="rounded-2xl bg-card border border-border p-4 h-fit lg:sticky lg:top-24 order-first lg:order-last">
+          <div className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Question navigator</div>
+          <div className="grid grid-cols-8 sm:grid-cols-10 lg:grid-cols-5 gap-1.5 sm:gap-2 mt-3">
             {questions.map((qq, i) => {
               const answered = !!answers[qq.id];
               const isCurrent = i === current;
               return (
                 <button key={qq.id} onClick={() => setCurrent(i)}
-                  className={`h-9 rounded-md text-sm font-medium border transition-colors ${
-                    isCurrent ? "bg-foreground text-background border-foreground" :
-                    answered ? "bg-primary/15 text-primary border-primary/30" :
-                    "bg-muted text-muted-foreground border-border"
+                  className={`h-8 sm:h-9 rounded-md text-xs sm:text-sm font-medium border transition-all active:scale-95 ${
+                    isCurrent ? "bg-foreground text-background border-foreground shadow-md" :
+                    answered ? "bg-primary/15 text-primary border-primary/30 hover:bg-primary/25" :
+                    "bg-muted text-muted-foreground border-border hover:bg-accent/50"
                   }`}>{i + 1}</button>
               );
             })}
           </div>
+
           <div className="mt-4 text-xs space-y-1 text-muted-foreground">
             <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-primary/30" /> Answered</div>
             <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-muted border border-border" /> Unanswered</div>
