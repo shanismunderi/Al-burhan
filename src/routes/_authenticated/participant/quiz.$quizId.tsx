@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "sonner";
 import { AlertTriangle, Clock, Maximize, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/participant/quiz/$quizId")({
