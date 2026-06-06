@@ -125,13 +125,11 @@ function QuestionsPage() {
           });
         }
       }
-      if (!payload.length) return toast.error("No valid questions found in file");
+      if (!payload.length) return;
       const { error } = await supabase.from("questions").insert(payload);
-      if (error) return toast.error(error.message);
-      toast.success(`Imported ${payload.length} question${payload.length === 1 ? "" : "s"}`);
+      if (error) return;
       load();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to parse file");
+    } catch (e: any) {}
     } finally {
       if (fileRef.current) fileRef.current.value = "";
     }
