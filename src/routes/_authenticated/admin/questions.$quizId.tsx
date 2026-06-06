@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, FileSpreadsheet, Download } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/questions/$quizId")({
@@ -60,21 +59,20 @@ function QuestionsPage() {
   };
 
   const add = async () => {
-    if (!draft.question_text.trim()) return toast.error("Question text required");
+    if (!draft.question_text.trim()) return;
     if (draft.question_type === "mcq") {
-      if (!draft.option_a || !draft.option_b) return toast.error("Provide at least options A and B");
+      if (!draft.option_a || !draft.option_b) return;
     }
     const payload: any = { ...draft };
     const { error } = await supabase.from("questions").insert(payload);
-    if (error) return toast.error(error.message);
-    toast.success("Question added");
+    if (error) return;
     load();
   };
 
   const remove = async (id?: string) => {
     if (!id) return;
     const { error } = await supabase.from("questions").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return;
     load();
   };
 
@@ -97,7 +95,7 @@ function QuestionsPage() {
       const wb = XLSX.read(buf);
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json<any>(ws, { defval: "" });
-      if (!data.length) return toast.error("Excel file is empty");
+      if (!data.length) return;
       const payload: any[] = [];
       let pos = list.length;
       for (const row of data) {
@@ -109,7 +107,6 @@ function QuestionsPage() {
         if (isMcq) {
           const correct = String(row.correct_answer || "A").trim().toUpperCase().charAt(0);
           if (!"ABCD".includes(correct)) {
-            toast.error(`Row "${qt.slice(0, 30)}…" has invalid correct_answer (must be A/B/C/D)`);
             continue;
           }
           payload.push({
@@ -128,13 +125,11 @@ function QuestionsPage() {
           });
         }
       }
-      if (!payload.length) return toast.error("No valid questions found in file");
+      if (!payload.length) return;
       const { error } = await supabase.from("questions").insert(payload);
-      if (error) return toast.error(error.message);
-      toast.success(`Imported ${payload.length} question${payload.length === 1 ? "" : "s"}`);
+      if (error) return;
       load();
     } catch (e: any) {
-      toast.error(e.message || "Failed to parse file");
     } finally {
       if (fileRef.current) fileRef.current.value = "";
     }

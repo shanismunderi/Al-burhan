@@ -4,7 +4,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import { Trophy, Eye, X, Check, AlertTriangle } from "lucide-react";
 import { gradeAnswer } from "@/lib/admin.functions";
 
@@ -182,12 +181,11 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
 
   const submitGrade = async (answerId: string) => {
     const v = grading[answerId];
-    if (v == null || isNaN(v)) return toast.error("Enter a score");
+    if (v == null || isNaN(v)) return;
     try {
       await grade({ data: { answer_id: answerId, manual_score: v } });
-      toast.success("Saved");
       load();
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: any) {}
   };
 
   if (!attempt) return null;

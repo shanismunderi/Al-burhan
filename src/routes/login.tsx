@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,12 +26,10 @@ function LoginPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!code.trim()) return toast.error("Enter your access code");
+    if (!code.trim()) return;
     setBusy(true);
     const { error } = await signInWithCode(code);
     setBusy(false);
-    if (error) toast.error("Invalid access code");
-    else toast.success("Welcome!");
   };
 
   return (

@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { Plus, Trash2, Users as UsersIcon, Copy, KeyRound, Pencil, Check, X } from "lucide-react";
 import { createParticipant, deleteParticipant, updateAccessCode } from "@/lib/admin.functions";
 
@@ -39,34 +38,32 @@ function ParticipantsPage() {
   useEffect(() => { load(); }, []);
 
   const add = async () => {
-    if (!m1.trim() || !m2.trim()) return toast.error("Both team member names required");
+    if (!m1.trim() || !m2.trim()) return;
     setBusy(true);
     try {
       const res = await create({ data: { member1_name: m1.trim(), member2_name: m2.trim(), access_code: customCode.trim() || undefined } });
       setLastCode({ name: `${m1.trim()} & ${m2.trim()}`, code: res.access_code });
-      toast.success("Team created — share the access code");
       setM1(""); setM2(""); setCustomCode("");
       load();
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: any) {}
     setBusy(false);
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this candidate and all their attempts?")) return;
-    try { await del({ data: { user_id: id } }); toast.success("Deleted"); load(); }
-    catch (e: any) { toast.error(e.message); }
+    try { await del({ data: { user_id: id } }); load(); }
+    catch (e: any) {}
   };
 
   const saveEdit = async () => {
     if (!editing) return;
     try {
       await updateCode({ data: { user_id: editing.id, access_code: editing.code.trim().toUpperCase() } });
-      toast.success("Access code updated");
       setEditing(null); load();
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: any) {}
   };
 
-  const copy = (text: string) => { navigator.clipboard.writeText(text); toast.success("Copied"); };
+  const copy = (text: string) => { navigator.clipboard.writeText(text); };
 
   return (
     <div className="p-4 md:p-8">
