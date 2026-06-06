@@ -76,7 +76,7 @@ function TakeQuiz() {
         user_id: user.id, quiz_id: quizId, ends_at, status: "in_progress",
         total_questions: list.length,
       }).select().single();
-      if (error) return toast.error(error.message);
+      if (error) return;
       a = data as Attempt;
     } else {
       const { data: saved } = await supabase.from("attempt_answers").select("*").eq("attempt_id", a.id);
@@ -102,7 +102,6 @@ function TakeQuiz() {
       .from("quiz_attempts").select("id,status").eq("user_id", user.id).eq("quiz_id", quizId)
       .neq("status", "in_progress").limit(1).maybeSingle();
     if (submitted) {
-      toast.error("You have already submitted this exam. Only one attempt is allowed.");
       navigate({ to: "/participant/dashboard" });
       return;
     }
@@ -114,7 +113,7 @@ function TakeQuiz() {
         user_id: user.id, quiz_id: quizId, ends_at, status: "in_progress",
         total_questions: questions.length,
       }).select().single();
-      if (error) return toast.error(error.message);
+      if (error) return;
       a = data as Attempt;
     } else {
       const { data: saved } = await supabase.from("attempt_answers").select("*").eq("attempt_id", a.id);
@@ -159,7 +158,6 @@ function TakeQuiz() {
     });
     if (error) {
       submittingRef.current = false;
-      toast.error(error.message);
       return;
     }
     if (document.fullscreenElement) try { await document.exitFullscreen(); } catch {}
