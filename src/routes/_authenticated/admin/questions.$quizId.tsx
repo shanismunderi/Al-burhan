@@ -129,7 +129,7 @@ function QuestionsPage() {
       const { error } = await supabase.from("questions").insert(payload);
       if (error) return;
       load();
-    } catch (e: any) {}
+    } catch (e: any) {
     } finally {
       if (fileRef.current) fileRef.current.value = "";
     }
