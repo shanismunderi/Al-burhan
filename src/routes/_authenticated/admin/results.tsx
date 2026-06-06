@@ -181,12 +181,11 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
 
   const submitGrade = async (answerId: string) => {
     const v = grading[answerId];
-    if (v == null || isNaN(v)) return toast.error("Enter a score");
+    if (v == null || isNaN(v)) return;
     try {
       await grade({ data: { answer_id: answerId, manual_score: v } });
-      toast.success("Saved");
       load();
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: any) {}
   };
 
   if (!attempt) return null;

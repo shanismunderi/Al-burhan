@@ -40,8 +40,7 @@ function AdminLogin() {
     try { await seed(); } catch {}
     const { error } = await signInWithUsername(username, password);
     setBusy(false);
-    if (error) toast.error(error.message);
-    else toast.success("Welcome, admin");
+    if (error) return;
   };
 
   return (

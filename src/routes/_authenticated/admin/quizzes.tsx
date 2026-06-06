@@ -53,7 +53,6 @@ function QuizSettingsPage() {
         .select()
         .single();
       if (error) {
-        toast.error(error.message);
         setLoading(false);
         return;
       }
@@ -78,7 +77,7 @@ function QuizSettingsPage() {
 
   const save = async () => {
     if (!quiz) return;
-    if (!quiz.title.trim()) return toast.error("Title is required");
+    if (!quiz.title.trim()) return;
     setSaving(true);
     const { error } = await supabase
       .from("quizzes")
@@ -92,8 +91,7 @@ function QuizSettingsPage() {
       })
       .eq("id", quiz.id);
     setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Quiz settings saved");
+    if (error) return;
   };
 
   if (loading || !quiz) {
