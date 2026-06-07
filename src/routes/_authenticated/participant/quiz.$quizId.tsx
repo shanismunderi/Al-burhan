@@ -207,10 +207,51 @@ function TakeQuiz() {
     saveTimers.current[qid] = setTimeout(() => saveAnswer(qid, value), 600);
   };
 
-  if (!quiz) return <div className="p-12 text-center text-muted-foreground">Loading quiz…</div>;
+  if (!quiz) return (
+    <div className="min-h-[80vh] flex items-center justify-center p-6">
+      <div className="text-center">
+        <div className="h-12 w-12 mx-auto rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+        <p className="mt-4 text-sm text-muted-foreground">Loading quiz…</p>
+      </div>
+    </div>
+  );
 
   if (!started) {
-    return <div className="p-12 text-center text-muted-foreground">Starting exam…</div>;
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="min-h-[85vh] flex items-center justify-center p-4 sm:p-6"
+      >
+        <div className="w-full max-w-md rounded-3xl border border-border bg-card shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-6 sm:p-8 text-center">
+            <div className="h-16 w-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
+              <ShieldCheck className="h-8 w-8 text-primary-foreground" />
+            </div>
+            <h1 className="mt-5 text-xl sm:text-2xl font-bold leading-tight">{quiz.title}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">Preparing your secure exam environment…</p>
+          </div>
+          <div className="p-5 sm:p-6 space-y-3">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-accent/40 border border-border">
+              <Clock className="h-5 w-5 text-primary shrink-0" />
+              <div className="text-sm"><span className="font-semibold">{quiz.duration_minutes} min</span> <span className="text-muted-foreground">duration</span></div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-accent/40 border border-border">
+              <Maximize className="h-5 w-5 text-primary shrink-0" />
+              <div className="text-sm text-muted-foreground">Fullscreen mode • No tab switching</div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-warning/10 border border-warning/30">
+              <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
+              <div className="text-xs text-foreground/80">3 warnings = auto-submit</div>
+            </div>
+            <div className="pt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+              Starting exam…
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
   }
 
   const q = questions[current];
@@ -341,7 +382,7 @@ function TakeQuiz() {
                 {current < questions.length - 1 ? (
                   <Button size="sm" className="sm:h-10 sm:px-6" onClick={() => setCurrent((c) => c + 1)}>Next</Button>
                 ) : (
-                  <Button size="sm" className="sm:h-10 sm:px-6 bg-gradient-to-r from-primary to-primary/80" onClick={() => { if (confirm("Submit your exam now?")) autoSubmit("submitted"); }}>Submit exam</Button>
+                  <Button size="sm" className="sm:h-10 sm:px-6 bg-gradient-to-r from-primary to-primary/80" onClick={() => autoSubmit("submitted")}>Submit exam</Button>
                 )}
               </div>
             </motion.div>
