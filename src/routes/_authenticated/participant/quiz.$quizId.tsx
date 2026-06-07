@@ -271,30 +271,40 @@ function TakeQuiz() {
   const dash = RING_C * (1 - elapsedFrac);
 
   return (
-    <div className="pt-2">
-      <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-xl border-b border-border -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+    <div className="pt-2 relative">
+      {/* Ambient background */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+      </div>
+
+      <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-2xl border-b border-border/60 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground font-medium">Q {current + 1} / {questions.length}</div>
-          <div className="font-semibold truncate text-sm sm:text-base">{quiz.title}</div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-6 items-center rounded-full bg-primary/10 text-primary px-2.5 text-[10px] font-bold tracking-wider uppercase">
+              Q {current + 1}/{questions.length}
+            </span>
+          </div>
+          <div className="font-semibold truncate text-sm sm:text-base mt-1.5">{quiz.title}</div>
         </div>
 
         {/* Animated timer */}
         <motion.div
           animate={criticalTime ? { scale: [1, 1.04, 1] } : { scale: 1 }}
           transition={criticalTime ? { duration: 0.8, repeat: Infinity } : { duration: 0.3 }}
-          className={`relative flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 pr-3 sm:pr-5 py-1.5 sm:py-2 rounded-2xl border backdrop-blur-md shadow-lg shrink-0 ${
+          className={`relative flex items-center gap-2.5 sm:gap-3 pl-2 sm:pl-2.5 pr-3 sm:pr-5 py-1.5 sm:py-2 rounded-full border backdrop-blur-md shadow-lg shrink-0 ${
             criticalTime
               ? "border-destructive/60 bg-destructive/10 shadow-destructive/30"
               : lowTime
               ? "border-warning/60 bg-warning/15"
-              : "border-primary/30 bg-primary/5"
+              : "border-primary/30 bg-gradient-to-r from-primary/10 to-primary/5"
           }`}
         >
           {criticalTime && (
-            <span className="absolute inset-0 rounded-2xl bg-destructive/20 animate-ping -z-10" />
+            <span className="absolute inset-0 rounded-full bg-destructive/20 animate-ping -z-10" />
           )}
 
-          <div className="relative h-10 w-10 sm:h-14 sm:w-14 shrink-0">
+          <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0">
             <svg viewBox="0 0 60 60" className="h-full w-full -rotate-90">
               <circle cx="30" cy="30" r={RING_R} className="fill-none stroke-foreground/10" strokeWidth="5" />
               <circle
@@ -309,14 +319,14 @@ function TakeQuiz() {
                 style={{ transition: "stroke-dashoffset 250ms linear" }}
               />
             </svg>
-            <Clock className={`h-4 w-4 sm:h-5 sm:w-5 absolute inset-0 m-auto ${criticalTime ? "text-destructive" : lowTime ? "text-warning" : "text-primary"}`} />
+            <Clock className={`h-4 w-4 absolute inset-0 m-auto ${criticalTime ? "text-destructive" : lowTime ? "text-warning" : "text-primary"}`} />
           </div>
 
           <div className="flex flex-col leading-none">
-            <span className="hidden sm:inline text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
-              Time {criticalTime ? "left!" : "remaining"}
+            <span className="hidden sm:inline text-[9px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">
+              {criticalTime ? "Hurry!" : "Time left"}
             </span>
-            <span className={`font-mono text-base sm:text-2xl font-bold tabular-nums mt-0 sm:mt-0.5 ${
+            <span className={`font-mono text-base sm:text-xl font-bold tabular-nums mt-0 sm:mt-1 ${
               criticalTime ? "text-destructive" : lowTime ? "text-warning" : "text-foreground"
             }`}>
               {h > 0 && `${String(h).padStart(2, "0")}:`}{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}
@@ -324,69 +334,133 @@ function TakeQuiz() {
           </div>
         </motion.div>
 
-        <div className="text-[10px] sm:text-xs text-muted-foreground text-right shrink-0 hidden xs:block sm:block">
-          <span className="hidden sm:inline">Warnings</span>
-          <span className="sm:hidden">⚠</span>
-          <br className="hidden sm:inline" />
-          <span className={attempt && attempt.warnings >= 2 ? "text-destructive font-bold text-sm sm:text-base" : "font-bold text-sm sm:text-base"}>{attempt?.warnings ?? 0}/{MAX_WARNINGS}</span>
+        <div className="hidden sm:flex flex-col items-end shrink-0 text-right">
+          <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold">Warnings</span>
+          <span className={`mt-0.5 font-bold text-base ${attempt && attempt.warnings >= 2 ? "text-destructive" : "text-foreground"}`}>
+            {attempt?.warnings ?? 0}<span className="text-muted-foreground font-normal">/{MAX_WARNINGS}</span>
+          </span>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 -mx-4 sm:-mx-6 bg-muted">
-        <div className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-300" style={{ width: `${((current + 1) / questions.length) * 100}%` }} />
+      <div className="h-1 -mx-4 sm:-mx-6 bg-muted/60 overflow-hidden">
+        <motion.div
+          initial={false}
+          animate={{ width: `${((current + 1) / questions.length) * 100}%` }}
+          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          className="h-full bg-gradient-to-r from-primary via-primary to-primary/60"
+        />
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_240px] gap-4 sm:gap-6 mt-4 sm:mt-6">
+      <div className="grid lg:grid-cols-[1fr_260px] gap-4 sm:gap-6 mt-5 sm:mt-8 pb-12">
         <div>
-          {q && (
-            <motion.div key={q.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-card border border-border p-4 sm:p-6 shadow-sm">
-              <div className="text-[10px] sm:text-xs uppercase tracking-widest text-primary font-semibold">
-                Q{current + 1} · {q.question_type === "mcq" ? "Multiple choice" : "Descriptive"} · {q.marks} mark{Number(q.marks) === 1 ? "" : "s"}
-              </div>
-              <h2 className="text-lg sm:text-xl font-semibold mt-2 whitespace-pre-line leading-snug">{q.question_text}</h2>
-
-
-              {q.question_type === "mcq" ? (
-                <div className="mt-5 space-y-2">
-                  {(["A","B","C","D"] as const).map((k) => {
-                    const text = (q as any)[`option_${k.toLowerCase()}`] as string | null;
-                    if (!text) return null;
-                    const sel = answers[q.id] === k;
-                    return (
-                      <button key={k} onClick={() => selectMcq(q.id, k)}
-                        className={`group w-full text-left px-3 sm:px-4 py-3 rounded-xl border transition-all flex items-center gap-3 active:scale-[0.99] ${
-                          sel ? "border-primary bg-primary/10 text-foreground shadow-sm shadow-primary/10" : "border-border hover:border-primary/40 hover:bg-accent/40"
-                        }`}>
-                        <span className={`h-8 w-8 sm:h-7 sm:w-7 shrink-0 rounded-full border flex items-center justify-center font-mono text-sm transition-colors ${sel ? "bg-primary text-primary-foreground border-primary" : "border-border group-hover:border-primary/40"}`}>{k}</span>
-                        <span className="text-sm sm:text-base">{text}</span>
-                      </button>
-                    );
-                  })}
+          <AnimatePresence mode="wait">
+            {q && (
+              <motion.div
+                key={q.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="rounded-3xl bg-card border border-border/60 p-5 sm:p-8 shadow-xl shadow-foreground/[0.03]"
+              >
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center h-7 rounded-full bg-foreground text-background px-3 text-xs font-bold">
+                    Q{current + 1}
+                  </span>
+                  <span className="inline-flex items-center h-7 rounded-full bg-primary/10 text-primary px-3 text-[11px] font-semibold uppercase tracking-wider">
+                    {q.question_type === "mcq" ? "Multiple choice" : "Descriptive"}
+                  </span>
+                  <span className="inline-flex items-center h-7 rounded-full bg-accent/60 text-foreground px-3 text-[11px] font-semibold">
+                    {q.marks} mark{Number(q.marks) === 1 ? "" : "s"}
+                  </span>
                 </div>
-              ) : (
-                <div className="mt-5">
-                  <Textarea
-                    rows={8}
-                    placeholder="Type your answer here…"
-                    value={answers[q.id] ?? ""}
-                    onChange={(e) => typeText(q.id, e.target.value)}
-                    className="text-sm sm:text-base"
-                  />
-                  <div className="text-xs text-muted-foreground mt-1">Auto-saved as you type.</div>
-                </div>
-              )}
 
-              <div className="mt-6 flex items-center justify-between gap-2">
-                <Button variant="outline" size="sm" className="sm:h-10 sm:px-4" disabled={current === 0} onClick={() => setCurrent((c) => c - 1)}>Previous</Button>
-                {current < questions.length - 1 ? (
-                  <Button size="sm" className="sm:h-10 sm:px-6" onClick={() => setCurrent((c) => c + 1)}>Next</Button>
+                <h2 className="text-lg sm:text-2xl font-semibold mt-4 whitespace-pre-line leading-snug tracking-tight">
+                  {q.question_text}
+                </h2>
+
+                {q.question_type === "mcq" ? (
+                  <div className="mt-6 space-y-2.5">
+                    {(["A","B","C","D"] as const).map((k) => {
+                      const text = (q as any)[`option_${k.toLowerCase()}`] as string | null;
+                      if (!text) return null;
+                      const sel = answers[q.id] === k;
+                      return (
+                        <button
+                          key={k}
+                          onClick={() => selectMcq(q.id, k)}
+                          className={`group relative w-full text-left px-3.5 sm:px-5 py-3.5 sm:py-4 rounded-2xl border-2 transition-all flex items-center gap-3.5 active:scale-[0.99] overflow-hidden ${
+                            sel
+                              ? "border-primary bg-gradient-to-r from-primary/15 via-primary/8 to-transparent text-foreground shadow-md shadow-primary/15"
+                              : "border-border/70 hover:border-primary/50 hover:bg-accent/40"
+                          }`}
+                        >
+                          <span
+                            className={`h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-xl border-2 flex items-center justify-center font-mono text-sm font-bold transition-all ${
+                              sel
+                                ? "bg-primary text-primary-foreground border-primary scale-105"
+                                : "border-border/80 group-hover:border-primary/50 group-hover:bg-background"
+                            }`}
+                          >
+                            {k}
+                          </span>
+                          <span className="text-sm sm:text-base flex-1">{text}</span>
+                          {sel && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="h-2 w-2 rounded-full bg-primary shadow-[0_0_12px_currentColor]"
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 ) : (
-                  <Button size="sm" className="sm:h-10 sm:px-6 bg-gradient-to-r from-primary to-primary/80" onClick={() => autoSubmit("submitted")}>Submit exam</Button>
+                  <div className="mt-6">
+                    <Textarea
+                      rows={8}
+                      placeholder="Type your answer here…"
+                      value={answers[q.id] ?? ""}
+                      onChange={(e) => typeText(q.id, e.target.value)}
+                      className="text-sm sm:text-base rounded-2xl border-2 border-border/70 focus-visible:border-primary p-4"
+                    />
+                    <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                      Auto-saved as you type
+                    </div>
+                  </div>
                 )}
-              </div>
-            </motion.div>
-          )}
+
+                <div className="mt-7 sm:mt-8 flex items-center justify-between gap-2 pt-5 border-t border-border/50">
+                  <Button
+                    variant="outline"
+                    className="h-11 px-5 rounded-xl"
+                    disabled={current === 0}
+                    onClick={() => setCurrent((c) => c - 1)}
+                  >
+                    ← Previous
+                  </Button>
+                  {current < questions.length - 1 ? (
+                    <Button
+                      className="h-11 px-6 rounded-xl bg-foreground text-background hover:bg-foreground/90"
+                      onClick={() => setCurrent((c) => c + 1)}
+                    >
+                      Next →
+                    </Button>
+                  ) : (
+                    <Button
+                      className="h-11 px-6 rounded-xl bg-gradient-to-r from-primary to-primary/80 shadow-lg shadow-primary/25"
+                      onClick={() => autoSubmit("submitted")}
+                    >
+                      Submit exam ✓
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <aside className="rounded-2xl bg-card border border-border p-4 h-fit lg:sticky lg:top-24 order-first lg:order-last">
