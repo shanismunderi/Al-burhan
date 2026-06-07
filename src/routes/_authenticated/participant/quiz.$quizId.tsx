@@ -341,7 +341,7 @@ function TakeQuiz() {
                 {current < questions.length - 1 ? (
                   <Button size="sm" className="sm:h-10 sm:px-6" onClick={() => setCurrent((c) => c + 1)}>Next</Button>
                 ) : (
-                  <Button size="sm" className="sm:h-10 sm:px-6 bg-gradient-to-r from-primary to-primary/80" onClick={() => { if (confirm("Submit your exam now?")) autoSubmit("submitted"); }}>Submit exam</Button>
+                  <Button size="sm" className="sm:h-10 sm:px-6 bg-gradient-to-r from-primary to-primary/80" onClick={() => autoSubmit("submitted")}>Submit exam</Button>
                 )}
               </div>
             </motion.div>
