@@ -463,26 +463,31 @@ function TakeQuiz() {
           </AnimatePresence>
         </div>
 
-        <aside className="rounded-2xl bg-card border border-border p-4 h-fit lg:sticky lg:top-24 order-first lg:order-last">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Question navigator</div>
-          <div className="grid grid-cols-8 sm:grid-cols-10 lg:grid-cols-5 gap-1.5 sm:gap-2 mt-3">
+        <aside className="rounded-3xl bg-card border border-border/60 p-5 h-fit lg:sticky lg:top-28 order-first lg:order-last shadow-lg shadow-foreground/[0.03]">
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Navigator</div>
+            <div className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+              {Object.keys(answers).filter(k => answers[k]).length}/{questions.length}
+            </div>
+          </div>
+          <div className="grid grid-cols-8 sm:grid-cols-10 lg:grid-cols-5 gap-1.5 sm:gap-2 mt-4">
             {questions.map((qq, i) => {
               const answered = !!answers[qq.id];
               const isCurrent = i === current;
               return (
                 <button key={qq.id} onClick={() => setCurrent(i)}
-                  className={`h-8 sm:h-9 rounded-md text-xs sm:text-sm font-medium border transition-all active:scale-95 ${
-                    isCurrent ? "bg-foreground text-background border-foreground shadow-md" :
-                    answered ? "bg-primary/15 text-primary border-primary/30 hover:bg-primary/25" :
-                    "bg-muted text-muted-foreground border-border hover:bg-accent/50"
+                  className={`h-9 sm:h-10 rounded-lg text-xs sm:text-sm font-bold border-2 transition-all active:scale-90 ${
+                    isCurrent ? "bg-foreground text-background border-foreground shadow-lg ring-2 ring-foreground/20 scale-105" :
+                    answered ? "bg-primary/15 text-primary border-primary/40 hover:bg-primary/25 hover:scale-105" :
+                    "bg-background text-muted-foreground border-border/70 hover:border-primary/30 hover:bg-accent/40"
                   }`}>{i + 1}</button>
               );
             })}
           </div>
 
-          <div className="mt-4 text-xs space-y-1 text-muted-foreground">
-            <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-primary/30" /> Answered</div>
-            <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-muted border border-border" /> Unanswered</div>
+          <div className="mt-5 pt-4 border-t border-border/50 text-[11px] space-y-2 text-muted-foreground">
+            <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-primary/30 border border-primary/40" /> Answered</div>
+            <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-background border-2 border-border/70" /> Unanswered</div>
             <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-foreground" /> Current</div>
           </div>
         </aside>
