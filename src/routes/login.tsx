@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,16 +14,23 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { session, role, loading } = useAuth();
+  const { session, role, loading, username } = useAuth();
   const navigate = useNavigate();
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const welcomedRef = useRef(false);
 
   useEffect(() => {
     if (!loading && session && role) {
+      if (!welcomedRef.current) {
+        welcomedRef.current = true;
+        toast.success(`Welcome${username ? `, ${username}` : ""}! 🎉`, {
+          description: "Signed in successfully. Redirecting…",
+        });
+      }
       navigate({ to: role === "admin" ? "/admin/dashboard" : "/participant/dashboard" });
     }
-  }, [loading, session, role, navigate]);
+  }, [loading, session, role, navigate, username]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +38,9 @@ function LoginPage() {
     setBusy(true);
     const { error } = await signInWithCode(code);
     setBusy(false);
+    if (error) {
+      toast.error("Invalid access code", { description: error.message });
+    }
   };
 
   return (
