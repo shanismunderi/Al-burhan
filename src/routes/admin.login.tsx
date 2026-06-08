@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,32 +16,40 @@ export const Route = createFileRoute("/admin/login")({
 });
 
 function AdminLogin() {
-  const { session, role, loading } = useAuth();
+  const { session, role, loading, username: displayName } = useAuth();
   const navigate = useNavigate();
   const seed = useServerFn(seedAdmin);
   const [username, setUsername] = useState("admin@burhan");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const welcomedRef = useRef(false);
 
   useEffect(() => {
-    // Bootstrap the admin account on first visit
     seed().catch(() => {});
   }, [seed]);
 
   useEffect(() => {
     if (!loading && session && role) {
+      if (!welcomedRef.current) {
+        welcomedRef.current = true;
+        toast.success(`Welcome${displayName ? `, ${displayName}` : " back"}! 🎉`, {
+          description: role === "admin" ? "Admin dashboard loading…" : "Redirecting…",
+        });
+      }
       navigate({ to: role === "admin" ? "/admin/dashboard" : "/participant/dashboard" });
     }
-  }, [loading, session, role, navigate]);
+  }, [loading, session, role, navigate, displayName]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    // Make sure admin account exists (idempotent)
     try { await seed(); } catch {}
     const { error } = await signInWithUsername(username, password);
     setBusy(false);
-    if (error) return;
+    if (error) {
+      toast.error("Sign-in failed", { description: error.message });
+      return;
+    }
   };
 
   return (
