@@ -123,7 +123,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <Toaster richColors position="top-right" />
+      <Toaster
+        richColors
+        closeButton
+        position="top-right"
+        expand
+        visibleToasts={5}
+        toastOptions={{ duration: 4000 }}
+      />
     </QueryClientProvider>
   );
 }
