@@ -78,9 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan." },
       { name: "author", content: "Darul Hasanath Islamic College" },
       { property: "og:title", content: "Al-Burhan 2.0 — National Grand Quiz Competition" },
-      { property: "og:description", content: "Compete in a national-level quiz on Islamic civilization. Cash prizes of ₹2222, ₹3333, ₹1111." },
+      { property: "og:description", content: "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Al-Burhan 2.0 — National Grand Quiz Competition" },
+      { name: "twitter:description", content: "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/eec4ff74-a77b-4b37-a66e-4ff8329e408a/id-preview-cd9bd56d--ff1e24cf-3f7c-480d-8780-e93fd2ffc9fc.lovable.app-1780894023079.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/eec4ff74-a77b-4b37-a66e-4ff8329e408a/id-preview-cd9bd56d--ff1e24cf-3f7c-480d-8780-e93fd2ffc9fc.lovable.app-1780894023079.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -123,14 +127,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <Toaster
-        richColors
-        closeButton
-        position="top-right"
-        expand
-        visibleToasts={5}
-        toastOptions={{ duration: 4000 }}
-      />
+      <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
 }
