@@ -29,16 +29,17 @@ function AdminLogin() {
   }, [seed]);
 
   useEffect(() => {
-    if (!loading && session && role) {
-      if (!welcomedRef.current) {
-        welcomedRef.current = true;
-        toast.success(`Welcome${displayName ? `, ${displayName}` : " back"}! 🎉`, {
-          description: role === "admin" ? "Admin dashboard loading…" : "Redirecting…",
-        });
-      }
-      navigate({ to: role === "admin" ? "/admin/dashboard" : "/participant/dashboard" });
+    if (loading || !session || !role) return;
+    if (role !== "admin") return; // don't bounce non-admins; let them log out and sign in as admin
+    if (!welcomedRef.current) {
+      welcomedRef.current = true;
+      toast.success(`Welcome${displayName ? `, ${displayName}` : " back"}! 🎉`, {
+        description: "Admin dashboard loading…",
+      });
     }
+    navigate({ to: "/admin/dashboard", replace: true });
   }, [loading, session, role, navigate, displayName]);
+
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/lib/auth";
 import { ArrowRight, Trophy, ScrollText, Clock } from "lucide-react";
 import logoHero from "@/assets/logo-hero.png";
+import { Finalists } from "@/components/finalists";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -129,6 +130,10 @@ function Landing() {
           </div>
         </section>
       </main>
+
+      <Finalists />
+
+
 
       <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground px-4">
         Powered by{" "}
