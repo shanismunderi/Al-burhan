@@ -1,46 +1,62 @@
 import { motion } from "framer-motion";
 import { Sparkles, Trophy } from "lucide-react";
 
-type Member = { name: string; role?: string; photo?: string };
+type Member = { name: string; photo?: string };
 type Team = {
   id: string;
   teamName: string;
-  institution: string;
-  location: string;
+  score: string;
   members: [Member, Member];
 };
 
-// Edit this list to update the finalists shown on the landing page.
 const FINALISTS: Team[] = [
   {
     id: "t1",
-    teamName: "Team Al-Furqan",
-    institution: "Darul Hasanath Islamic College",
-    location: "Malappuram, Kerala",
-    members: [
-      { name: "Muhammad Ashiq", role: "Captain" },
-      { name: "Abdul Rahman", role: "Member" },
-    ],
+    teamName: "Team #1",
+    score: "29 / 300",
+    members: [{ name: "Muhammed shamil pk" }, { name: "Amin mohamed TP" }],
   },
   {
     id: "t2",
-    teamName: "Team Ihsan",
-    institution: "Markaz Knowledge City",
-    location: "Kozhikode, Kerala",
-    members: [
-      { name: "Hamza Iqbal", role: "Captain" },
-      { name: "Yusuf Salim", role: "Member" },
-    ],
+    teamName: "Team #2",
+    score: "29 / 300",
+    members: [{ name: "Muhammed Swalih M" }, { name: "Muhammed Mishab KP" }],
   },
   {
     id: "t3",
-    teamName: "Team Burhan",
-    institution: "Jamia Nadwiyya",
-    location: "Edavanna, Kerala",
-    members: [
-      { name: "Bilal Ahmed", role: "Captain" },
-      { name: "Saif Anwar", role: "Member" },
-    ],
+    teamName: "Team #3",
+    score: "29 / 300",
+    members: [{ name: "Sahal C" }, { name: "Mohammed Anshif" }],
+  },
+  {
+    id: "t4",
+    teamName: "Team #4",
+    score: "29 / 300",
+    members: [{ name: "Afnan" }, { name: "Swalih" }],
+  },
+  {
+    id: "t5",
+    teamName: "Team #5",
+    score: "29 / 300",
+    members: [{ name: "Musned" }, { name: "Irfan Ali ok" }],
+  },
+  {
+    id: "t6",
+    teamName: "Team #6",
+    score: "29 / 300",
+    members: [{ name: "MUHAMMAD MUBARAK" }, { name: "AMEEN NISHAD" }],
+  },
+  {
+    id: "t7",
+    teamName: "Team #7",
+    score: "28 / 300",
+    members: [{ name: "Thajul Haqu .N" }, { name: "Muhammed Sahl P" }],
+  },
+  {
+    id: "t8",
+    teamName: "Team #8",
+    score: "26 / 300",
+    members: [{ name: "Muhammed irfan tm" }, { name: "Muhammed ismail" }],
   },
 ];
 
@@ -96,7 +112,7 @@ export function Finalists() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {FINALISTS.map((t, idx) => (
             <motion.div
               key={t.id}
@@ -115,9 +131,7 @@ export function Finalists() {
                 </span>
               </div>
               <h3 className="mt-2 text-lg font-bold text-foreground">{t.teamName}</h3>
-              <p className="text-xs text-muted-foreground">
-                {t.institution} • {t.location}
-              </p>
+              <p className="text-xs text-muted-foreground font-mono">{t.score}</p>
 
               {/* Collage of two members */}
               <div className="mt-5 flex items-center justify-center gap-3">
@@ -133,11 +147,6 @@ export function Finalists() {
                 {t.members.map((m, i) => (
                   <div key={i} className="rounded-lg bg-muted/50 px-2 py-2">
                     <div className="text-xs font-semibold text-foreground truncate">{m.name}</div>
-                    {m.role && (
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        {m.role}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
