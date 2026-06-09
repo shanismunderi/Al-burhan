@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated/participant/quiz/$quizId")
 });
 
 interface Quiz { id: string; title: string; instructions: string | null; duration_minutes: number; negative_marks: number; randomize: boolean; }
-interface Question { id: string; question_text: string; question_type: "mcq" | "descriptive"; option_a: string | null; option_b: string | null; option_c: string | null; option_d: string | null; marks: number; correct_answer: string | null; }
+interface Question { id: string; question_text: string; question_type: "mcq" | "descriptive"; option_a: string | null; option_b: string | null; option_c: string | null; option_d: string | null; marks: number; }
 interface Attempt { id: string; ends_at: string; warnings: number; status: string; }
 
 const MAX_WARNINGS = 3;
@@ -55,7 +55,7 @@ function TakeQuiz() {
       }
       const [{ data: q }, { data: qs }] = await Promise.all([
         supabase.from("quizzes").select("*").eq("id", quizId).maybeSingle(),
-        supabase.from("questions").select("*").eq("quiz_id", quizId).order("position"),
+        supabase.from("questions").select("id,quiz_id,question_text,question_type,option_a,option_b,option_c,option_d,marks,position,created_at").eq("quiz_id", quizId).order("position"),
       ]);
       setQuiz(q as Quiz);
       let list = (qs as Question[]) ?? [];
