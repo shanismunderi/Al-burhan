@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trophy, Eye, X, Check, AlertTriangle } from "lucide-react";
 import { gradeAnswer } from "@/lib/admin.functions";
+import { formatDisplayName } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin/results")({
   component: ResultsPage,
@@ -21,6 +22,7 @@ interface AttemptRow {
 function fmtExact(iso: string | null) {
   if (!iso) return "—";
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
   const date = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
   const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
   return `${date} · ${time}`;
@@ -28,7 +30,10 @@ function fmtExact(iso: string | null) {
 
 function fmtDuration(startIso: string | null, endIso: string | null) {
   if (!startIso || !endIso) return null;
-  const ms = new Date(endIso).getTime() - new Date(startIso).getTime();
+  const startTime = new Date(startIso).getTime();
+  const endTime = new Date(endIso).getTime();
+  if (isNaN(startTime) || isNaN(endTime)) return null;
+  const ms = endTime - startTime;
   if (ms < 0) return null;
   const s = Math.floor(ms / 1000);
   const m = Math.floor(s / 60);
@@ -48,8 +53,8 @@ function ResultsPage() {
       supabase.from("profiles").select("id, username, display_name"),
       supabase.from("quizzes").select("id, title"),
     ]);
-    const pMap = Object.fromEntries((p ?? []).map((x: any) => [x.id, x.display_name || x.username]));
-    const qMap = Object.fromEntries((q ?? []).map((x) => [x.id, x.title]));
+    const pMap = Object.fromEntries((p ?? []).map((x: any) => [x.id, formatDisplayName(x.display_name, x.username)]));
+    const qMap = Object.fromEntries((q ?? []).map((x: any) => [x.id, x.title]));
     setQuizzes(q ?? []);
     setRows((a ?? []).map((r: any) => ({ ...r, username: pMap[r.user_id], quiz_title: qMap[r.quiz_id] })));
   };
@@ -93,7 +98,7 @@ function ResultsPage() {
                   <td className="px-4 py-3">{r.quiz_title}</td>
                   <td className="px-4 py-3 font-semibold">{r.score}</td>
                   <td className="px-4 py-3">{r.correct_count}/{r.total_questions}</td>
-                  <td className="px-4 py-3">{r.warnings}</td>
+                  <td className="px-4 py-3">{r.warnings || 0}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     <div className="font-mono text-xs text-foreground">{fmtExact(r.submitted_at)}</div>
                     {fmtDuration(r.started_at, r.submitted_at) && (
@@ -128,7 +133,7 @@ function ResultsPage() {
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div><div className="text-muted-foreground">Score</div><div className="font-semibold">{r.score}</div></div>
                 <div><div className="text-muted-foreground">Correct</div><div className="font-semibold">{r.correct_count}/{r.total_questions}</div></div>
-                <div><div className="text-muted-foreground">Warn</div><div className="font-semibold">{r.warnings}</div></div>
+                <div><div className="text-muted-foreground">Warn</div><div className="font-semibold">{r.warnings || 0}</div></div>
               </div>
               {r.submitted_at && (
                 <div className="text-[11px] text-muted-foreground font-mono">
@@ -156,7 +161,7 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
   const [rows, setRows] = useState<DetailRow[]>([]);
   const [candidate, setCandidate] = useState<string>("");
   const [quizTitle, setQuizTitle] = useState("");
-  const [grading, setGrading] = useState<Record<string, number>>({});
+  const [grading, setGrading] = useState<Record<string, string | number>>({});
   const grade = useServerFn(gradeAnswer);
 
   const load = async () => {
@@ -169,10 +174,19 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
       supabase.rpc("admin_get_questions", { _quiz_id: a.quiz_id }),
       supabase.from("attempt_answers").select("*").eq("attempt_id", attemptId),
     ]);
-    setCandidate((prof as any)?.display_name || (prof as any)?.username || "");
+    setCandidate(formatDisplayName((prof as any)?.display_name, (prof as any)?.username));
     setQuizTitle(quiz?.title ?? "");
     const aMap = Object.fromEntries((ans ?? []).map((x: any) => [x.question_id, x]));
-    setRows((qs ?? []).map((q: any) => ({ question: q, answer: aMap[q.id] ?? null })));
+    const orderMap: Record<string, number> = { mcq: 0, one_word: 1, descriptive: 2 };
+    const sortedQs = [...(qs ?? [])].sort((a: any, b: any) => {
+      const typeA = a.question_type ?? "mcq";
+      const typeB = b.question_type ?? "mcq";
+      if (typeA !== typeB) {
+        return (orderMap[typeA] ?? 9) - (orderMap[typeB] ?? 9);
+      }
+      return (a.position ?? 0) - (b.position ?? 0);
+    });
+    setRows(sortedQs.map((q: any) => ({ question: q, answer: aMap[q.id] ?? null })));
     const g: Record<string, number> = {};
     (ans ?? []).forEach((x: any) => { if (x.manual_score != null) g[x.id] = Number(x.manual_score); });
     setGrading(g);
@@ -181,9 +195,11 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
 
   const submitGrade = async (answerId: string) => {
     const v = grading[answerId];
-    if (v == null || isNaN(v)) return;
+    if (v === undefined || v === null || (v as any) === "") return;
+    const num = Number(v);
+    if (isNaN(num)) return;
     try {
-      await grade({ data: { answer_id: answerId, manual_score: v } });
+      await grade({ data: { answer_id: answerId, manual_score: num } });
       load();
     } catch (e: any) {}
   };
@@ -197,7 +213,7 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
             <div className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Full answer sheet</div>
             <h2 className="text-xl font-bold">{candidate} · {quizTitle}</h2>
             <div className="text-xs text-muted-foreground mt-1">
-              Score {attempt.score} · {attempt.correct_count}/{attempt.total_questions} correct · {attempt.warnings} warning{attempt.warnings === 1 ? "" : "s"} · {attempt.status.replace("_", " ")}
+              Score {attempt.score} · {attempt.correct_count}/{attempt.total_questions} correct · {attempt.warnings || 0} warning{(attempt.warnings || 0) === 1 ? "" : "s"} · {attempt.status.replace("_", " ")}
             </div>
             <div className="text-xs text-muted-foreground mt-1 font-mono">
               Submitted: {fmtExact(attempt.submitted_at)}
@@ -210,13 +226,23 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
         <div className="p-6 space-y-4">
           {rows.map(({ question: q, answer }, i) => {
             const isMcq = q.question_type === "mcq";
+            const isOneWord = q.question_type === "one_word";
             const sel = answer?.selected_answer ?? null;
-            const correct = isMcq ? sel === q.correct_answer : null;
+            
+            let isCorrect = null;
+            if (isMcq) {
+              isCorrect = sel === q.correct_answer;
+            } else if (isOneWord) {
+              const userAns = String(sel || "").trim().toLowerCase();
+              const correctAns = String(q.correct_answer || "").trim().toLowerCase();
+              isCorrect = userAns === correctAns;
+            }
+
             return (
               <div key={q.id} className="rounded-xl border border-border p-4">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
-                    {isMcq ? "MCQ" : "Descriptive"}
+                    {isMcq ? "MCQ (Optional)" : isOneWord ? "One Word" : "Descriptive (Essay)"}
                   </span>
                   <span className="text-xs text-muted-foreground">{q.marks} mark{Number(q.marks) === 1 ? "" : "s"}</span>
                 </div>
@@ -242,6 +268,19 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
                       );
                     })}
                   </div>
+                ) : isOneWord ? (
+                  <div className="mt-3 space-y-2">
+                    <div className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Candidate's answer</div>
+                    {sel ? (
+                      <div className={`rounded-lg p-3 text-sm font-mono border ${isCorrect ? "border-success bg-success/5 text-success font-semibold" : "border-destructive bg-destructive/5 text-destructive font-semibold"}`}>{sel}</div>
+                    ) : (
+                      <div className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground italic">No answer provided</div>
+                    )}
+                    <div className="text-xs">
+                      <span className="text-muted-foreground">Correct answer: </span>
+                      <span className="font-mono bg-success/10 text-success px-2 py-0.5 rounded font-semibold">{q.correct_answer}</span>
+                    </div>
+                  </div>
                 ) : (
                   <div className="mt-3">
                     <div className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1">Candidate's answer</div>
@@ -257,7 +296,7 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
                           <Input
                             type="number" step="0.25" min={0} max={Number(q.marks)}
                             value={grading[answer.id] ?? answer.manual_score ?? ""}
-                            onChange={(e) => setGrading((g) => ({ ...g, [answer.id]: Number(e.target.value) }))}
+                            onChange={(e) => setGrading((g) => ({ ...g, [answer.id]: e.target.value }))}
                           />
                         </div>
                         <Button onClick={() => submitGrade(answer.id)}>Save grade</Button>
@@ -269,11 +308,11 @@ function AttemptDetail({ attemptId, onClose }: { attemptId: string; onClose: () 
                   </div>
                 )}
 
-                {isMcq && (
+                {(isMcq || isOneWord) && (
                   <div className="mt-2 text-xs">
                     {sel == null ? <span className="text-muted-foreground">Not answered</span> :
-                      correct ? <span className="text-success font-semibold inline-flex items-center gap-1"><Check className="h-3 w-3" />Correct</span> :
-                      <span className="text-destructive font-semibold inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" />Wrong (selected {sel})</span>}
+                      isCorrect ? <span className="text-success font-semibold inline-flex items-center gap-1"><Check className="h-3 w-3" />Correct</span> :
+                      <span className="text-destructive font-semibold inline-flex items-center gap-1"><AlertTriangle className="h-3 w-3" />Wrong {isOneWord && `(typed: "${sel}")`}</span>}
                   </div>
                 )}
               </div>

@@ -61,14 +61,23 @@ const createParticipantSchema = z.object({
 });
 
 export const createParticipant = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => createParticipantSchema.parse(d))
+  .inputValidator((d: unknown) => {
+    const parsed = createParticipantSchema.safeParse(d);
+    if (!parsed.success) {
+      throw new Error(parsed.error.errors[0]?.message || "Invalid input data");
+    }
+    return parsed.data;
+  })
   .handler(async ({ data }) => {
     const m1 = data.member1_name.trim();
     const m2 = data.member2_name.trim();
     const teamName = `${m1} & ${m2}`;
     let code = (data.access_code ?? "").trim().toUpperCase();
     if (code) {
-      accessCodeSchema.parse(code);
+      const parsed = accessCodeSchema.safeParse(code);
+      if (!parsed.success) {
+        throw new Error(parsed.error.errors[0]?.message || "Invalid access code format");
+      }
       const { data: clash } = await supabaseAdmin
         .from("profiles").select("id").eq("access_code", code).maybeSingle();
       if (clash) throw new Error("That access code is already in use — pick another.");
@@ -102,9 +111,13 @@ export const createParticipant = createServerFn({ method: "POST" })
   });
 
 export const updateAccessCode = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
-    z.object({ user_id: z.string().uuid(), access_code: accessCodeSchema }).parse(d),
-  )
+  .inputValidator((d: unknown) => {
+    const parsed = z.object({ user_id: z.string().uuid(), access_code: accessCodeSchema }).safeParse(d);
+    if (!parsed.success) {
+      throw new Error(parsed.error.errors[0]?.message || "Invalid input data");
+    }
+    return parsed.data;
+  })
   .handler(async ({ data }) => {
     const code = data.access_code.toUpperCase();
     const { data: clash } = await supabaseAdmin
@@ -131,6 +144,28 @@ export const updateAccessCode = createServerFn({ method: "POST" })
 export const deleteParticipant = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
+    // 1. Delete cheat events
+    await supabaseAdmin.from("cheat_events").delete().eq("user_id", data.user_id);
+    
+    // 2. Fetch attempts to delete attempt answers
+    const { data: attempts } = await supabaseAdmin
+      .from("quiz_attempts")
+      .select("id")
+      .eq("user_id", data.user_id);
+      
+    if (attempts && attempts.length > 0) {
+      const attemptIds = attempts.map((a: any) => a.id);
+      await supabaseAdmin.from("attempt_answers").delete().in("attempt_id", attemptIds);
+      await supabaseAdmin.from("quiz_attempts").delete().in("id", attemptIds);
+    }
+    
+    // 3. Delete user roles
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
+    
+    // 4. Delete profile
+    await supabaseAdmin.from("profiles").delete().eq("id", data.user_id);
+
+    // 5. Delete auth user
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -162,18 +197,18 @@ export const gradeAnswer = createServerFn({ method: "POST" })
         .from("attempt_answers")
         .select("is_correct, manual_score, question_id")
         .eq("attempt_id", ans.attempt_id);
-      const qIds = (all ?? []).map((a) => a.question_id);
+      const qIds = (all ?? []).map((a: any) => a.question_id);
       const { data: qs } = await supabaseAdmin
         .from("questions")
         .select("id, marks, question_type")
         .in("id", qIds.length ? qIds : ["00000000-0000-0000-0000-000000000000"]);
-      const qMap = Object.fromEntries((qs ?? []).map((q) => [q.id, q]));
+      const qMap = Object.fromEntries((qs ?? []).map((q: any) => [q.id, q]));
       let score = 0;
       let correct = 0;
-      (all ?? []).forEach((a) => {
+      (all ?? []).forEach((a: any) => {
         const q = qMap[a.question_id];
         if (!q) return;
-        if (q.question_type === "mcq") {
+        if (q.question_type === "mcq" || q.question_type === "one_word") {
           if (a.is_correct) { score += Number(q.marks); correct += 1; }
         } else if (a.manual_score != null) {
           score += Number(a.manual_score);

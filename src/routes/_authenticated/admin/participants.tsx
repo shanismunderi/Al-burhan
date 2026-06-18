@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Users as UsersIcon, Copy, KeyRound, Pencil, Check, X } from "lucide-react";
 import { createParticipant, deleteParticipant, updateAccessCode } from "@/lib/admin.functions";
+import { formatDisplayName } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/participants")({
   component: ParticipantsPage,
@@ -32,35 +34,67 @@ function ParticipantsPage() {
       supabase.from("user_roles").select("user_id, role"),
     ]);
     const roleMap: Record<string, string> = {};
-    (roles ?? []).forEach((r) => { if (r.role === "admin" || !roleMap[r.user_id]) roleMap[r.user_id] = r.role; });
+    (roles ?? []).forEach((r: any) => { if (r.role === "admin" || !roleMap[r.user_id]) roleMap[r.user_id] = r.role; });
     setRows((profiles ?? []).map((p: any) => ({ ...p, role: roleMap[p.id] ?? "participant" })));
   };
   useEffect(() => { load(); }, []);
 
   const add = async () => {
     if (!m1.trim() || !m2.trim()) return;
+    const code = customCode.trim().toUpperCase();
+    if (code) {
+      if (code.length < 4 || code.length > 16) {
+        toast.error("Custom access code must be between 4 and 16 characters");
+        return;
+      }
+      if (!/^[A-Z0-9]+$/.test(code)) {
+        toast.error("Custom access code must contain only letters (A-Z) and numbers (0-9)");
+        return;
+      }
+    }
     setBusy(true);
     try {
-      const res = await create({ data: { member1_name: m1.trim(), member2_name: m2.trim(), access_code: customCode.trim() || undefined } });
+      const res = await create({ data: { member1_name: m1.trim(), member2_name: m2.trim(), access_code: code || undefined } });
       setLastCode({ name: `${m1.trim()} & ${m2.trim()}`, code: res.access_code });
       setM1(""); setM2(""); setCustomCode("");
+      toast.success("Candidate created successfully");
       load();
-    } catch (e: any) {}
+    } catch (e: any) {
+      toast.error(e.message || "Failed to create candidate");
+    }
     setBusy(false);
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this candidate and all their attempts?")) return;
-    try { await del({ data: { user_id: id } }); load(); }
-    catch (e: any) {}
+    try {
+      await del({ data: { user_id: id } });
+      toast.success("Candidate deleted successfully");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to delete candidate");
+    }
   };
 
   const saveEdit = async () => {
     if (!editing) return;
+    const code = editing.code.trim().toUpperCase();
+    if (code.length < 4 || code.length > 16) {
+      toast.error("Access code must be between 4 and 16 characters");
+      return;
+    }
+    if (!/^[A-Z0-9]+$/.test(code)) {
+      toast.error("Access code must contain only letters (A-Z) and numbers (0-9)");
+      return;
+    }
     try {
-      await updateCode({ data: { user_id: editing.id, access_code: editing.code.trim().toUpperCase() } });
-      setEditing(null); load();
-    } catch (e: any) {}
+      await updateCode({ data: { user_id: editing.id, access_code: code } });
+      setEditing(null);
+      toast.success("Access code updated successfully");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update access code");
+    }
   };
 
   const copy = (text: string) => { navigator.clipboard.writeText(text); };
@@ -118,7 +152,7 @@ function ParticipantsPage() {
                 {rows.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">No candidates yet.</td></tr>}
                 {rows.map((r) => (
                   <tr key={r.id} className="border-t border-border">
-                    <td className="px-4 py-3 font-medium">{r.display_name || r.username}</td>
+                    <td className="px-4 py-3 font-medium">{formatDisplayName(r.display_name, r.username)}</td>
                     <td className="px-4 py-3">
                       {editing?.id === r.id ? (
                         <div className="flex items-center gap-1">
@@ -161,7 +195,7 @@ function ParticipantsPage() {
               <div key={r.id} className="p-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="font-semibold truncate">{r.display_name || r.username}</div>
+                    <div className="font-semibold truncate">{formatDisplayName(r.display_name, r.username)}</div>
                     <span className={`inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full ${r.role === "admin" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>{r.role}</span>
                   </div>
                   {r.role !== "admin" && (

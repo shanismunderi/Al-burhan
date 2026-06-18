@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, createContext, useContext, createElement } from "react";
 import type { Session, User } from "@supabase/supabase-js";
+import { formatDisplayName } from "./utils";
 
 // Admin uses username "admin@burhan" -> "admin@burhan.local"
 export function usernameToEmail(input: string): string {
@@ -43,53 +44,92 @@ export interface AuthState {
   loading: boolean;
 }
 
-export function useAuth(): AuthState {
+const AuthContext = createContext<AuthState>({
+  session: null,
+  user: null,
+  role: null,
+  username: null,
+  member1: null,
+  member2: null,
+  loading: true,
+});
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [member1, setMember1] = useState<string | null>(null);
   const [member2, setMember2] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const currentUserRef = useRef<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    const loadRole = async (uid: string) => {
-      const [{ data: roles }, { data: profile }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", uid),
-        supabase.from("profiles").select("username, display_name, member1_name, member2_name").eq("id", uid).maybeSingle(),
-      ]);
-      if (!mounted) return;
-      const r = roles?.find((x) => x.role === "admin") ? "admin" : roles?.[0]?.role ?? null;
-      setRole((r as Role) ?? null);
-      const p: any = profile;
-      setUsername(p?.display_name ?? p?.username ?? null);
-      setMember1(p?.member1_name ?? null);
-      setMember2(p?.member2_name ?? null);
+
+    const handleUserChange = async (user: User | null) => {
+      const uid = user?.id ?? null;
+      console.log("[AuthProvider] handleUserChange: uid =", uid, "current =", currentUserRef.current);
+      
+      // If the user hasn't changed, keep current state and avoid redundant loading
+      if (uid && uid === currentUserRef.current) {
+        console.log("[AuthProvider] handleUserChange: no change, returning");
+        return;
+      }
+      
+      currentUserRef.current = uid;
+      
+      if (uid) {
+        setLoading(true);
+        try {
+          console.log("[AuthProvider] Fetching role and profile for uid:", uid);
+          const [{ data: roles }, { data: profile }] = await Promise.all([
+            supabase.from("user_roles").select("role").eq("user_id", uid),
+            supabase.from("profiles").select("username, display_name, member1_name, member2_name").eq("id", uid).maybeSingle(),
+          ]);
+          console.log("[AuthProvider] Fetched: roles =", roles, "profile =", profile);
+          
+          if (!mounted) {
+            console.log("[AuthProvider] handleUserChange: not mounted, returning");
+            return;
+          }
+          if (currentUserRef.current !== uid) {
+            console.log("[AuthProvider] handleUserChange: uid changed, returning");
+            return;
+          }
+          
+          const r = roles?.find((x: any) => x.role === "admin") ? "admin" : roles?.[0]?.role ?? null;
+          console.log("[AuthProvider] Resolved role:", r);
+          setRole((r as Role) ?? null);
+          const p: any = profile;
+          setUsername(formatDisplayName(p?.display_name, p?.username) || null);
+          setMember1(p?.member1_name ?? null);
+          setMember2(p?.member2_name ?? null);
+        } catch (error) {
+          console.error("[AuthProvider] Failed to load user info:", error);
+        } finally {
+          if (mounted && currentUserRef.current === uid) {
+            console.log("[AuthProvider] Setting loading to false");
+            setLoading(false);
+          }
+        }
+      } else {
+        console.log("[AuthProvider] No uid, clearing state");
+        setRole(null);
+        setUsername(null);
+        setMember1(null);
+        setMember2(null);
+        setLoading(false);
+      }
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, s) => {
       setSession(s);
-      if (s?.user) {
-        setRole(null);
-        setUsername(null);
-        setMember1(null);
-        setMember2(null);
-        setTimeout(() => loadRole(s.user.id), 0);
-      } else {
-        setRole(null);
-        setUsername(null);
-        setMember1(null);
-        setMember2(null);
-      }
+      handleUserChange(s?.user ?? null);
     });
 
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      if (data.session?.user) {
-        loadRole(data.session.user.id).finally(() => mounted && setLoading(false));
-      } else {
-        setLoading(false);
-      }
+      handleUserChange(data.session?.user ?? null);
     });
 
     return () => {
@@ -98,5 +138,13 @@ export function useAuth(): AuthState {
     };
   }, []);
 
-  return { session, user: session?.user ?? null, role, username, member1, member2, loading };
+  return createElement(
+    AuthContext.Provider,
+    { value: { session, user: session?.user ?? null, role, username, member1, member2, loading } },
+    children
+  );
+}
+
+export function useAuth(): AuthState {
+  return useContext(AuthContext);
 }

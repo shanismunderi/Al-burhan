@@ -51,7 +51,15 @@ function LoginPage() {
           <h2 className="text-4xl font-bold leading-tight">Take your exam.<br />Stay focused.</h2>
           <p className="mt-4 opacity-90">Enter the access code your administrator gave you. The exam starts in fullscreen mode.</p>
         </div>
-        <div className="text-primary-foreground/70 text-xs">© QuizGreen</div>
+        <div className="text-primary-foreground/70 text-xs"> Powered by{" "}
+          <a
+            href="https://instagram.com/flow.core__"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-foreground hover:text-primary transition-colors"
+          >
+            Flowcore
+          </a></div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
