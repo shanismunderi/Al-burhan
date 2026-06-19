@@ -1,5 +1,5 @@
-import { c as createServerRpc } from "./createServerRpc-DvWiWdjD.mjs";
-import { a as createServerFn } from "./server-DSnt8QHz.mjs";
+import { c as createServerRpc } from "./createServerRpc-B7zX4-xF.mjs";
+import { a as createServerFn, g as getRequest } from "./server-Ce5jB8e1.mjs";
 import { c as createClient } from "../_libs/supabase__supabase-js.mjs";
 import fs from "fs";
 import path from "path";
@@ -38,6 +38,35 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
     autoRefreshToken: false
   }
 }) : null;
+function getClientForRequest() {
+  if (!supabase) return null;
+  const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (hasServiceRoleKey) {
+    return supabase;
+  }
+  try {
+    const request = getRequest();
+    const authHeader = request?.headers?.get("authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7);
+      if (token) {
+        return createClient(supabaseUrl, process.env.SUPABASE_PUBLISHABLE_KEY, {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          },
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false
+          }
+        });
+      }
+    }
+  } catch (e) {
+  }
+  return supabase;
+}
 const DB_FILE = path.join(process.cwd(), "db.json");
 function readDb() {
   try {
@@ -111,12 +140,13 @@ function getInitialDb() {
 function handleNewUserTrigger(db, user) {
 }
 async function runQuery(query) {
-  if (!supabase) {
+  const client = getClientForRequest();
+  if (!client) {
     console.warn("Supabase client not initialized. Falling back to local db.json.");
     return runLocalQuery(query);
   }
   try {
-    let q = supabase.from(query.table);
+    let q = client.from(query.table);
     let builder;
     if (query.action === "select") {
       builder = q.select(query.selectColumns || "*", query.selectOptions);
@@ -163,12 +193,13 @@ async function runQuery(query) {
   }
 }
 async function runRpc(name, args) {
-  if (!supabase) {
+  const client = getClientForRequest();
+  if (!client) {
     console.warn("Supabase client not initialized. Falling back to local db.json RPC.");
     return runLocalRpc(name, args);
   }
   try {
-    const { data, error } = await supabase.rpc(name, args);
+    const { data, error } = await client.rpc(name, args);
     if (error) {
       console.error(`Supabase RPC error on ${name}:`, error);
       return { data: null, error };
@@ -710,6 +741,29 @@ const authAdminCreateUser = createServerFn({
     };
   }
   try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn("[AuthAdmin] Service role key missing. Falling back to public signUp.");
+      const {
+        data: authData2,
+        error: error2
+      } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password_hash_or_code,
+        options: {
+          data: data.user_metadata || {}
+        }
+      });
+      if (error2) {
+        return {
+          error: {
+            message: error2.message
+          }
+        };
+      }
+      return {
+        data: authData2
+      };
+    }
     const {
       data: authData,
       error
@@ -778,6 +832,9 @@ const authAdminUpdateUserById = createServerFn({
     };
   }
   try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to update other users' credentials.");
+    }
     const updateData = {};
     if (data.email) updateData.email = data.email;
     if (data.password) updateData.password = data.password;
@@ -833,6 +890,9 @@ const authAdminDeleteUser = createServerFn({
     };
   }
   try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to delete users.");
+    }
     const {
       error
     } = await supabase.auth.admin.deleteUser(data.id);

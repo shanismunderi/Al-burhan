@@ -12,11 +12,21 @@ const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
     }
     console.error("Server request failed:", error);
     
-    // Propagate error for server function invocations and non-GET requests
-    // to let the framework serialize the error to the client properly.
+    // Return a structured JSON response for server function invocations and non-GET requests
+    // to prevent Vinxi/H3 from swallowing the actual error message into a generic 500 response.
     const url = new URL(request.url);
     if (request.method !== "GET" || url.pathname.includes("/_server-fn")) {
-      throw error;
+      const message = error instanceof Error ? error.message : String(error);
+      return new Response(
+        JSON.stringify({
+          error: { message },
+          message,
+        }),
+        {
+          status: 500,
+          headers: { "content-type": "application/json; charset=utf-8" },
+        },
+      );
     }
 
     return new Response(renderErrorPage(), {

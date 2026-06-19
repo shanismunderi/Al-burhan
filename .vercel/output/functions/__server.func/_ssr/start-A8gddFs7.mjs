@@ -1,6 +1,6 @@
-import { c as createMiddleware } from "./server-DSnt8QHz.mjs";
+import { c as createMiddleware } from "./server-Ce5jB8e1.mjs";
 import { r as renderErrorPage } from "./index.mjs";
-import { s as supabase } from "./client-PopuJf90.mjs";
+import { s as supabase } from "./client-MIMKKODO.mjs";
 import "../_libs/seroval.mjs";
 import "../_libs/react.mjs";
 import "node:async_hooks";
@@ -62,7 +62,17 @@ const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
     console.error("Server request failed:", error);
     const url = new URL(request.url);
     if (request.method !== "GET" || url.pathname.includes("/_server-fn")) {
-      throw error;
+      const message = error instanceof Error ? error.message : String(error);
+      return new Response(
+        JSON.stringify({
+          error: { message },
+          message
+        }),
+        {
+          status: 500,
+          headers: { "content-type": "application/json; charset=utf-8" }
+        }
+      );
     }
     return new Response(renderErrorPage(), {
       status: 500,

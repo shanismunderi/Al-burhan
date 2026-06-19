@@ -169,6 +169,21 @@ export const authAdminCreateUser = createServerFn({ method: "POST" })
     }
 
     try {
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.warn("[AuthAdmin] Service role key missing. Falling back to public signUp.");
+        const { data: authData, error } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password_hash_or_code,
+          options: {
+            data: data.user_metadata || {},
+          },
+        });
+        if (error) {
+          return { error: { message: error.message } };
+        }
+        return { data: authData };
+      }
+
       const { data: authData, error } = await supabase.auth.admin.createUser({
         email: data.email,
         password: data.password_hash_or_code,
@@ -211,6 +226,10 @@ export const authAdminUpdateUserById = createServerFn({ method: "POST" })
     }
 
     try {
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to update other users' credentials.");
+      }
+
       const updateData: any = {};
       if (data.email) updateData.email = data.email;
       if (data.password) updateData.password = data.password;
@@ -241,6 +260,10 @@ export const authAdminDeleteUser = createServerFn({ method: "POST" })
     }
 
     try {
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to delete users.");
+      }
+
       const { error } = await supabase.auth.admin.deleteUser(data.id);
       if (error) {
         return { error: { message: error.message } };

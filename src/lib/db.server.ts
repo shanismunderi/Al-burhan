@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { getRequest } from "@tanstack/react-start/server";
 
 const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "";
@@ -14,6 +15,39 @@ export const supabase = (supabaseUrl && supabaseKey)
       },
     })
   : null;
+
+function getClientForRequest() {
+  if (!supabase) return null;
+  const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (hasServiceRoleKey) {
+    return supabase;
+  }
+
+  try {
+    const request = getRequest();
+    const authHeader = request?.headers?.get("authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7);
+      if (token) {
+        return createClient(supabaseUrl, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+          },
+        });
+      }
+    }
+  } catch (e) {
+    // getRequest can throw if called outside a request context (like startup migration)
+  }
+
+  return supabase;
+}
 
 const DB_FILE = path.join(process.cwd(), "db.json");
 
@@ -106,13 +140,14 @@ export interface DBQuery {
 }
 
 export async function runQuery(query: DBQuery): Promise<{ data: any; count?: number; error?: any }> {
-  if (!supabase) {
+  const client = getClientForRequest();
+  if (!client) {
     console.warn("Supabase client not initialized. Falling back to local db.json.");
     return runLocalQuery(query);
   }
 
   try {
-    let q = supabase.from(query.table);
+    let q = client.from(query.table);
     let builder: any;
 
     if (query.action === "select") {
@@ -167,13 +202,14 @@ export async function runQuery(query: DBQuery): Promise<{ data: any; count?: num
 }
 
 export async function runRpc(name: string, args?: any): Promise<{ data: any; error?: any }> {
-  if (!supabase) {
+  const client = getClientForRequest();
+  if (!client) {
     console.warn("Supabase client not initialized. Falling back to local db.json RPC.");
     return runLocalRpc(name, args);
   }
 
   try {
-    const { data, error } = await supabase.rpc(name, args);
+    const { data, error } = await client.rpc(name, args);
     if (error) {
       console.error(`Supabase RPC error on ${name}:`, error);
       return { data: null, error };
