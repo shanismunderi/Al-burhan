@@ -3,7 +3,7 @@ import { Q as QueryClientProvider } from "../_libs/tanstack__react-query.mjs";
 import { c as createRouter, a as createRootRouteWithContext, u as useRouter, L as Link, O as Outlet, H as HeadContent, S as Scripts, b as createFileRoute, l as lazyRouteComponent } from "../_libs/tanstack__react-router.mjs";
 import { j as jsxRuntimeExports, r as reactExports } from "../_libs/react.mjs";
 import { T as Toaster } from "../_libs/sonner.mjs";
-import { s as supabase } from "./client-MIMKKODO.mjs";
+import { s as supabase } from "./client-CUWuqVgB.mjs";
 import { c as clsx } from "../_libs/clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import "../_libs/tanstack__router-core.mjs";
@@ -19,7 +19,7 @@ import "async_hooks";
 import "stream";
 import "crypto";
 import "../_libs/isbot.mjs";
-import "./server-Ce5jB8e1.mjs";
+import "./server-DrrGCU9u.mjs";
 import "node:async_hooks";
 import "../_libs/h3-v2.mjs";
 import "../_libs/rou3.mjs";
@@ -277,16 +277,16 @@ function RootComponent() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(Toaster, { richColors: true, position: "top-right" })
   ] }) });
 }
-const $$splitComponentImporter$d = () => import("./login-D_Dd1joV.mjs");
+const $$splitComponentImporter$d = () => import("./login-hA-nL62K.mjs");
 const Route$d = createFileRoute("/login")({
   component: lazyRouteComponent($$splitComponentImporter$d, "component")
 });
-const $$splitComponentImporter$c = () => import("../_authenticated-BwLMmrW5.mjs");
+const $$splitComponentImporter$c = () => import("../_authenticated-UYmFxjQV.mjs");
 const Route$c = createFileRoute("/_authenticated")({
   component: lazyRouteComponent($$splitComponentImporter$c, "component")
 });
 const logoHero = "/assets/logo-hero-BfZPLwnb.png";
-const $$splitComponentImporter$b = () => import("./index-BgUyK29s.mjs");
+const $$splitComponentImporter$b = () => import("./index-tmssrISa.mjs");
 const Route$b = createFileRoute("/")({
   component: lazyRouteComponent($$splitComponentImporter$b, "component"),
   head: () => ({
@@ -304,47 +304,47 @@ const Route$b = createFileRoute("/")({
     }]
   })
 });
-const $$splitComponentImporter$a = () => import("./admin.login-DnodOjrv.mjs");
+const $$splitComponentImporter$a = () => import("./admin.login-CyfpDRvU.mjs");
 const Route$a = createFileRoute("/admin/login")({
   component: lazyRouteComponent($$splitComponentImporter$a, "component")
 });
-const $$splitComponentImporter$9 = () => import("./participant-CxpDFvrv.mjs");
+const $$splitComponentImporter$9 = () => import("./participant-ChQyYsO4.mjs");
 const Route$9 = createFileRoute("/_authenticated/participant")({
   component: lazyRouteComponent($$splitComponentImporter$9, "component")
 });
-const $$splitComponentImporter$8 = () => import("./admin-jhB0HBJG.mjs");
+const $$splitComponentImporter$8 = () => import("./admin-DfEegJqW.mjs");
 const Route$8 = createFileRoute("/_authenticated/admin")({
   component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-const $$splitComponentImporter$7 = () => import("./dashboard-J4xZw0a0.mjs");
+const $$splitComponentImporter$7 = () => import("./dashboard-CJlbVy94.mjs");
 const Route$7 = createFileRoute("/_authenticated/participant/dashboard")({
   component: lazyRouteComponent($$splitComponentImporter$7, "component")
 });
-const $$splitComponentImporter$6 = () => import("./results-DLVjP3Px.mjs");
+const $$splitComponentImporter$6 = () => import("./results-BpEpnLjU.mjs");
 const Route$6 = createFileRoute("/_authenticated/admin/results")({
   component: lazyRouteComponent($$splitComponentImporter$6, "component")
 });
-const $$splitComponentImporter$5 = () => import("./quizzes-DJXropwM.mjs");
+const $$splitComponentImporter$5 = () => import("./quizzes-DQQAGaSO.mjs");
 const Route$5 = createFileRoute("/_authenticated/admin/quizzes")({
   component: lazyRouteComponent($$splitComponentImporter$5, "component")
 });
-const $$splitComponentImporter$4 = () => import("./participants-BpD7eYdB.mjs");
+const $$splitComponentImporter$4 = () => import("./participants-q-PW_id9.mjs");
 const Route$4 = createFileRoute("/_authenticated/admin/participants")({
   component: lazyRouteComponent($$splitComponentImporter$4, "component")
 });
-const $$splitComponentImporter$3 = () => import("./dashboard-DjIIuW-P.mjs");
+const $$splitComponentImporter$3 = () => import("./dashboard-Bbcl1LjF.mjs");
 const Route$3 = createFileRoute("/_authenticated/admin/dashboard")({
   component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-const $$splitComponentImporter$2 = () => import("./result._attemptId-DzgNdbQf.mjs");
+const $$splitComponentImporter$2 = () => import("./result._attemptId-B4wZ255T.mjs");
 const Route$2 = createFileRoute("/_authenticated/participant/result/$attemptId")({
   component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-const $$splitComponentImporter$1 = () => import("./quiz._quizId-DqU_VS_2.mjs");
+const $$splitComponentImporter$1 = () => import("./quiz._quizId-BPWKtV0x.mjs");
 const Route$1 = createFileRoute("/_authenticated/participant/quiz/$quizId")({
   component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-const $$splitComponentImporter = () => import("./questions._quizId-bta7YRwu.mjs");
+const $$splitComponentImporter = () => import("./questions._quizId-DvUS77PI.mjs");
 const Route = createFileRoute("/_authenticated/admin/questions/$quizId")({
   component: lazyRouteComponent($$splitComponentImporter, "component")
 });

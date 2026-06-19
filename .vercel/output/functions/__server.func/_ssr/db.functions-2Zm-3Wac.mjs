@@ -1,12 +1,615 @@
-import { __rest } from "tslib";
-const version = "2.108.2";
+import { c as createServerRpc } from "./createServerRpc-BJXDj5C7.mjs";
+import { a as createServerFn, g as getRequest } from "./server-DrrGCU9u.mjs";
+import { P as PostgrestClient } from "../_libs/supabase__postgrest-js.mjs";
+import { R as RealtimeClient } from "../_libs/supabase__realtime-js.mjs";
+import { S as StorageClient } from "../_libs/supabase__storage-js.mjs";
+import fs from "fs";
+import path from "path";
+import crypto$1 from "crypto";
+import "../_libs/seroval.mjs";
+import "../_libs/react.mjs";
+import { F as FunctionsClient } from "../_libs/supabase__functions-js.mjs";
+import "node:async_hooks";
+import "../_libs/h3-v2.mjs";
+import "../_libs/rou3.mjs";
+import "../_libs/srvx.mjs";
+import "node:stream";
+import "../_libs/tanstack__router-core.mjs";
+import "../_libs/tanstack__history.mjs";
+import "../_libs/cookie-es.mjs";
+import "../_libs/seroval-plugins.mjs";
+import "node:stream/web";
+import "../_libs/tanstack__react-router.mjs";
+import "../_libs/react-dom.mjs";
+import "util";
+import "async_hooks";
+import "stream";
+import "../_libs/isbot.mjs";
+import "../_libs/supabase__phoenix.mjs";
+import "../_libs/iceberg-js.mjs";
+import "tslib";
+var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
+function getDefaultExportFromCjs(x) {
+  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+}
+var tslib$1 = { exports: {} };
+var hasRequiredTslib;
+function requireTslib() {
+  if (hasRequiredTslib) return tslib$1.exports;
+  hasRequiredTslib = 1;
+  (function(module) {
+    var __extends2;
+    var __assign2;
+    var __rest2;
+    var __decorate2;
+    var __param2;
+    var __esDecorate2;
+    var __runInitializers2;
+    var __propKey2;
+    var __setFunctionName2;
+    var __metadata2;
+    var __awaiter2;
+    var __generator2;
+    var __exportStar2;
+    var __values2;
+    var __read2;
+    var __spread2;
+    var __spreadArrays2;
+    var __spreadArray2;
+    var __await2;
+    var __asyncGenerator2;
+    var __asyncDelegator2;
+    var __asyncValues2;
+    var __makeTemplateObject2;
+    var __importStar2;
+    var __importDefault2;
+    var __classPrivateFieldGet2;
+    var __classPrivateFieldSet2;
+    var __classPrivateFieldIn2;
+    var __createBinding2;
+    var __addDisposableResource2;
+    var __disposeResources2;
+    var __rewriteRelativeImportExtension2;
+    (function(factory) {
+      var root = typeof commonjsGlobal === "object" ? commonjsGlobal : typeof self === "object" ? self : typeof this === "object" ? this : {};
+      {
+        factory(createExporter(root, createExporter(module.exports)));
+      }
+      function createExporter(exports, previous) {
+        if (exports !== root) {
+          if (typeof Object.create === "function") {
+            Object.defineProperty(exports, "__esModule", { value: true });
+          } else {
+            exports.__esModule = true;
+          }
+        }
+        return function(id, v) {
+          return exports[id] = previous ? previous(id, v) : v;
+        };
+      }
+    })(function(exporter) {
+      var extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d, b) {
+        d.__proto__ = b;
+      } || function(d, b) {
+        for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
+      };
+      __extends2 = function(d, b) {
+        if (typeof b !== "function" && b !== null)
+          throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() {
+          this.constructor = d;
+        }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+      };
+      __assign2 = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+          s = arguments[i];
+          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+      };
+      __rest2 = function(s, e) {
+        var t = {};
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+          t[p] = s[p];
+        if (s != null && typeof Object.getOwnPropertySymbols === "function")
+          for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+              t[p[i]] = s[p[i]];
+          }
+        return t;
+      };
+      __decorate2 = function(decorators, target, key, desc) {
+        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        return c > 3 && r && Object.defineProperty(target, key, r), r;
+      };
+      __param2 = function(paramIndex, decorator) {
+        return function(target, key) {
+          decorator(target, key, paramIndex);
+        };
+      };
+      __esDecorate2 = function(ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
+        function accept(f) {
+          if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected");
+          return f;
+        }
+        var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
+        var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
+        var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
+        var _, done = false;
+        for (var i = decorators.length - 1; i >= 0; i--) {
+          var context = {};
+          for (var p in contextIn) context[p] = p === "access" ? {} : contextIn[p];
+          for (var p in contextIn.access) context.access[p] = contextIn.access[p];
+          context.addInitializer = function(f) {
+            if (done) throw new TypeError("Cannot add initializers after decoration has completed");
+            extraInitializers.push(accept(f || null));
+          };
+          var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
+          if (kind === "accessor") {
+            if (result === void 0) continue;
+            if (result === null || typeof result !== "object") throw new TypeError("Object expected");
+            if (_ = accept(result.get)) descriptor.get = _;
+            if (_ = accept(result.set)) descriptor.set = _;
+            if (_ = accept(result.init)) initializers.unshift(_);
+          } else if (_ = accept(result)) {
+            if (kind === "field") initializers.unshift(_);
+            else descriptor[key] = _;
+          }
+        }
+        if (target) Object.defineProperty(target, contextIn.name, descriptor);
+        done = true;
+      };
+      __runInitializers2 = function(thisArg, initializers, value) {
+        var useValue = arguments.length > 2;
+        for (var i = 0; i < initializers.length; i++) {
+          value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+        }
+        return useValue ? value : void 0;
+      };
+      __propKey2 = function(x) {
+        return typeof x === "symbol" ? x : "".concat(x);
+      };
+      __setFunctionName2 = function(f, name, prefix) {
+        if (typeof name === "symbol") name = name.description ? "[".concat(name.description, "]") : "";
+        return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
+      };
+      __metadata2 = function(metadataKey, metadataValue) {
+        if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+      };
+      __awaiter2 = function(thisArg, _arguments, P, generator) {
+        function adopt(value) {
+          return value instanceof P ? value : new P(function(resolve) {
+            resolve(value);
+          });
+        }
+        return new (P || (P = Promise))(function(resolve, reject) {
+          function fulfilled(value) {
+            try {
+              step(generator.next(value));
+            } catch (e) {
+              reject(e);
+            }
+          }
+          function rejected(value) {
+            try {
+              step(generator["throw"](value));
+            } catch (e) {
+              reject(e);
+            }
+          }
+          function step(result) {
+            result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+          }
+          step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+      };
+      __generator2 = function(thisArg, body) {
+        var _ = { label: 0, sent: function() {
+          if (t[0] & 1) throw t[1];
+          return t[1];
+        }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+        return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() {
+          return this;
+        }), g;
+        function verb(n) {
+          return function(v) {
+            return step([n, v]);
+          };
+        }
+        function step(op) {
+          if (f) throw new TypeError("Generator is already executing.");
+          while (g && (g = 0, op[0] && (_ = 0)), _) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+              case 0:
+              case 1:
+                t = op;
+                break;
+              case 4:
+                _.label++;
+                return { value: op[1], done: false };
+              case 5:
+                _.label++;
+                y = op[1];
+                op = [0];
+                continue;
+              case 7:
+                op = _.ops.pop();
+                _.trys.pop();
+                continue;
+              default:
+                if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                  _ = 0;
+                  continue;
+                }
+                if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                  _.label = op[1];
+                  break;
+                }
+                if (op[0] === 6 && _.label < t[1]) {
+                  _.label = t[1];
+                  t = op;
+                  break;
+                }
+                if (t && _.label < t[2]) {
+                  _.label = t[2];
+                  _.ops.push(op);
+                  break;
+                }
+                if (t[2]) _.ops.pop();
+                _.trys.pop();
+                continue;
+            }
+            op = body.call(thisArg, _);
+          } catch (e) {
+            op = [6, e];
+            y = 0;
+          } finally {
+            f = t = 0;
+          }
+          if (op[0] & 5) throw op[1];
+          return { value: op[0] ? op[1] : void 0, done: true };
+        }
+      };
+      __exportStar2 = function(m, o) {
+        for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(o, p)) __createBinding2(o, m, p);
+      };
+      __createBinding2 = Object.create ? (function(o, m, k, k2) {
+        if (k2 === void 0) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = { enumerable: true, get: function() {
+            return m[k];
+          } };
+        }
+        Object.defineProperty(o, k2, desc);
+      }) : (function(o, m, k, k2) {
+        if (k2 === void 0) k2 = k;
+        o[k2] = m[k];
+      });
+      __values2 = function(o) {
+        var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+        if (m) return m.call(o);
+        if (o && typeof o.length === "number") return {
+          next: function() {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+          }
+        };
+        throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+      };
+      __read2 = function(o, n) {
+        var m = typeof Symbol === "function" && o[Symbol.iterator];
+        if (!m) return o;
+        var i = m.call(o), r, ar = [], e;
+        try {
+          while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+        } catch (error) {
+          e = { error };
+        } finally {
+          try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+          } finally {
+            if (e) throw e.error;
+          }
+        }
+        return ar;
+      };
+      __spread2 = function() {
+        for (var ar = [], i = 0; i < arguments.length; i++)
+          ar = ar.concat(__read2(arguments[i]));
+        return ar;
+      };
+      __spreadArrays2 = function() {
+        for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+        for (var r = Array(s), k = 0, i = 0; i < il; i++)
+          for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+        return r;
+      };
+      __spreadArray2 = function(to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+          if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+          }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
+      };
+      __await2 = function(v) {
+        return this instanceof __await2 ? (this.v = v, this) : new __await2(v);
+      };
+      __asyncGenerator2 = function(thisArg, _arguments, generator) {
+        if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+        var g = generator.apply(thisArg, _arguments || []), i, q = [];
+        return i = Object.create((typeof AsyncIterator === "function" ? AsyncIterator : Object).prototype), verb("next"), verb("throw"), verb("return", awaitReturn), i[Symbol.asyncIterator] = function() {
+          return this;
+        }, i;
+        function awaitReturn(f) {
+          return function(v) {
+            return Promise.resolve(v).then(f, reject);
+          };
+        }
+        function verb(n, f) {
+          if (g[n]) {
+            i[n] = function(v) {
+              return new Promise(function(a, b) {
+                q.push([n, v, a, b]) > 1 || resume(n, v);
+              });
+            };
+            if (f) i[n] = f(i[n]);
+          }
+        }
+        function resume(n, v) {
+          try {
+            step(g[n](v));
+          } catch (e) {
+            settle(q[0][3], e);
+          }
+        }
+        function step(r) {
+          r.value instanceof __await2 ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+        }
+        function fulfill(value) {
+          resume("next", value);
+        }
+        function reject(value) {
+          resume("throw", value);
+        }
+        function settle(f, v) {
+          if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]);
+        }
+      };
+      __asyncDelegator2 = function(o) {
+        var i, p;
+        return i = {}, verb("next"), verb("throw", function(e) {
+          throw e;
+        }), verb("return"), i[Symbol.iterator] = function() {
+          return this;
+        }, i;
+        function verb(n, f) {
+          i[n] = o[n] ? function(v) {
+            return (p = !p) ? { value: __await2(o[n](v)), done: false } : f ? f(v) : v;
+          } : f;
+        }
+      };
+      __asyncValues2 = function(o) {
+        if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+        var m = o[Symbol.asyncIterator], i;
+        return m ? m.call(o) : (o = typeof __values2 === "function" ? __values2(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+          return this;
+        }, i);
+        function verb(n) {
+          i[n] = o[n] && function(v) {
+            return new Promise(function(resolve, reject) {
+              v = o[n](v), settle(resolve, reject, v.done, v.value);
+            });
+          };
+        }
+        function settle(resolve, reject, d, v) {
+          Promise.resolve(v).then(function(v2) {
+            resolve({ value: v2, done: d });
+          }, reject);
+        }
+      };
+      __makeTemplateObject2 = function(cooked, raw) {
+        if (Object.defineProperty) {
+          Object.defineProperty(cooked, "raw", { value: raw });
+        } else {
+          cooked.raw = raw;
+        }
+        return cooked;
+      };
+      var __setModuleDefault = Object.create ? (function(o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+      }) : function(o, v) {
+        o["default"] = v;
+      };
+      var ownKeys2 = function(o) {
+        ownKeys2 = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys2(o);
+      };
+      __importStar2 = function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys2(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+      __importDefault2 = function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      __classPrivateFieldGet2 = function(receiver, state, kind, f) {
+        if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+        return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+      };
+      __classPrivateFieldSet2 = function(receiver, state, value, kind, f) {
+        if (kind === "m") throw new TypeError("Private method is not writable");
+        if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+        if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+        return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+      };
+      __classPrivateFieldIn2 = function(state, receiver) {
+        if (receiver === null || typeof receiver !== "object" && typeof receiver !== "function") throw new TypeError("Cannot use 'in' operator on non-object");
+        return typeof state === "function" ? receiver === state : state.has(receiver);
+      };
+      __addDisposableResource2 = function(env, value, async) {
+        if (value !== null && value !== void 0) {
+          if (typeof value !== "object" && typeof value !== "function") throw new TypeError("Object expected.");
+          var dispose, inner;
+          if (async) {
+            if (!Symbol.asyncDispose) throw new TypeError("Symbol.asyncDispose is not defined.");
+            dispose = value[Symbol.asyncDispose];
+          }
+          if (dispose === void 0) {
+            if (!Symbol.dispose) throw new TypeError("Symbol.dispose is not defined.");
+            dispose = value[Symbol.dispose];
+            if (async) inner = dispose;
+          }
+          if (typeof dispose !== "function") throw new TypeError("Object not disposable.");
+          if (inner) dispose = function() {
+            try {
+              inner.call(this);
+            } catch (e) {
+              return Promise.reject(e);
+            }
+          };
+          env.stack.push({ value, dispose, async });
+        } else if (async) {
+          env.stack.push({ async: true });
+        }
+        return value;
+      };
+      var _SuppressedError = typeof SuppressedError === "function" ? SuppressedError : function(error, suppressed, message) {
+        var e = new Error(message);
+        return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+      };
+      __disposeResources2 = function(env) {
+        function fail(e) {
+          env.error = env.hasError ? new _SuppressedError(e, env.error, "An error was suppressed during disposal.") : e;
+          env.hasError = true;
+        }
+        var r, s = 0;
+        function next() {
+          while (r = env.stack.pop()) {
+            try {
+              if (!r.async && s === 1) return s = 0, env.stack.push(r), Promise.resolve().then(next);
+              if (r.dispose) {
+                var result = r.dispose.call(r.value);
+                if (r.async) return s |= 2, Promise.resolve(result).then(next, function(e) {
+                  fail(e);
+                  return next();
+                });
+              } else s |= 1;
+            } catch (e) {
+              fail(e);
+            }
+          }
+          if (s === 1) return env.hasError ? Promise.reject(env.error) : Promise.resolve();
+          if (env.hasError) throw env.error;
+        }
+        return next();
+      };
+      __rewriteRelativeImportExtension2 = function(path2, preserveJsx) {
+        if (typeof path2 === "string" && /^\.\.?\//.test(path2)) {
+          return path2.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function(m, tsx, d, ext, cm) {
+            return tsx ? preserveJsx ? ".jsx" : ".js" : d && (!ext || !cm) ? m : d + ext + "." + cm.toLowerCase() + "js";
+          });
+        }
+        return path2;
+      };
+      exporter("__extends", __extends2);
+      exporter("__assign", __assign2);
+      exporter("__rest", __rest2);
+      exporter("__decorate", __decorate2);
+      exporter("__param", __param2);
+      exporter("__esDecorate", __esDecorate2);
+      exporter("__runInitializers", __runInitializers2);
+      exporter("__propKey", __propKey2);
+      exporter("__setFunctionName", __setFunctionName2);
+      exporter("__metadata", __metadata2);
+      exporter("__awaiter", __awaiter2);
+      exporter("__generator", __generator2);
+      exporter("__exportStar", __exportStar2);
+      exporter("__createBinding", __createBinding2);
+      exporter("__values", __values2);
+      exporter("__read", __read2);
+      exporter("__spread", __spread2);
+      exporter("__spreadArrays", __spreadArrays2);
+      exporter("__spreadArray", __spreadArray2);
+      exporter("__await", __await2);
+      exporter("__asyncGenerator", __asyncGenerator2);
+      exporter("__asyncDelegator", __asyncDelegator2);
+      exporter("__asyncValues", __asyncValues2);
+      exporter("__makeTemplateObject", __makeTemplateObject2);
+      exporter("__importStar", __importStar2);
+      exporter("__importDefault", __importDefault2);
+      exporter("__classPrivateFieldGet", __classPrivateFieldGet2);
+      exporter("__classPrivateFieldSet", __classPrivateFieldSet2);
+      exporter("__classPrivateFieldIn", __classPrivateFieldIn2);
+      exporter("__addDisposableResource", __addDisposableResource2);
+      exporter("__disposeResources", __disposeResources2);
+      exporter("__rewriteRelativeImportExtension", __rewriteRelativeImportExtension2);
+    });
+  })(tslib$1);
+  return tslib$1.exports;
+}
+var tslibExports = /* @__PURE__ */ requireTslib();
+const tslib = /* @__PURE__ */ getDefaultExportFromCjs(tslibExports);
+const {
+  __extends,
+  __assign,
+  __rest,
+  __decorate,
+  __param,
+  __esDecorate,
+  __runInitializers,
+  __propKey,
+  __setFunctionName,
+  __metadata,
+  __awaiter: __awaiter$1,
+  __generator,
+  __exportStar,
+  __createBinding,
+  __values,
+  __read,
+  __spread,
+  __spreadArrays,
+  __spreadArray,
+  __await,
+  __asyncGenerator,
+  __asyncDelegator,
+  __asyncValues,
+  __makeTemplateObject,
+  __importStar,
+  __importDefault,
+  __classPrivateFieldGet,
+  __classPrivateFieldSet,
+  __classPrivateFieldIn,
+  __addDisposableResource,
+  __disposeResources,
+  __rewriteRelativeImportExtension
+} = tslib;
+const version$1 = "2.108.2";
 const AUTO_REFRESH_TICK_DURATION_MS = 30 * 1e3;
 const AUTO_REFRESH_TICK_THRESHOLD = 3;
 const EXPIRY_MARGIN_MS = AUTO_REFRESH_TICK_THRESHOLD * AUTO_REFRESH_TICK_DURATION_MS;
 const REFRESH_FAILURE_COOLDOWN_MS = 2 * AUTO_REFRESH_TICK_DURATION_MS;
 const GOTRUE_URL = "http://localhost:9999";
 const STORAGE_KEY = "supabase.auth.token";
-const DEFAULT_HEADERS = { "X-Client-Info": `gotrue-js/${version}` };
+const DEFAULT_HEADERS$1 = { "X-Client-Info": `gotrue-js/${version$1}` };
 const API_VERSION_HEADER_NAME = "X-Supabase-Api-Version";
 const API_VERSIONS = {
   "2024-01-01": {
@@ -352,7 +955,7 @@ function parseParametersFromURL(href) {
   });
   return result;
 }
-const resolveFetch = (customFetch) => {
+const resolveFetch$1 = (customFetch) => {
   if (customFetch) {
     return (...args) => customFetch(...args);
   }
@@ -770,7 +1373,7 @@ class GoTrueAdminApi {
   constructor({ url = "", headers = {}, fetch: fetch2, experimental }) {
     this.url = url;
     this.headers = headers;
-    this.fetch = resolveFetch(fetch2);
+    this.fetch = resolveFetch$1(fetch2);
     this.experimental = experimental !== null && experimental !== void 0 ? experimental : {};
     this.mfa = {
       listFactors: this._listFactors.bind(this),
@@ -2630,7 +3233,7 @@ const DEFAULT_OPTIONS = {
   autoRefreshToken: true,
   persistSession: true,
   detectSessionInUrl: true,
-  headers: DEFAULT_HEADERS,
+  headers: DEFAULT_HEADERS$1,
   flowType: "implicit",
   debug: false,
   hasCustomAuthorizationHeader: false,
@@ -2727,7 +3330,7 @@ class GoTrueClient {
     });
     this.url = settings.url;
     this.headers = settings.headers;
-    this.fetch = resolveFetch(settings.fetch);
+    this.fetch = resolveFetch$1(settings.fetch);
     this.detectSessionInUrl = settings.detectSessionInUrl;
     this.flowType = settings.flowType;
     this.hasCustomAuthorizationHeader = settings.hasCustomAuthorizationHeader;
@@ -2826,7 +3429,7 @@ class GoTrueClient {
     return result;
   }
   _logPrefix() {
-    return `GoTrueClient@${this.storageKey}:${this.instanceID} (${version}) ${(/* @__PURE__ */ new Date()).toISOString()}`;
+    return `GoTrueClient@${this.storageKey}:${this.instanceID} (${version$1}) ${(/* @__PURE__ */ new Date()).toISOString()}`;
   }
   _debug(...args) {
     if (this.logDebugMessages) {
@@ -7717,6 +8320,1633 @@ class GoTrueClient {
 }
 GoTrueClient.nextInstanceID = {};
 const AuthClient = GoTrueClient;
+const version = "2.108.2";
+let JS_ENV = "";
+let JS_RUNTIME_VERSION;
+if (typeof Deno !== "undefined") {
+  var _Deno$version;
+  JS_ENV = "deno";
+  JS_RUNTIME_VERSION = (_Deno$version = Deno.version) === null || _Deno$version === void 0 ? void 0 : _Deno$version.deno;
+} else if (typeof document !== "undefined") JS_ENV = "web";
+else if (typeof navigator !== "undefined" && navigator.product === "ReactNative") JS_ENV = "react-native";
+else {
+  var _process$version;
+  JS_ENV = "node";
+  JS_RUNTIME_VERSION = typeof process !== "undefined" ? (_process$version = process.version) === null || _process$version === void 0 ? void 0 : _process$version.replace(/^v/, "") : void 0;
+}
+const _runtimeMeta = [`runtime=${JS_ENV}`];
+if (JS_RUNTIME_VERSION) _runtimeMeta.push(`runtime-version=${JS_RUNTIME_VERSION}`);
+const DEFAULT_HEADERS = { "X-Client-Info": `supabase-js/${version}; ${_runtimeMeta.join("; ")}` };
+const DEFAULT_GLOBAL_OPTIONS = { headers: DEFAULT_HEADERS };
+const DEFAULT_DB_OPTIONS = { schema: "public" };
+const DEFAULT_AUTH_OPTIONS = {
+  autoRefreshToken: true,
+  persistSession: true,
+  detectSessionInUrl: true,
+  flowType: "implicit"
+};
+const DEFAULT_REALTIME_OPTIONS = {};
+const DEFAULT_TRACE_PROPAGATION_OPTIONS = {
+  enabled: false,
+  respectSamplingDecision: true
+};
+function __awaiter(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve) {
+      resolve(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, [])).next());
+  });
+}
+let otelModulePromise = null;
+const OTEL_PKG = "@opentelemetry/api";
+function loadOtel() {
+  if (otelModulePromise === null) otelModulePromise = import(
+    /* webpackIgnore: true */
+    /* turbopackIgnore: true */
+    /* @vite-ignore */
+    OTEL_PKG
+  ).catch(() => null);
+  return otelModulePromise;
+}
+function extractTraceContext() {
+  return __awaiter(this, void 0, void 0, function* () {
+    try {
+      const otel = yield loadOtel();
+      if (!otel || !otel.propagation || !otel.context) return null;
+      const carrier = {};
+      otel.propagation.inject(otel.context.active(), carrier);
+      const traceparent = carrier["traceparent"];
+      if (!traceparent) return null;
+      return {
+        traceparent,
+        tracestate: carrier["tracestate"],
+        baggage: carrier["baggage"]
+      };
+    } catch (_a) {
+      return null;
+    }
+  });
+}
+function parseTraceParent(traceparent) {
+  if (!traceparent || typeof traceparent !== "string") return null;
+  const parts = traceparent.split("-");
+  if (parts.length !== 4) return null;
+  const [version$12, traceId, parentId, traceFlags] = parts;
+  if (version$12.length !== 2 || traceId.length !== 32 || parentId.length !== 16 || traceFlags.length !== 2) return null;
+  const hexRegex = /^[0-9a-f]+$/i;
+  if (!hexRegex.test(version$12) || !hexRegex.test(traceId) || !hexRegex.test(parentId) || !hexRegex.test(traceFlags)) return null;
+  if (traceId === "00000000000000000000000000000000" || parentId === "0000000000000000") return null;
+  return {
+    version: version$12,
+    traceId,
+    parentId,
+    traceFlags,
+    isSampled: (parseInt(traceFlags, 16) & 1) === 1
+  };
+}
+function shouldPropagateToTarget(targetUrl, targets) {
+  if (!targetUrl || !targets || targets.length === 0) return false;
+  let url;
+  if (targetUrl instanceof URL) url = targetUrl;
+  else try {
+    url = new URL(targetUrl);
+  } catch (error) {
+    return false;
+  }
+  for (const target of targets) try {
+    if (typeof target === "string") {
+      if (matchStringTarget(url.hostname, target)) return true;
+    } else if (target instanceof RegExp) {
+      if (target.test(url.hostname)) return true;
+    } else if (typeof target === "function") {
+      if (target(url)) return true;
+    }
+  } catch (error) {
+    continue;
+  }
+  return false;
+}
+function matchStringTarget(hostname, target) {
+  if (target === hostname) return true;
+  if (target.startsWith("*.")) {
+    const domain = target.slice(2);
+    if (hostname.endsWith(domain)) {
+      if (hostname === domain || hostname.endsWith("." + domain)) return true;
+    }
+  }
+  return false;
+}
+function getDefaultPropagationTargets(supabaseUrl2) {
+  const targets = [];
+  try {
+    const url = new URL(supabaseUrl2);
+    targets.push(url.hostname);
+  } catch (error) {
+  }
+  targets.push("*.supabase.co", "*.supabase.in");
+  targets.push("localhost", "127.0.0.1", "[::1]");
+  return targets;
+}
+function _typeof(o) {
+  "@babel/helpers - typeof";
+  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o$1) {
+    return typeof o$1;
+  } : function(o$1) {
+    return o$1 && "function" == typeof Symbol && o$1.constructor === Symbol && o$1 !== Symbol.prototype ? "symbol" : typeof o$1;
+  }, _typeof(o);
+}
+function toPrimitive(t, r) {
+  if ("object" != _typeof(t) || !t) return t;
+  var e = t[Symbol.toPrimitive];
+  if (void 0 !== e) {
+    var i = e.call(t, r);
+    if ("object" != _typeof(i)) return i;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return ("string" === r ? String : Number)(t);
+}
+function toPropertyKey(t) {
+  var i = toPrimitive(t, "string");
+  return "symbol" == _typeof(i) ? i : i + "";
+}
+function _defineProperty(e, r, t) {
+  return (r = toPropertyKey(r)) in e ? Object.defineProperty(e, r, {
+    value: t,
+    enumerable: true,
+    configurable: true,
+    writable: true
+  }) : e[r] = t, e;
+}
+function ownKeys(e, r) {
+  var t = Object.keys(e);
+  if (Object.getOwnPropertySymbols) {
+    var o = Object.getOwnPropertySymbols(e);
+    r && (o = o.filter(function(r$1) {
+      return Object.getOwnPropertyDescriptor(e, r$1).enumerable;
+    })), t.push.apply(t, o);
+  }
+  return t;
+}
+function _objectSpread2(e) {
+  for (var r = 1; r < arguments.length; r++) {
+    var t = null != arguments[r] ? arguments[r] : {};
+    r % 2 ? ownKeys(Object(t), true).forEach(function(r$1) {
+      _defineProperty(e, r$1, t[r$1]);
+    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r$1) {
+      Object.defineProperty(e, r$1, Object.getOwnPropertyDescriptor(t, r$1));
+    });
+  }
+  return e;
+}
+const resolveFetch = (customFetch) => {
+  if (customFetch) return (...args) => customFetch(...args);
+  return (...args) => fetch(...args);
+};
+const resolveHeadersConstructor = () => {
+  return Headers;
+};
+const fetchWithAuth = (supabaseKey2, supabaseUrl2, getAccessToken, customFetch, tracePropagationOptions) => {
+  const fetch$1 = resolveFetch(customFetch);
+  const HeadersConstructor = resolveHeadersConstructor();
+  const traceEnabled = (tracePropagationOptions === null || tracePropagationOptions === void 0 ? void 0 : tracePropagationOptions.enabled) === true;
+  const respectSampling = (tracePropagationOptions === null || tracePropagationOptions === void 0 ? void 0 : tracePropagationOptions.respectSamplingDecision) !== false;
+  const traceTargets = traceEnabled ? getDefaultPropagationTargets(supabaseUrl2) : null;
+  return async (input, init) => {
+    var _await$getAccessToken;
+    const accessToken = (_await$getAccessToken = await getAccessToken()) !== null && _await$getAccessToken !== void 0 ? _await$getAccessToken : supabaseKey2;
+    let headers = new HeadersConstructor(init === null || init === void 0 ? void 0 : init.headers);
+    if (!headers.has("apikey")) headers.set("apikey", supabaseKey2);
+    if (!headers.has("Authorization")) headers.set("Authorization", `Bearer ${accessToken}`);
+    if (traceTargets) {
+      const traceHeaders = await getTraceHeaders(input, traceTargets, respectSampling);
+      if (traceHeaders) {
+        if (traceHeaders.traceparent && !headers.has("traceparent")) headers.set("traceparent", traceHeaders.traceparent);
+        if (traceHeaders.tracestate && !headers.has("tracestate")) headers.set("tracestate", traceHeaders.tracestate);
+        if (traceHeaders.baggage && !headers.has("baggage")) headers.set("baggage", traceHeaders.baggage);
+      }
+    }
+    return fetch$1(input, _objectSpread2(_objectSpread2({}, init), {}, { headers }));
+  };
+};
+async function getTraceHeaders(input, targets, respectSampling) {
+  if (!shouldPropagateToTarget(typeof input === "string" ? input : input instanceof URL ? input : input.url, targets)) return null;
+  const traceContext = await extractTraceContext();
+  if (!traceContext || !traceContext.traceparent) return null;
+  if (respectSampling) {
+    const parsed = parseTraceParent(traceContext.traceparent);
+    if (parsed && !parsed.isSampled) return null;
+  }
+  return traceContext;
+}
+function normalizeTracePropagation(value) {
+  return typeof value === "boolean" ? { enabled: value } : value;
+}
+function ensureTrailingSlash(url) {
+  return url.endsWith("/") ? url : url + "/";
+}
+function applySettingDefaults(options, defaults) {
+  var _DEFAULT_GLOBAL_OPTIO, _globalOptions$header, _ref, _tracePropagationOpti, _ref2, _tracePropagationOpti2;
+  const { db: dbOptions, auth: authOptions, realtime: realtimeOptions, global: globalOptions } = options;
+  const { db: DEFAULT_DB_OPTIONS$1, auth: DEFAULT_AUTH_OPTIONS$1, realtime: DEFAULT_REALTIME_OPTIONS$1, global: DEFAULT_GLOBAL_OPTIONS$1 } = defaults;
+  const tracePropagationOptions = normalizeTracePropagation(options.tracePropagation);
+  const DEFAULT_TRACE_PROPAGATION_OPTIONS$1 = normalizeTracePropagation(defaults.tracePropagation);
+  const result = {
+    db: _objectSpread2(_objectSpread2({}, DEFAULT_DB_OPTIONS$1), dbOptions),
+    auth: _objectSpread2(_objectSpread2({}, DEFAULT_AUTH_OPTIONS$1), authOptions),
+    realtime: _objectSpread2(_objectSpread2({}, DEFAULT_REALTIME_OPTIONS$1), realtimeOptions),
+    storage: {},
+    global: _objectSpread2(_objectSpread2(_objectSpread2({}, DEFAULT_GLOBAL_OPTIONS$1), globalOptions), {}, { headers: _objectSpread2(_objectSpread2({}, (_DEFAULT_GLOBAL_OPTIO = DEFAULT_GLOBAL_OPTIONS$1 === null || DEFAULT_GLOBAL_OPTIONS$1 === void 0 ? void 0 : DEFAULT_GLOBAL_OPTIONS$1.headers) !== null && _DEFAULT_GLOBAL_OPTIO !== void 0 ? _DEFAULT_GLOBAL_OPTIO : {}), (_globalOptions$header = globalOptions === null || globalOptions === void 0 ? void 0 : globalOptions.headers) !== null && _globalOptions$header !== void 0 ? _globalOptions$header : {}) }),
+    tracePropagation: {
+      enabled: (_ref = (_tracePropagationOpti = tracePropagationOptions === null || tracePropagationOptions === void 0 ? void 0 : tracePropagationOptions.enabled) !== null && _tracePropagationOpti !== void 0 ? _tracePropagationOpti : DEFAULT_TRACE_PROPAGATION_OPTIONS$1 === null || DEFAULT_TRACE_PROPAGATION_OPTIONS$1 === void 0 ? void 0 : DEFAULT_TRACE_PROPAGATION_OPTIONS$1.enabled) !== null && _ref !== void 0 ? _ref : false,
+      respectSamplingDecision: (_ref2 = (_tracePropagationOpti2 = tracePropagationOptions === null || tracePropagationOptions === void 0 ? void 0 : tracePropagationOptions.respectSamplingDecision) !== null && _tracePropagationOpti2 !== void 0 ? _tracePropagationOpti2 : DEFAULT_TRACE_PROPAGATION_OPTIONS$1 === null || DEFAULT_TRACE_PROPAGATION_OPTIONS$1 === void 0 ? void 0 : DEFAULT_TRACE_PROPAGATION_OPTIONS$1.respectSamplingDecision) !== null && _ref2 !== void 0 ? _ref2 : true
+    },
+    accessToken: async () => ""
+  };
+  if (options.accessToken) result.accessToken = options.accessToken;
+  else delete result.accessToken;
+  return result;
+}
+function validateSupabaseUrl(supabaseUrl2) {
+  const trimmedUrl = supabaseUrl2 === null || supabaseUrl2 === void 0 ? void 0 : supabaseUrl2.trim();
+  if (!trimmedUrl) throw new Error("supabaseUrl is required.");
+  if (!trimmedUrl.match(/^https?:\/\//i)) throw new Error("Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL.");
+  try {
+    return new URL(ensureTrailingSlash(trimmedUrl));
+  } catch (_unused) {
+    throw Error("Invalid supabaseUrl: Provided URL is malformed.");
+  }
+}
+var SupabaseAuthClient = class extends AuthClient {
+  constructor(options) {
+    super(options);
+  }
+};
+var SupabaseClient = class {
+  /**
+  * Create a new client for use in the browser.
+  *
+  * @category Initializing
+  *
+  * @param supabaseUrl The unique Supabase URL which is supplied when you create a new project in your project dashboard.
+  * @param supabaseKey The unique Supabase Key which is supplied when you create a new project in your project dashboard.
+  * @param options.db.schema You can switch in between schemas. The schema needs to be on the list of exposed schemas inside Supabase.
+  * @param options.auth.autoRefreshToken Set to "true" if you want to automatically refresh the token before expiring.
+  * @param options.auth.persistSession Set to "true" if you want to automatically save the user session into local storage.
+  * @param options.auth.detectSessionInUrl Set to "true" if you want to automatically detects OAuth grants in the URL and signs in the user.
+  * @param options.realtime Options passed along to realtime-js constructor.
+  * @param options.storage Options passed along to the storage-js constructor.
+  * @param options.global.fetch A custom fetch implementation.
+  * @param options.global.headers Any additional headers to send with each network request.
+  *
+  * @example Creating a client
+  * ```js
+  * import { createClient } from '@supabase/supabase-js'
+  *
+  * // Create a single supabase client for interacting with your database
+  * const supabase = createClient('https://xyzcompany.supabase.co', 'your-publishable-key')
+  * ```
+  *
+  * @example With a custom domain
+  * ```js
+  * import { createClient } from '@supabase/supabase-js'
+  *
+  * // Use a custom domain as the supabase URL
+  * const supabase = createClient('https://my-custom-domain.com', 'your-publishable-key')
+  * ```
+  *
+  * @example With additional parameters
+  * ```js
+  * import { createClient } from '@supabase/supabase-js'
+  *
+  * const options = {
+  *   db: {
+  *     schema: 'public',
+  *   },
+  *   auth: {
+  *     autoRefreshToken: true,
+  *     persistSession: true,
+  *     detectSessionInUrl: true
+  *   },
+  *   global: {
+  *     headers: { 'x-my-custom-header': 'my-app-name' },
+  *   },
+  * }
+  * const supabase = createClient("https://xyzcompany.supabase.co", "your-publishable-key", options)
+  * ```
+  *
+  * @exampleDescription With custom schemas
+  * By default the API server points to the `public` schema. You can enable other database schemas within the Dashboard.
+  * Go to [Settings > API > Exposed schemas](/dashboard/project/_/settings/api) and add the schema which you want to expose to the API.
+  *
+  * Note: each client connection can only access a single schema, so the code above can access the `other_schema` schema but cannot access the `public` schema.
+  *
+  * @example With custom schemas
+  * ```js
+  * import { createClient } from '@supabase/supabase-js'
+  *
+  * const supabase = createClient('https://xyzcompany.supabase.co', 'your-publishable-key', {
+  *   // Provide a custom schema. Defaults to "public".
+  *   db: { schema: 'other_schema' }
+  * })
+  * ```
+  *
+  * @exampleDescription Custom fetch implementation
+  * `supabase-js` uses the [`cross-fetch`](https://www.npmjs.com/package/cross-fetch) library to make HTTP requests,
+  * but an alternative `fetch` implementation can be provided as an option.
+  * This is most useful in environments where `cross-fetch` is not compatible (for instance Cloudflare Workers).
+  *
+  * @example Custom fetch implementation
+  * ```js
+  * import { createClient } from '@supabase/supabase-js'
+  *
+  * const supabase = createClient('https://xyzcompany.supabase.co', 'your-publishable-key', {
+  *   global: { fetch: fetch.bind(globalThis) }
+  * })
+  * ```
+  *
+  * @exampleDescription React Native options with AsyncStorage
+  * For React Native we recommend using `AsyncStorage` as the storage implementation for Supabase Auth.
+  *
+  * @example React Native options with AsyncStorage
+  * ```js
+  * import 'react-native-url-polyfill/auto'
+  * import { createClient } from '@supabase/supabase-js'
+  * import AsyncStorage from "@react-native-async-storage/async-storage";
+  *
+  * const supabase = createClient("https://xyzcompany.supabase.co", "your-publishable-key", {
+  *   auth: {
+  *     storage: AsyncStorage,
+  *     autoRefreshToken: true,
+  *     persistSession: true,
+  *     detectSessionInUrl: false,
+  *   },
+  * });
+  * ```
+  *
+  * @exampleDescription React Native options with Expo SecureStore
+  * If you wish to encrypt the user's session information, you can use `aes-js` and store the encryption key in Expo SecureStore.
+  * The `aes-js` library, a reputable JavaScript-only implementation of the AES encryption algorithm in CTR mode.
+  * A new 256-bit encryption key is generated using the `react-native-get-random-values` library.
+  * This key is stored inside Expo's SecureStore, while the value is encrypted and placed inside AsyncStorage.
+  *
+  * Please make sure that:
+  * - You keep the `expo-secure-store`, `aes-js` and `react-native-get-random-values` libraries up-to-date.
+  * - Choose the correct [`SecureStoreOptions`](https://docs.expo.dev/versions/latest/sdk/securestore/#securestoreoptions) for your app's needs.
+  *   E.g. [`SecureStore.WHEN_UNLOCKED`](https://docs.expo.dev/versions/latest/sdk/securestore/#securestorewhen_unlocked) regulates when the data can be accessed.
+  * - Carefully consider optimizations or other modifications to the above example, as those can lead to introducing subtle security vulnerabilities.
+  *
+  * @example React Native options with Expo SecureStore
+  * ```ts
+  * import 'react-native-url-polyfill/auto'
+  * import { createClient } from '@supabase/supabase-js'
+  * import AsyncStorage from '@react-native-async-storage/async-storage';
+  * import * as SecureStore from 'expo-secure-store';
+  * import * as aesjs from 'aes-js';
+  * import 'react-native-get-random-values';
+  *
+  * // As Expo's SecureStore does not support values larger than 2048
+  * // bytes, an AES-256 key is generated and stored in SecureStore, while
+  * // it is used to encrypt/decrypt values stored in AsyncStorage.
+  * class LargeSecureStore {
+  *   private async _encrypt(key: string, value: string) {
+  *     const encryptionKey = crypto.getRandomValues(new Uint8Array(256 / 8));
+  *
+  *     const cipher = new aesjs.ModeOfOperation.ctr(encryptionKey, new aesjs.Counter(1));
+  *     const encryptedBytes = cipher.encrypt(aesjs.utils.utf8.toBytes(value));
+  *
+  *     await SecureStore.setItemAsync(key, aesjs.utils.hex.fromBytes(encryptionKey));
+  *
+  *     return aesjs.utils.hex.fromBytes(encryptedBytes);
+  *   }
+  *
+  *   private async _decrypt(key: string, value: string) {
+  *     const encryptionKeyHex = await SecureStore.getItemAsync(key);
+  *     if (!encryptionKeyHex) {
+  *       return encryptionKeyHex;
+  *     }
+  *
+  *     const cipher = new aesjs.ModeOfOperation.ctr(aesjs.utils.hex.toBytes(encryptionKeyHex), new aesjs.Counter(1));
+  *     const decryptedBytes = cipher.decrypt(aesjs.utils.hex.toBytes(value));
+  *
+  *     return aesjs.utils.utf8.fromBytes(decryptedBytes);
+  *   }
+  *
+  *   async getItem(key: string) {
+  *     const encrypted = await AsyncStorage.getItem(key);
+  *     if (!encrypted) { return encrypted; }
+  *
+  *     return await this._decrypt(key, encrypted);
+  *   }
+  *
+  *   async removeItem(key: string) {
+  *     await AsyncStorage.removeItem(key);
+  *     await SecureStore.deleteItemAsync(key);
+  *   }
+  *
+  *   async setItem(key: string, value: string) {
+  *     const encrypted = await this._encrypt(key, value);
+  *
+  *     await AsyncStorage.setItem(key, encrypted);
+  *   }
+  * }
+  *
+  * const supabase = createClient("https://xyzcompany.supabase.co", "your-publishable-key", {
+  *   auth: {
+  *     storage: new LargeSecureStore(),
+  *     autoRefreshToken: true,
+  *     persistSession: true,
+  *     detectSessionInUrl: false,
+  *   },
+  * });
+  * ```
+  *
+  * @example With a database query
+  * ```ts
+  * import { createClient } from '@supabase/supabase-js'
+  *
+  * const supabase = createClient('https://xyzcompany.supabase.co', 'your-publishable-key')
+  *
+  * const { data } = await supabase.from('profiles').select('*')
+  * ```
+  *
+  * @exampleDescription With OpenTelemetry tracing
+  * Opt in to W3C trace context propagation so the `trace_id` from your
+  * client-side spans is attached to Supabase requests and appears in API
+  * Gateway and Edge Function logs. Requires `@opentelemetry/api` to be
+  * installed in your application. See [Tracing with the JS SDK](https://supabase.com/docs/guides/telemetry/client-side-tracing).
+  *
+  * @example With OpenTelemetry tracing
+  * ```ts
+  * import { createClient } from '@supabase/supabase-js'
+  * import { trace } from '@opentelemetry/api'
+  *
+  * const supabase = createClient('https://xyzcompany.supabase.co', 'your-publishable-key', {
+  *   tracePropagation: true,
+  * })
+  *
+  * const tracer = trace.getTracer('my-app')
+  *
+  * await tracer.startActiveSpan('fetch-users', async (span) => {
+  *   // Outgoing request carries the active trace context.
+  *   const { data, error } = await supabase.from('users').select('*')
+  *   span.end()
+  * })
+  * ```
+  */
+  constructor(supabaseUrl2, supabaseKey2, options) {
+    var _settings$auth$storag, _settings$global$head;
+    this.supabaseUrl = supabaseUrl2;
+    this.supabaseKey = supabaseKey2;
+    const baseUrl = validateSupabaseUrl(supabaseUrl2);
+    if (!supabaseKey2) throw new Error("supabaseKey is required.");
+    this.realtimeUrl = new URL("realtime/v1", baseUrl);
+    this.realtimeUrl.protocol = this.realtimeUrl.protocol.replace("http", "ws");
+    this.authUrl = new URL("auth/v1", baseUrl);
+    this.storageUrl = new URL("storage/v1", baseUrl);
+    this.functionsUrl = new URL("functions/v1", baseUrl);
+    const defaultStorageKey = `sb-${baseUrl.hostname.split(".")[0]}-auth-token`;
+    const DEFAULTS = {
+      db: DEFAULT_DB_OPTIONS,
+      realtime: DEFAULT_REALTIME_OPTIONS,
+      auth: _objectSpread2(_objectSpread2({}, DEFAULT_AUTH_OPTIONS), {}, { storageKey: defaultStorageKey }),
+      global: DEFAULT_GLOBAL_OPTIONS,
+      tracePropagation: DEFAULT_TRACE_PROPAGATION_OPTIONS
+    };
+    const settings = applySettingDefaults(options !== null && options !== void 0 ? options : {}, DEFAULTS);
+    this.settings = settings;
+    this.storageKey = (_settings$auth$storag = settings.auth.storageKey) !== null && _settings$auth$storag !== void 0 ? _settings$auth$storag : "";
+    this.headers = (_settings$global$head = settings.global.headers) !== null && _settings$global$head !== void 0 ? _settings$global$head : {};
+    if (!settings.accessToken) {
+      var _settings$auth;
+      this.auth = this._initSupabaseAuthClient((_settings$auth = settings.auth) !== null && _settings$auth !== void 0 ? _settings$auth : {}, this.headers, settings.global.fetch);
+    } else {
+      this.accessToken = settings.accessToken;
+      this.auth = new Proxy({}, { get: (_, prop) => {
+        throw new Error(`@supabase/supabase-js: Supabase Client is configured with the accessToken option, accessing supabase.auth.${String(prop)} is not possible`);
+      } });
+    }
+    this.fetch = fetchWithAuth(supabaseKey2, supabaseUrl2, this._getAccessToken.bind(this), settings.global.fetch, settings.tracePropagation);
+    this.realtime = this._initRealtimeClient(_objectSpread2({
+      headers: this.headers,
+      accessToken: this._getAccessToken.bind(this),
+      fetch: this.fetch
+    }, settings.realtime));
+    if (this.accessToken) Promise.resolve(this.accessToken()).then((token) => this.realtime.setAuth(token)).catch((e) => console.warn("Failed to set initial Realtime auth token:", e));
+    this.rest = new PostgrestClient(new URL("rest/v1", baseUrl).href, {
+      headers: this.headers,
+      schema: settings.db.schema,
+      fetch: this.fetch,
+      timeout: settings.db.timeout,
+      urlLengthLimit: settings.db.urlLengthLimit
+    });
+    this.storage = new StorageClient(this.storageUrl.href, this.headers, this.fetch, options === null || options === void 0 ? void 0 : options.storage);
+    if (!settings.accessToken) this._listenForAuthEvents();
+  }
+  /**
+  * Supabase Functions allows you to deploy and invoke edge functions.
+  */
+  get functions() {
+    return new FunctionsClient(this.functionsUrl.href, {
+      headers: this.headers,
+      customFetch: this.fetch
+    });
+  }
+  /**
+  * Perform a query on a table or a view.
+  *
+  * @param relation - The table or view name to query
+  */
+  from(relation) {
+    return this.rest.from(relation);
+  }
+  /**
+  * Select a schema to query or perform an function (rpc) call.
+  *
+  * The schema needs to be on the list of exposed schemas inside Supabase.
+  *
+  * @param schema - The schema to query
+  */
+  schema(schema) {
+    return this.rest.schema(schema);
+  }
+  /**
+  * Perform a function call.
+  *
+  * @param fn - The function name to call
+  * @param args - The arguments to pass to the function call
+  * @param options - Named parameters
+  * @param options.head - When set to `true`, `data` will not be returned.
+  * Useful if you only need the count.
+  * @param options.get - When set to `true`, the function will be called with
+  * read-only access mode.
+  * @param options.count - Count algorithm to use to count rows returned by the
+  * function. Only applicable for [set-returning
+  * functions](https://www.postgresql.org/docs/current/functions-srf.html).
+  *
+  * `"exact"`: Exact but slow count algorithm. Performs a `COUNT(*)` under the
+  * hood.
+  *
+  * `"planned"`: Approximated but fast count algorithm. Uses the Postgres
+  * statistics under the hood.
+  *
+  * `"estimated"`: Uses exact count for low numbers and planned count for high
+  * numbers.
+  */
+  rpc(fn, args = {}, options = {
+    head: false,
+    get: false,
+    count: void 0
+  }) {
+    return this.rest.rpc(fn, args, options);
+  }
+  /**
+  * Creates a Realtime channel with Broadcast, Presence, and Postgres Changes.
+  *
+  * @param {string} name - The name of the Realtime channel.
+  * @param {Object} opts - The options to pass to the Realtime channel.
+  *
+  * @category Realtime
+  */
+  channel(name, opts = { config: {} }) {
+    return this.realtime.channel(name, opts);
+  }
+  /**
+  * Returns all Realtime channels.
+  *
+  * @category Realtime
+  *
+  * @example Get all channels
+  * ```js
+  * const channels = supabase.getChannels()
+  * ```
+  */
+  getChannels() {
+    return this.realtime.getChannels();
+  }
+  /**
+  * Unsubscribes and removes Realtime channel from Realtime client.
+  *
+  * @param {RealtimeChannel} channel - The name of the Realtime channel.
+  *
+  *
+  * @category Realtime
+  *
+  * @remarks
+  * - Removing a channel is a great way to maintain the performance of your project's Realtime service as well as your database if you're listening to Postgres changes. Supabase will automatically handle cleanup 30 seconds after a client is disconnected, but unused channels may cause degradation as more clients are simultaneously subscribed.
+  *
+  * @example Removes a channel
+  * ```js
+  * supabase.removeChannel(myChannel)
+  * ```
+  */
+  removeChannel(channel) {
+    return this.realtime.removeChannel(channel);
+  }
+  /**
+  * Unsubscribes and removes all Realtime channels from Realtime client.
+  *
+  * @category Realtime
+  *
+  * @remarks
+  * - Removing channels is a great way to maintain the performance of your project's Realtime service as well as your database if you're listening to Postgres changes. Supabase will automatically handle cleanup 30 seconds after a client is disconnected, but unused channels may cause degradation as more clients are simultaneously subscribed.
+  *
+  * @example Remove all channels
+  * ```js
+  * supabase.removeAllChannels()
+  * ```
+  */
+  removeAllChannels() {
+    return this.realtime.removeAllChannels();
+  }
+  async _getAccessToken() {
+    var _this = this;
+    var _data$session$access_, _data$session;
+    if (_this.accessToken) return await _this.accessToken();
+    const { data } = await _this.auth.getSession();
+    return (_data$session$access_ = (_data$session = data.session) === null || _data$session === void 0 ? void 0 : _data$session.access_token) !== null && _data$session$access_ !== void 0 ? _data$session$access_ : _this.supabaseKey;
+  }
+  _initSupabaseAuthClient({ autoRefreshToken, persistSession, detectSessionInUrl, storage, userStorage, storageKey, flowType, lock, debug, throwOnError, experimental, lockAcquireTimeout, skipAutoInitialize }, headers, fetch$1) {
+    const authHeaders = {
+      Authorization: `Bearer ${this.supabaseKey}`,
+      apikey: `${this.supabaseKey}`
+    };
+    return new SupabaseAuthClient({
+      url: this.authUrl.href,
+      headers: _objectSpread2(_objectSpread2({}, authHeaders), headers),
+      storageKey,
+      autoRefreshToken,
+      persistSession,
+      detectSessionInUrl,
+      storage,
+      userStorage,
+      flowType,
+      lock,
+      debug,
+      throwOnError,
+      experimental,
+      fetch: fetch$1,
+      lockAcquireTimeout,
+      skipAutoInitialize,
+      hasCustomAuthorizationHeader: Object.keys(this.headers).some((key) => key.toLowerCase() === "authorization")
+    });
+  }
+  _initRealtimeClient(options) {
+    return new RealtimeClient(this.realtimeUrl.href, _objectSpread2(_objectSpread2({}, options), {}, { params: _objectSpread2(_objectSpread2({}, { apikey: this.supabaseKey }), options === null || options === void 0 ? void 0 : options.params) }));
+  }
+  _listenForAuthEvents() {
+    return this.auth.onAuthStateChange((event, session) => {
+      this._handleTokenChanged(event, "CLIENT", session === null || session === void 0 ? void 0 : session.access_token);
+    });
+  }
+  _handleTokenChanged(event, source, token) {
+    if ((event === "TOKEN_REFRESHED" || event === "SIGNED_IN") && this.changedAccessToken !== token) {
+      this.changedAccessToken = token;
+      this.realtime.setAuth(token);
+    } else if (event === "SIGNED_OUT") {
+      this.realtime.setAuth();
+      if (source == "STORAGE") this.auth.signOut();
+      this.changedAccessToken = void 0;
+    }
+  }
+};
+const createClient = (supabaseUrl2, supabaseKey2, options) => {
+  return new SupabaseClient(supabaseUrl2, supabaseKey2, options);
+};
+function shouldShowDeprecationWarning() {
+  if (typeof window !== "undefined") return false;
+  const _process = globalThis["process"];
+  if (!_process) return false;
+  const processVersion = _process["version"];
+  if (processVersion === void 0 || processVersion === null) return false;
+  const versionMatch = processVersion.match(/^v(\d+)\./);
+  if (!versionMatch) return false;
+  return parseInt(versionMatch[1], 10) <= 18;
+}
+if (shouldShowDeprecationWarning()) console.warn("⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217");
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "";
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false
+  }
+}) : null;
+function getClientForRequest() {
+  if (!supabase) return null;
+  const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (hasServiceRoleKey) {
+    return supabase;
+  }
+  try {
+    const request = getRequest();
+    const authHeader = request?.headers?.get("authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7);
+      if (token) {
+        return createClient(supabaseUrl, process.env.SUPABASE_PUBLISHABLE_KEY, {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          },
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false
+          }
+        });
+      }
+    }
+  } catch (e) {
+  }
+  return supabase;
+}
+const DB_FILE = path.join(process.cwd(), "db.json");
+function readDb() {
+  try {
+    if (!fs.existsSync(DB_FILE)) {
+      return getInitialDb();
+    }
+    const content = fs.readFileSync(DB_FILE, "utf-8");
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error reading db.json:", error);
+    return getInitialDb();
+  }
+}
+function writeDb(db) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Error writing db.json:", error);
+  }
+}
+function getInitialDb() {
+  const adminId = "00000000-0000-4000-a000-000000000000";
+  const defaultQuizId = "00000000-0000-4000-q000-000000000000";
+  return {
+    users: [
+      {
+        id: adminId,
+        email: "admin@burhan.local",
+        password: "burhan@540",
+        user_metadata: {
+          username: "admin@burhan",
+          display_name: "Administrator"
+        },
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
+      }
+    ],
+    profiles: [
+      {
+        id: adminId,
+        username: "admin@burhan",
+        display_name: "Administrator",
+        access_code: null,
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
+      }
+    ],
+    user_roles: [
+      {
+        id: crypto$1.randomUUID(),
+        user_id: adminId,
+        role: "admin"
+      }
+    ],
+    quizzes: [
+      {
+        id: defaultQuizId,
+        title: "Main Examination",
+        instructions: "Read each question carefully. Manage your time wisely.",
+        duration_minutes: 30,
+        negative_marks: 0,
+        is_active: true,
+        randomize: false,
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
+      }
+    ],
+    questions: [],
+    quiz_attempts: [],
+    attempt_answers: [],
+    cheat_events: []
+  };
+}
+function handleNewUserTrigger(db, user) {
+}
+async function runQuery(query) {
+  const client = getClientForRequest();
+  if (!client) {
+    console.warn("Supabase client not initialized. Falling back to local db.json.");
+    return runLocalQuery(query);
+  }
+  try {
+    let q = client.from(query.table);
+    let builder;
+    if (query.action === "select") {
+      builder = q.select(query.selectColumns || "*", query.selectOptions);
+    } else if (query.action === "insert") {
+      builder = q.insert(query.data).select();
+    } else if (query.action === "update") {
+      builder = q.update(query.data).select();
+    } else if (query.action === "delete") {
+      builder = q.delete().select();
+    } else if (query.action === "upsert") {
+      builder = q.upsert(query.data, query.upsertOptions).select();
+    }
+    if (query.filters) {
+      for (const filter of query.filters) {
+        if (filter.type === "eq") {
+          builder = builder.eq(filter.column, filter.value);
+        } else if (filter.type === "neq") {
+          builder = builder.neq(filter.column, filter.value);
+        } else if (filter.type === "in") {
+          builder = builder.in(filter.column, filter.value);
+        } else if (filter.type === "not") {
+          builder = builder.not(filter.column, filter.operator || "is", filter.value);
+        }
+      }
+    }
+    if (query.order) {
+      builder = builder.order(query.order.column, { ascending: query.order.ascending });
+    }
+    if (query.limit !== void 0) {
+      builder = builder.limit(query.limit);
+    }
+    const { data, count, error } = await builder;
+    if (error) {
+      console.error(`Supabase error on ${query.action} ${query.table}:`, error);
+      return { data: null, error };
+    }
+    if ((query.action === "insert" || query.action === "update" || query.action === "upsert") && data) {
+      return { data: Array.isArray(query.data) ? data : data[0] };
+    }
+    return { data, count };
+  } catch (error) {
+    console.error("runQuery exception:", error);
+    return { data: null, error: { message: error.message } };
+  }
+}
+async function runRpc(name, args) {
+  const client = getClientForRequest();
+  if (!client) {
+    console.warn("Supabase client not initialized. Falling back to local db.json RPC.");
+    return runLocalRpc(name, args);
+  }
+  try {
+    const { data, error } = await client.rpc(name, args);
+    if (error) {
+      console.error(`Supabase RPC error on ${name}:`, error);
+      return { data: null, error };
+    }
+    return { data };
+  } catch (error) {
+    console.error("runRpc exception:", error);
+    return { data: null, error: { message: error.message } };
+  }
+}
+function runLocalQuery(query) {
+  const db = readDb();
+  if (!db[query.table]) {
+    db[query.table] = [];
+  }
+  const rows = db[query.table];
+  let filtered = [...rows];
+  for (const filter of query.filters || []) {
+    if (filter.type === "eq") {
+      filtered = filtered.filter((row) => row[filter.column] === filter.value);
+    } else if (filter.type === "neq") {
+      filtered = filtered.filter((row) => row[filter.column] !== filter.value);
+    } else if (filter.type === "in") {
+      if (Array.isArray(filter.value)) {
+        filtered = filtered.filter((row) => filter.value.includes(row[filter.column]));
+      }
+    } else if (filter.type === "not") {
+      const { operator, value, column } = filter;
+      if (operator === "is" && value === null) {
+        filtered = filtered.filter((row) => row[column] !== null && row[column] !== void 0);
+      } else {
+        filtered = filtered.filter((row) => row[column] !== value);
+      }
+    }
+  }
+  const totalCount = filtered.length;
+  if (query.order) {
+    const col = query.order.column;
+    const asc = query.order.ascending;
+    filtered.sort((a, b) => {
+      let valA = a[col];
+      let valB = b[col];
+      if (valA === void 0 || valA === null) return asc ? -1 : 1;
+      if (valB === void 0 || valB === null) return asc ? 1 : -1;
+      if (typeof valA === "number" && typeof valB === "number") {
+        return asc ? valA - valB : valB - valA;
+      }
+      return asc ? String(valA).localeCompare(String(valB)) : String(valB).localeCompare(String(valA));
+    });
+  }
+  if (query.limit !== void 0) {
+    filtered = filtered.slice(0, query.limit);
+  }
+  if (query.action === "select") {
+    if (query.selectOptions?.head) return { data: [], count: totalCount };
+    if (query.selectOptions?.count === "exact") return { data: filtered, count: totalCount };
+    return { data: filtered };
+  }
+  if (query.action === "insert") {
+    const items = Array.isArray(query.data) ? query.data : [query.data];
+    const inserted = [];
+    for (const item of items) {
+      const newItem = {
+        id: item.id || crypto$1.randomUUID(),
+        created_at: item.created_at || (/* @__PURE__ */ new Date()).toISOString(),
+        ...item
+      };
+      rows.push(newItem);
+      inserted.push(newItem);
+    }
+    writeDb(db);
+    return { data: Array.isArray(query.data) ? inserted : inserted[0] };
+  }
+  if (query.action === "update") {
+    const updated = [];
+    const filterIds = filtered.map((row) => row.id);
+    for (let i = 0; i < rows.length; i++) {
+      if (filterIds.includes(rows[i].id)) {
+        rows[i] = {
+          ...rows[i],
+          ...query.data,
+          updated_at: (/* @__PURE__ */ new Date()).toISOString()
+        };
+        updated.push(rows[i]);
+      }
+    }
+    writeDb(db);
+    return { data: updated };
+  }
+  if (query.action === "delete") {
+    const filterIds = filtered.map((row) => row.id);
+    db[query.table] = rows.filter((row) => !filterIds.includes(row.id));
+    writeDb(db);
+    return { data: rows.filter((row) => filterIds.includes(row.id)) };
+  }
+  if (query.action === "upsert") {
+    const items = Array.isArray(query.data) ? query.data : [query.data];
+    const upserted = [];
+    for (const item of items) {
+      let idx = -1;
+      if (item.id) {
+        idx = rows.findIndex((r) => r.id === item.id);
+      }
+      if (idx === -1 && query.table === "user_roles" && item.user_id && item.role) {
+        idx = rows.findIndex((r) => r.user_id === item.user_id && r.role === item.role);
+      }
+      if (idx !== -1) {
+        rows[idx] = { ...rows[idx], ...item, updated_at: (/* @__PURE__ */ new Date()).toISOString() };
+        upserted.push(rows[idx]);
+      } else {
+        const newItem = {
+          id: item.id || crypto$1.randomUUID(),
+          created_at: item.created_at || (/* @__PURE__ */ new Date()).toISOString(),
+          ...item
+        };
+        rows.push(newItem);
+        upserted.push(newItem);
+      }
+    }
+    writeDb(db);
+    return { data: Array.isArray(query.data) ? upserted : upserted[0] };
+  }
+  return { data: [] };
+}
+function runLocalRpc(name, args) {
+  const db = readDb();
+  if (name === "admin_get_questions") {
+    const quizId = args?._quiz_id;
+    if (!quizId) return { data: [], error: { message: "quiz_id required" } };
+    const questions = (db.questions ?? []).filter((q) => q.quiz_id === quizId);
+    questions.sort((a, b) => (a.position || 0) - (b.position || 0));
+    return { data: questions };
+  }
+  if (name === "submit_quiz_attempt") {
+    const attemptId = args?._attempt_id;
+    const answers = args?._answers || {};
+    const auto = !!args?._auto;
+    if (!attemptId) return { data: null, error: { message: "attempt_id required" } };
+    const attempts = db.quiz_attempts || [];
+    const attemptIndex = attempts.findIndex((a) => a.id === attemptId);
+    if (attemptIndex === -1) {
+      return { data: null, error: { message: "Attempt not found" } };
+    }
+    const attempt = attempts[attemptIndex];
+    if (attempt.status !== "in_progress") {
+      return { data: attemptId };
+    }
+    const quiz = (db.quizzes || []).find((q) => q.id === attempt.quiz_id);
+    const negativeMarks = quiz ? Number(quiz.negative_marks || 0) : 0;
+    const questions = (db.questions || []).filter((q) => q.quiz_id === attempt.quiz_id);
+    let correct = 0;
+    let score = 0;
+    let total = 0;
+    if (!db.attempt_answers) db.attempt_answers = [];
+    for (const q of questions) {
+      total += 1;
+      const sel = answers[q.id];
+      if (sel === void 0 || sel === null || sel === "") continue;
+      const isCorrect = q.question_type === "mcq" ? sel === q.correct_answer : String(sel).trim().toLowerCase() === String(q.correct_answer).trim().toLowerCase();
+      if (isCorrect) {
+        correct += 1;
+        score += Number(q.marks || 0);
+      } else {
+        score -= negativeMarks;
+      }
+      const existingIdx = db.attempt_answers.findIndex(
+        (ans) => ans.attempt_id === attemptId && ans.question_id === q.id
+      );
+      if (existingIdx !== -1) {
+        db.attempt_answers[existingIdx] = {
+          ...db.attempt_answers[existingIdx],
+          selected_answer: sel,
+          is_correct: isCorrect,
+          updated_at: (/* @__PURE__ */ new Date()).toISOString()
+        };
+      } else {
+        db.attempt_answers.push({
+          id: crypto$1.randomUUID(),
+          attempt_id: attemptId,
+          question_id: q.id,
+          selected_answer: sel,
+          is_correct: isCorrect,
+          created_at: (/* @__PURE__ */ new Date()).toISOString()
+        });
+      }
+    }
+    if (score < 0) score = 0;
+    attempt.status = auto ? "auto_submitted" : "submitted";
+    attempt.submitted_at = (/* @__PURE__ */ new Date()).toISOString();
+    attempt.score = score;
+    attempt.correct_count = correct;
+    attempt.total_questions = Math.max(total, attempt.total_questions || 0);
+    writeDb(db);
+    return { data: attemptId };
+  }
+  return { data: null, error: { message: `RPC method ${name} not implemented` } };
+}
+async function runMigrationsIfNeeded() {
+  if (!supabase) return;
+  if (!fs.existsSync(DB_FILE)) return;
+  const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!hasServiceRoleKey) {
+    console.warn("[Migration] SUPABASE_SERVICE_ROLE_KEY is missing in env. Skipping auto-migration to prevent auth errors.");
+    return;
+  }
+  try {
+    const db = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+    console.log("[Migration] Found local db.json. Checking migration status...");
+    const { data: existingQuizzes, error } = await supabase.from("quizzes").select("id").limit(1);
+    if (error) {
+      console.error("[Migration] Error checking database status:", error.message);
+      return;
+    }
+    if (!existingQuizzes || existingQuizzes.length === 0) {
+      console.log("[Migration] Supabase database is empty. Starting migration...");
+      const idMapping = {
+        "00000000-0000-4000-a000-000000000000": "00000000-0000-4000-a000-000000000000"
+        // map default admin ID
+      };
+      const { data: { users: existingUsers } } = await supabase.auth.admin.listUsers();
+      const existingUserEmails = new Set(existingUsers.map((u) => u.email?.toLowerCase()));
+      for (const user of existingUsers) {
+        if (user.email) {
+          idMapping[user.email.toLowerCase()] = user.id;
+        }
+      }
+      for (const u of db.users || []) {
+        const emailLower = u.email.toLowerCase();
+        let finalId = idMapping[emailLower];
+        if (!existingUserEmails.has(emailLower)) {
+          console.log(`[Migration] Creating auth user: ${u.email}`);
+          const { data: resUser, error: err } = await supabase.auth.admin.createUser({
+            email: u.email,
+            password: u.password,
+            email_confirm: true,
+            user_metadata: u.user_metadata
+          });
+          if (err) {
+            console.error(`[Migration] Failed to create user ${u.email}:`, err.message);
+            continue;
+          }
+          if (resUser?.user) {
+            finalId = resUser.user.id;
+          }
+        }
+        if (finalId) {
+          idMapping[u.id] = finalId;
+        }
+      }
+      console.log("[Migration] User mappings generated:", idMapping);
+      const profilesToInsert = (db.profiles || []).map((p) => {
+        const mappedId = idMapping[p.id];
+        if (!mappedId) return null;
+        return {
+          id: mappedId,
+          username: p.username,
+          display_name: p.display_name,
+          access_code: p.access_code,
+          member1_name: p.member1_name || null,
+          member2_name: p.member2_name || null,
+          created_at: p.created_at
+        };
+      }).filter(Boolean);
+      if (profilesToInsert.length > 0) {
+        console.log(`[Migration] Migrating ${profilesToInsert.length} profiles...`);
+        const { error: pErr } = await supabase.from("profiles").upsert(profilesToInsert);
+        if (pErr) console.error("[Migration] Profile insert error:", pErr.message);
+      }
+      const rolesToInsert = (db.user_roles || []).map((r) => {
+        const mappedUserId = idMapping[r.user_id];
+        if (!mappedUserId) return null;
+        return {
+          user_id: mappedUserId,
+          role: r.role
+        };
+      }).filter(Boolean);
+      if (rolesToInsert.length > 0) {
+        console.log(`[Migration] Migrating ${rolesToInsert.length} user roles...`);
+        const { error: rErr } = await supabase.from("user_roles").upsert(rolesToInsert);
+        if (rErr) console.error("[Migration] User roles insert error:", rErr.message);
+      }
+      if (db.quizzes && db.quizzes.length > 0) {
+        console.log(`[Migration] Migrating ${db.quizzes.length} quizzes...`);
+        const { error: qErr } = await supabase.from("quizzes").upsert(db.quizzes);
+        if (qErr) console.error("[Migration] Quizzes insert error:", qErr.message);
+      }
+      if (db.questions && db.questions.length > 0) {
+        console.log(`[Migration] Migrating ${db.questions.length} questions...`);
+        const { error: questErr } = await supabase.from("questions").upsert(db.questions);
+        if (questErr) console.error("[Migration] Questions insert error:", questErr.message);
+      }
+      console.log("[Migration] Database migration completed successfully!");
+    } else {
+      console.log("[Migration] Supabase already has data. Skipping migration.");
+    }
+  } catch (error) {
+    console.error("[Migration] Migration exception occurred:", error.message || error);
+  }
+}
+if (typeof window === "undefined") {
+  setTimeout(() => {
+    runMigrationsIfNeeded().catch(console.error);
+  }, 2e3);
+}
+const db_server = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  handleNewUserTrigger,
+  readDb,
+  runMigrationsIfNeeded,
+  runQuery,
+  runRpc,
+  supabase,
+  writeDb
+}, Symbol.toStringTag, { value: "Module" }));
+const executeDbQuery_createServerFn_handler = createServerRpc({
+  id: "ee16594c9495053e88caba4f67eb34a8ef1d4f002cc94f9b9b7c16c09345de01",
+  name: "executeDbQuery",
+  filename: "src/lib/db.functions.ts"
+}, (opts) => executeDbQuery.__executeServer(opts));
+const executeDbQuery = createServerFn({
+  method: "POST"
+}).inputValidator((query) => query).handler(executeDbQuery_createServerFn_handler, async ({
+  data: query
+}) => {
+  return runQuery(query);
+});
+const authSignIn_createServerFn_handler = createServerRpc({
+  id: "1c1583497f995205ce5444e47a5be1195de5b3e97977272800e2c658d36b7d8d",
+  name: "authSignIn",
+  filename: "src/lib/db.functions.ts"
+}, (opts) => authSignIn.__executeServer(opts));
+const authSignIn = createServerFn({
+  method: "POST"
+}).inputValidator((d) => d).handler(authSignIn_createServerFn_handler, async ({
+  data
+}) => {
+  if (!supabase) {
+    const db = (await Promise.resolve().then(() => db_server)).readDb();
+    const email = data.email.trim().toLowerCase();
+    const user = db.users.find((u) => u.email.trim().toLowerCase() === email);
+    if (!user || user.password !== data.password_hash_or_code) {
+      return {
+        error: {
+          message: "Invalid login credentials"
+        }
+      };
+    }
+    const sessionToken = crypto$1.randomUUID();
+    const session = {
+      access_token: sessionToken,
+      token_type: "bearer",
+      expires_in: 3600,
+      refresh_token: crypto$1.randomUUID(),
+      user: {
+        id: user.id,
+        email: user.email,
+        user_metadata: user.user_metadata,
+        created_at: user.created_at
+      }
+    };
+    return {
+      data: {
+        session,
+        user: session.user
+      }
+    };
+  }
+  try {
+    const {
+      data: authData,
+      error
+    } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password_hash_or_code
+    });
+    if (error) {
+      return {
+        error: {
+          message: error.message
+        }
+      };
+    }
+    return {
+      data: authData
+    };
+  } catch (err) {
+    return {
+      error: {
+        message: err?.message || "Sign in failed"
+      }
+    };
+  }
+});
+const authSignUp_createServerFn_handler = createServerRpc({
+  id: "886e0c873e724d76d899cc855694d8c33146fd1b8e2ac9f23b1a66931b397673",
+  name: "authSignUp",
+  filename: "src/lib/db.functions.ts"
+}, (opts) => authSignUp.__executeServer(opts));
+const authSignUp = createServerFn({
+  method: "POST"
+}).inputValidator((d) => d).handler(authSignUp_createServerFn_handler, async ({
+  data
+}) => {
+  if (!supabase) {
+    const db = (await Promise.resolve().then(() => db_server)).readDb();
+    const email = data.email.trim().toLowerCase();
+    const existing = db.users.find((u) => u.email.trim().toLowerCase() === email);
+    if (existing) {
+      return {
+        error: {
+          message: "User already exists"
+        }
+      };
+    }
+    const newUser = {
+      id: crypto$1.randomUUID(),
+      email: data.email,
+      password: data.password_hash_or_code,
+      user_metadata: data.user_metadata || {},
+      created_at: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    db.users.push(newUser);
+    const username = newUser.user_metadata?.username || newUser.email.split("@")[0];
+    const displayName = newUser.user_metadata?.display_name || username;
+    db.profiles.push({
+      id: newUser.id,
+      username,
+      display_name: displayName,
+      access_code: newUser.user_metadata?.username || null,
+      created_at: (/* @__PURE__ */ new Date()).toISOString()
+    });
+    db.user_roles.push({
+      id: crypto$1.randomUUID(),
+      user_id: newUser.id,
+      role: "participant"
+    });
+    (await Promise.resolve().then(() => db_server)).writeDb(db);
+    const sessionToken = crypto$1.randomUUID();
+    const session = {
+      access_token: sessionToken,
+      token_type: "bearer",
+      expires_in: 3600,
+      refresh_token: crypto$1.randomUUID(),
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        user_metadata: newUser.user_metadata,
+        created_at: newUser.created_at
+      }
+    };
+    return {
+      data: {
+        session,
+        user: session.user
+      }
+    };
+  }
+  try {
+    const {
+      data: authData,
+      error
+    } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password_hash_or_code,
+      options: {
+        data: data.user_metadata || {}
+      }
+    });
+    if (error) {
+      return {
+        error: {
+          message: error.message
+        }
+      };
+    }
+    return {
+      data: authData
+    };
+  } catch (err) {
+    return {
+      error: {
+        message: err?.message || "Sign up failed"
+      }
+    };
+  }
+});
+const authAdminCreateUser_createServerFn_handler = createServerRpc({
+  id: "9773d916ab75e1e24ae151506e855ae3ec24ae23ec19cb66a92e9c3748294352",
+  name: "authAdminCreateUser",
+  filename: "src/lib/db.functions.ts"
+}, (opts) => authAdminCreateUser.__executeServer(opts));
+const authAdminCreateUser = createServerFn({
+  method: "POST"
+}).inputValidator((d) => d).handler(authAdminCreateUser_createServerFn_handler, async ({
+  data
+}) => {
+  if (!supabase) {
+    const db = (await Promise.resolve().then(() => db_server)).readDb();
+    const email = data.email.trim().toLowerCase();
+    const existing = db.users.find((u) => u.email.trim().toLowerCase() === email);
+    if (existing) {
+      return {
+        error: {
+          message: "User already exists"
+        }
+      };
+    }
+    const newUser = {
+      id: crypto$1.randomUUID(),
+      email: data.email,
+      password: data.password_hash_or_code,
+      user_metadata: data.user_metadata || {},
+      created_at: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    db.users.push(newUser);
+    const username = newUser.user_metadata?.username || newUser.email.split("@")[0];
+    const displayName = newUser.user_metadata?.display_name || username;
+    db.profiles.push({
+      id: newUser.id,
+      username,
+      display_name: displayName,
+      access_code: newUser.user_metadata?.username || null,
+      created_at: (/* @__PURE__ */ new Date()).toISOString()
+    });
+    db.user_roles.push({
+      id: crypto$1.randomUUID(),
+      user_id: newUser.id,
+      role: "participant"
+    });
+    (await Promise.resolve().then(() => db_server)).writeDb(db);
+    return {
+      data: {
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          user_metadata: newUser.user_metadata
+        }
+      }
+    };
+  }
+  try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn("[AuthAdmin] Service role key missing. Falling back to public signUp.");
+      const {
+        data: authData2,
+        error: error2
+      } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password_hash_or_code,
+        options: {
+          data: data.user_metadata || {}
+        }
+      });
+      if (error2) {
+        return {
+          error: {
+            message: error2.message
+          }
+        };
+      }
+      return {
+        data: authData2
+      };
+    }
+    const {
+      data: authData,
+      error
+    } = await supabase.auth.admin.createUser({
+      email: data.email,
+      password: data.password_hash_or_code,
+      user_metadata: data.user_metadata || {},
+      email_confirm: true
+    });
+    if (error) {
+      return {
+        error: {
+          message: error.message
+        }
+      };
+    }
+    return {
+      data: authData
+    };
+  } catch (err) {
+    return {
+      error: {
+        message: err?.message || "Create user failed"
+      }
+    };
+  }
+});
+const authAdminUpdateUserById_createServerFn_handler = createServerRpc({
+  id: "6c80671492352a2b07bc7b386dbf5ed3ca3361ca641a56f7bf0a2f43481cc275",
+  name: "authAdminUpdateUserById",
+  filename: "src/lib/db.functions.ts"
+}, (opts) => authAdminUpdateUserById.__executeServer(opts));
+const authAdminUpdateUserById = createServerFn({
+  method: "POST"
+}).inputValidator((d) => d).handler(authAdminUpdateUserById_createServerFn_handler, async ({
+  data
+}) => {
+  if (!supabase) {
+    const db = (await Promise.resolve().then(() => db_server)).readDb();
+    const index = db.users.findIndex((u) => u.id === data.id);
+    if (index === -1) {
+      return {
+        error: {
+          message: "User not found"
+        }
+      };
+    }
+    const user = db.users[index];
+    if (data.email) user.email = data.email;
+    if (data.password) user.password = data.password;
+    if (data.user_metadata) {
+      user.user_metadata = {
+        ...user.user_metadata,
+        ...data.user_metadata
+      };
+    }
+    (await Promise.resolve().then(() => db_server)).writeDb(db);
+    return {
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          user_metadata: user.user_metadata
+        }
+      }
+    };
+  }
+  try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to update other users' credentials.");
+    }
+    const updateData = {};
+    if (data.email) updateData.email = data.email;
+    if (data.password) updateData.password = data.password;
+    if (data.user_metadata) updateData.user_metadata = data.user_metadata;
+    const {
+      data: authData,
+      error
+    } = await supabase.auth.admin.updateUserById(data.id, updateData);
+    if (error) {
+      return {
+        error: {
+          message: error.message
+        }
+      };
+    }
+    return {
+      data: authData
+    };
+  } catch (err) {
+    return {
+      error: {
+        message: err?.message || "Update user failed"
+      }
+    };
+  }
+});
+const authAdminDeleteUser_createServerFn_handler = createServerRpc({
+  id: "25f44339869c58c98abe11b38ab52a8c0b4d1a17a986562cd25112353efcc0dc",
+  name: "authAdminDeleteUser",
+  filename: "src/lib/db.functions.ts"
+}, (opts) => authAdminDeleteUser.__executeServer(opts));
+const authAdminDeleteUser = createServerFn({
+  method: "POST"
+}).inputValidator((d) => d).handler(authAdminDeleteUser_createServerFn_handler, async ({
+  data
+}) => {
+  if (!supabase) {
+    const db = (await Promise.resolve().then(() => db_server)).readDb();
+    const index = db.users.findIndex((u) => u.id === data.id);
+    if (index === -1) {
+      return {
+        error: {
+          message: "User not found"
+        }
+      };
+    }
+    db.users.splice(index, 1);
+    (await Promise.resolve().then(() => db_server)).writeDb(db);
+    return {
+      data: {
+        user: null
+      }
+    };
+  }
+  try {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to delete users.");
+    }
+    const {
+      error
+    } = await supabase.auth.admin.deleteUser(data.id);
+    if (error) {
+      return {
+        error: {
+          message: error.message
+        }
+      };
+    }
+    return {
+      data: {
+        user: null
+      }
+    };
+  } catch (err) {
+    return {
+      error: {
+        message: err?.message || "Delete user failed"
+      }
+    };
+  }
+});
+const executeDbRpc_createServerFn_handler = createServerRpc({
+  id: "d4f5bd528da7e2de150be67a2d049f12582f4aa48ba4bcd8f9f9bbfcca5b281d",
+  name: "executeDbRpc",
+  filename: "src/lib/db.functions.ts"
+}, (opts) => executeDbRpc.__executeServer(opts));
+const executeDbRpc = createServerFn({
+  method: "POST"
+}).inputValidator((d) => d).handler(executeDbRpc_createServerFn_handler, async ({
+  data
+}) => {
+  return runRpc(data.name, data.args);
+});
 export {
-  AuthClient as A
+  authAdminCreateUser_createServerFn_handler,
+  authAdminDeleteUser_createServerFn_handler,
+  authAdminUpdateUserById_createServerFn_handler,
+  authSignIn_createServerFn_handler,
+  authSignUp_createServerFn_handler,
+  executeDbQuery_createServerFn_handler,
+  executeDbRpc_createServerFn_handler
 };

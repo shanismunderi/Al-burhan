@@ -22,6 +22,9 @@ export default defineConfig({
   css: {
     transformer: "lightningcss",
   },
+  ssr: {
+    noExternal: ["@supabase/supabase-js", "@supabase/auth-js", "tslib"],
+  },
   server: {
     host: "::",
     port: 8080,
@@ -42,6 +45,9 @@ export default defineConfig({
     }),
     nitro({
       preset: "vercel",
+      externals: {
+        inline: ["tslib"],
+      },
     }),
     react(),
   ],

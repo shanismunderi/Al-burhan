@@ -1,6 +1,6 @@
-import { c as createMiddleware } from "./server-Ce5jB8e1.mjs";
+import { c as createMiddleware } from "./server-DrrGCU9u.mjs";
 import { r as renderErrorPage } from "./index.mjs";
-import { s as supabase } from "./client-MIMKKODO.mjs";
+import { s as supabase } from "./client-CUWuqVgB.mjs";
 import "../_libs/seroval.mjs";
 import "../_libs/react.mjs";
 import "node:async_hooks";
