@@ -1,8 +1,8 @@
 import { r as reactExports } from "../_libs/react.mjs";
 import { u as useRouter } from "../_libs/tanstack__react-router.mjs";
 import { m as isRedirect } from "../_libs/tanstack__router-core.mjs";
-import { c as createSsrRpc } from "./client-DEvGjMSn.mjs";
-import { a as createServerFn } from "./server-CS0DRPDm.mjs";
+import { c as createSsrRpc } from "./client-PopuJf90.mjs";
+import { a as createServerFn } from "./server-DSnt8QHz.mjs";
 import { o as objectType, s as stringType, n as numberType } from "../_libs/zod.mjs";
 function useServerFn(serverFn) {
   const router = useRouter();

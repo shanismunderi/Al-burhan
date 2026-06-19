@@ -1,4 +1,4 @@
-import { a as createServerFn, T as TSS_SERVER_FUNCTION, g as getServerFnById } from "./server-CS0DRPDm.mjs";
+import { a as createServerFn, T as TSS_SERVER_FUNCTION, g as getServerFnById } from "./server-DSnt8QHz.mjs";
 var createSsrRpc = (functionId) => {
   const url = "/_serverFn/" + functionId;
   const serverFnMeta = { id: functionId };

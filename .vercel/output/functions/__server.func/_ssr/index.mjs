@@ -53,13 +53,25 @@ function renderErrorPage() {
 let serverEntryPromise;
 async function getServerEntry() {
   if (!serverEntryPromise) {
-    serverEntryPromise = import("./server-CS0DRPDm.mjs").then((n) => n.s).then(
+    serverEntryPromise = import("./server-DSnt8QHz.mjs").then((n) => n.s).then(
       (m) => m.default ?? m
     );
   }
   return serverEntryPromise;
 }
-function brandedErrorResponse() {
+function brandedErrorResponse(request, errorMessage) {
+  const url = new URL(request.url);
+  if (request.method !== "GET" || url.pathname.includes("/_server-fn")) {
+    return new Response(
+      JSON.stringify({
+        error: { message: errorMessage || "Internal Server Error" }
+      }),
+      {
+        status: 500,
+        headers: { "content-type": "application/json; charset=utf-8" }
+      }
+    );
+  }
   return new Response(renderErrorPage(), {
     status: 500,
     headers: { "content-type": "text/html; charset=utf-8" }
@@ -82,7 +94,7 @@ function isCatastrophicSsrErrorBody(body, responseStatus) {
   }
   return fields.unhandled === true && fields.message === "HTTPError" && (fields.status === void 0 || fields.status === responseStatus);
 }
-async function normalizeCatastrophicSsrResponse(response) {
+async function normalizeCatastrophicSsrResponse(response, request) {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) return response;
@@ -90,18 +102,19 @@ async function normalizeCatastrophicSsrResponse(response) {
   if (!isCatastrophicSsrErrorBody(body, response.status)) {
     return response;
   }
-  console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
-  return brandedErrorResponse();
+  const lastError = consumeLastCapturedError();
+  console.error(lastError ?? new Error(`h3 swallowed SSR error: ${body}`));
+  return brandedErrorResponse(request, lastError?.message);
 }
 const server = {
   async fetch(request, env, ctx) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return await normalizeCatastrophicSsrResponse(response, request);
     } catch (error) {
       console.error(error);
-      return brandedErrorResponse();
+      return brandedErrorResponse(request, error?.message);
     }
   }
 };

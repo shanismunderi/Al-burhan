@@ -1,6 +1,6 @@
-import { c as createMiddleware } from "./server-CS0DRPDm.mjs";
+import { c as createMiddleware } from "./server-DSnt8QHz.mjs";
 import { r as renderErrorPage } from "./index.mjs";
-import { s as supabase } from "./client-DEvGjMSn.mjs";
+import { s as supabase } from "./client-PopuJf90.mjs";
 import "../_libs/seroval.mjs";
 import "../_libs/react.mjs";
 import "node:async_hooks";
@@ -52,14 +52,18 @@ const attachSupabaseAuth = createMiddleware({ type: "function" }).client(
     });
   }
 );
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
   try {
     return await next();
   } catch (error) {
     if (error != null && typeof error === "object" && "statusCode" in error) {
       throw error;
     }
-    console.error(error);
+    console.error("Server request failed:", error);
+    const url = new URL(request.url);
+    if (request.method !== "GET" || url.pathname.includes("/_server-fn")) {
+      throw error;
+    }
     return new Response(renderErrorPage(), {
       status: 500,
       headers: { "content-type": "text/html; charset=utf-8" }

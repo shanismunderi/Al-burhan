@@ -18,7 +18,19 @@ async function getServerEntry(): Promise<ServerEntry> {
   return serverEntryPromise;
 }
 
-function brandedErrorResponse(): Response {
+function brandedErrorResponse(request: Request, errorMessage?: string): Response {
+  const url = new URL(request.url);
+  if (request.method !== "GET" || url.pathname.includes("/_server-fn")) {
+    return new Response(
+      JSON.stringify({
+        error: { message: errorMessage || "Internal Server Error" },
+      }),
+      {
+        status: 500,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      },
+    );
+  }
   return new Response(renderErrorPage(), {
     status: 500,
     headers: { "content-type": "text/html; charset=utf-8" },
@@ -52,7 +64,7 @@ function isCatastrophicSsrErrorBody(body: string, responseStatus: number): boole
 
 // h3 swallows in-handler throws into a normal 500 Response with body
 // {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
-async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
+async function normalizeCatastrophicSsrResponse(response: Response, request: Request): Promise<Response> {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) return response;
@@ -62,8 +74,9 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
     return response;
   }
 
-  console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
-  return brandedErrorResponse();
+  const lastError = consumeLastCapturedError();
+  console.error(lastError ?? new Error(`h3 swallowed SSR error: ${body}`));
+  return brandedErrorResponse(request, lastError?.message);
 }
 
 export default {
@@ -71,10 +84,10 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
-    } catch (error) {
+      return await normalizeCatastrophicSsrResponse(response, request);
+    } catch (error: any) {
       console.error(error);
-      return brandedErrorResponse();
+      return brandedErrorResponse(request, error?.message);
     }
   },
 };
