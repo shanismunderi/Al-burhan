@@ -1,7 +1,7 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { R as Root } from "../_libs/radix-ui__react-label.mjs";
 import { c as cva } from "../_libs/class-variance-authority.mjs";
-import { c as cn } from "./router-DPsvKmVx.mjs";
+import { c as cn } from "./router-CdCHwnXV.mjs";
 const labelVariants = cva(
   "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 );

@@ -1,8 +1,42 @@
+import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "";
+
+export const supabase = (supabaseUrl && supabaseKey)
+  ? createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    })
+  : null;
+
 const DB_FILE = path.join(process.cwd(), "db.json");
+
+export function readDb(): any {
+  try {
+    if (!fs.existsSync(DB_FILE)) {
+      return getInitialDb();
+    }
+    const content = fs.readFileSync(DB_FILE, "utf-8");
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error reading db.json:", error);
+    return getInitialDb();
+  }
+}
+
+export function writeDb(db: any) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Error writing db.json:", error);
+  }
+}
 
 function getInitialDb() {
   const adminId = "00000000-0000-4000-a000-000000000000";
@@ -55,55 +89,8 @@ function getInitialDb() {
   };
 }
 
-export function readDb(): any {
-  try {
-    if (!fs.existsSync(DB_FILE)) {
-      const db = getInitialDb();
-      fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf8");
-      return db;
-    }
-    const content = fs.readFileSync(DB_FILE, "utf8");
-    return JSON.parse(content);
-  } catch (error) {
-    console.error("Error reading db.json:", error);
-    return getInitialDb();
-  }
-}
-
-export function writeDb(db: any) {
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf8");
-  } catch (error) {
-    console.error("Error writing db.json:", error);
-  }
-}
-
 export function handleNewUserTrigger(db: any, user: any) {
-  const profileId = user.id;
-  const username = user.user_metadata?.username || user.email.split("@")[0];
-  const displayName = user.user_metadata?.display_name || username;
-
-  const existingProfile = db.profiles.find((p: any) => p.id === profileId);
-  if (!existingProfile) {
-    db.profiles.push({
-      id: profileId,
-      username,
-      display_name: displayName,
-      access_code: user.user_metadata?.username || null,
-      created_at: new Date().toISOString(),
-    });
-  }
-
-  const existingRole = db.user_roles.find(
-    (r: any) => r.user_id === profileId && r.role === "participant",
-  );
-  if (!existingRole) {
-    db.user_roles.push({
-      id: crypto.randomUUID(),
-      user_id: profileId,
-      role: "participant",
-    });
-  }
+  // Kept for backward compatibility
 }
 
 export interface DBQuery {
@@ -111,22 +98,103 @@ export interface DBQuery {
   action: "select" | "insert" | "update" | "delete" | "upsert";
   selectColumns?: string;
   selectOptions?: { count?: string; head?: boolean };
-  filters: Array<{ type: "eq" | "neq" | "in"; column: string; value: any }>;
+  filters: Array<{ type: "eq" | "neq" | "in" | "not"; column: string; value: any; operator?: string }>;
   order?: { column: string; ascending: boolean };
   limit?: number;
   data?: any;
+  upsertOptions?: any;
 }
 
-export function runQuery(query: DBQuery): { data: any; count?: number; error?: any } {
+export async function runQuery(query: DBQuery): Promise<{ data: any; count?: number; error?: any }> {
+  if (!supabase) {
+    console.warn("Supabase client not initialized. Falling back to local db.json.");
+    return runLocalQuery(query);
+  }
+
+  try {
+    let q = supabase.from(query.table);
+    let builder: any;
+
+    if (query.action === "select") {
+      builder = q.select(query.selectColumns || "*", query.selectOptions);
+    } else if (query.action === "insert") {
+      builder = q.insert(query.data).select();
+    } else if (query.action === "update") {
+      builder = q.update(query.data).select();
+    } else if (query.action === "delete") {
+      builder = q.delete().select();
+    } else if (query.action === "upsert") {
+      builder = q.upsert(query.data, query.upsertOptions).select();
+    }
+
+    if (query.filters) {
+      for (const filter of query.filters) {
+        if (filter.type === "eq") {
+          builder = builder.eq(filter.column, filter.value);
+        } else if (filter.type === "neq") {
+          builder = builder.neq(filter.column, filter.value);
+        } else if (filter.type === "in") {
+          builder = builder.in(filter.column, filter.value);
+        } else if (filter.type === "not") {
+          builder = builder.not(filter.column, filter.operator || "is", filter.value);
+        }
+      }
+    }
+
+    if (query.order) {
+      builder = builder.order(query.order.column, { ascending: query.order.ascending });
+    }
+
+    if (query.limit !== undefined) {
+      builder = builder.limit(query.limit);
+    }
+
+    const { data, count, error } = await builder;
+    if (error) {
+      console.error(`Supabase error on ${query.action} ${query.table}:`, error);
+      return { data: null, error };
+    }
+
+    if ((query.action === "insert" || query.action === "update" || query.action === "upsert") && data) {
+      return { data: Array.isArray(query.data) ? data : data[0] };
+    }
+
+    return { data, count };
+  } catch (error: any) {
+    console.error("runQuery exception:", error);
+    return { data: null, error: { message: error.message } };
+  }
+}
+
+export async function runRpc(name: string, args?: any): Promise<{ data: any; error?: any }> {
+  if (!supabase) {
+    console.warn("Supabase client not initialized. Falling back to local db.json RPC.");
+    return runLocalRpc(name, args);
+  }
+
+  try {
+    const { data, error } = await supabase.rpc(name, args);
+    if (error) {
+      console.error(`Supabase RPC error on ${name}:`, error);
+      return { data: null, error };
+    }
+    return { data };
+  } catch (error: any) {
+    console.error("runRpc exception:", error);
+    return { data: null, error: { message: error.message } };
+  }
+}
+
+// Local fallback implementations (from original code)
+function runLocalQuery(query: any): any {
   const db = readDb();
   if (!db[query.table]) {
     db[query.table] = [];
   }
   const rows = db[query.table];
 
-  // Apply filters
   let filtered = [...rows];
-  for (const filter of query.filters) {
+  for (const filter of query.filters || []) {
     if (filter.type === "eq") {
       filtered = filtered.filter((row) => row[filter.column] === filter.value);
     } else if (filter.type === "neq") {
@@ -147,46 +215,35 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
 
   const totalCount = filtered.length;
 
-  // Apply ordering
   if (query.order) {
     const col = query.order.column;
     const asc = query.order.ascending;
     filtered.sort((a, b) => {
       let valA = a[col];
       let valB = b[col];
-
       if (valA === undefined || valA === null) return asc ? -1 : 1;
       if (valB === undefined || valB === null) return asc ? 1 : -1;
-
-      // Handle numbers or date strings
       if (typeof valA === "number" && typeof valB === "number") {
         return asc ? valA - valB : valB - valA;
       }
-      valA = String(valA);
-      valB = String(valB);
-      return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      return asc ? String(valA).localeCompare(String(valB)) : String(valB).localeCompare(String(valA));
     });
   }
 
-  // Apply limit
   if (query.limit !== undefined) {
     filtered = filtered.slice(0, query.limit);
   }
 
   if (query.action === "select") {
-    if (query.selectOptions?.head) {
-      return { data: [], count: totalCount };
-    }
-    if (query.selectOptions?.count === "exact") {
-      return { data: filtered, count: totalCount };
-    }
+    if (query.selectOptions?.head) return { data: [], count: totalCount };
+    if (query.selectOptions?.count === "exact") return { data: filtered, count: totalCount };
     return { data: filtered };
   }
 
   if (query.action === "insert") {
-    const itemsToInsert = Array.isArray(query.data) ? query.data : [query.data];
+    const items = Array.isArray(query.data) ? query.data : [query.data];
     const inserted: any[] = [];
-    for (const item of itemsToInsert) {
+    for (const item of items) {
       const newItem = {
         id: item.id || crypto.randomUUID(),
         created_at: item.created_at || new Date().toISOString(),
@@ -218,38 +275,26 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
 
   if (query.action === "delete") {
     const filterIds = filtered.map((row) => row.id);
-    const remaining = rows.filter((row: any) => !filterIds.includes(row.id));
-    const deleted = rows.filter((row: any) => filterIds.includes(row.id));
-    db[query.table] = remaining;
+    db[query.table] = rows.filter((row: any) => !filterIds.includes(row.id));
     writeDb(db);
-    return { data: deleted };
+    return { data: rows.filter((row: any) => filterIds.includes(row.id)) };
   }
 
   if (query.action === "upsert") {
-    const itemsToUpsert = Array.isArray(query.data) ? query.data : [query.data];
+    const items = Array.isArray(query.data) ? query.data : [query.data];
     const upserted: any[] = [];
-    for (const item of itemsToUpsert) {
-      let existingIndex = -1;
-
-      // Try finding by id
+    for (const item of items) {
+      let idx = -1;
       if (item.id) {
-        existingIndex = rows.findIndex((row: any) => row.id === item.id);
+        idx = rows.findIndex((r: any) => r.id === item.id);
+      }
+      if (idx === -1 && query.table === "user_roles" && item.user_id && item.role) {
+        idx = rows.findIndex((r: any) => r.user_id === item.user_id && r.role === item.role);
       }
 
-      // If not found and it's user_roles, try user_id + role unique constraint
-      if (existingIndex === -1 && query.table === "user_roles" && item.user_id && item.role) {
-        existingIndex = rows.findIndex(
-          (row: any) => row.user_id === item.user_id && row.role === item.role,
-        );
-      }
-
-      if (existingIndex !== -1) {
-        rows[existingIndex] = {
-          ...rows[existingIndex],
-          ...item,
-          updated_at: new Date().toISOString(),
-        };
-        upserted.push(rows[existingIndex]);
+      if (idx !== -1) {
+        rows[idx] = { ...rows[idx], ...item, updated_at: new Date().toISOString() };
+        upserted.push(rows[idx]);
       } else {
         const newItem = {
           id: item.id || crypto.randomUUID(),
@@ -267,7 +312,7 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
   return { data: [] };
 }
 
-export function runRpc(name: string, args?: any): { data: any; error?: any } {
+function runLocalRpc(name: string, args?: any): any {
   const db = readDb();
   if (name === "admin_get_questions") {
     const quizId = args?._quiz_id;
@@ -296,111 +341,53 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
 
     const quiz = (db.quizzes || []).find((q: any) => q.id === attempt.quiz_id);
     const negativeMarks = quiz ? Number(quiz.negative_marks || 0) : 0;
-
     const questions = (db.questions || []).filter((q: any) => q.quiz_id === attempt.quiz_id);
     let correct = 0;
     let score = 0;
     let total = 0;
 
-    if (!db.attempt_answers) {
-      db.attempt_answers = [];
-    }
+    if (!db.attempt_answers) db.attempt_answers = [];
 
     for (const q of questions) {
       total += 1;
       const sel = answers[q.id];
-      if (sel === undefined || sel === null || sel === "") {
-        continue;
-      }
-      if (q.question_type === "mcq") {
-        const isCorrect = sel === q.correct_answer;
-        if (isCorrect) {
-          correct += 1;
-          score += Number(q.marks || 0);
-        } else {
-          score -= negativeMarks;
-        }
+      if (sel === undefined || sel === null || sel === "") continue;
 
-        const existingIdx = db.attempt_answers.findIndex(
-          (ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id,
-        );
-        if (existingIdx !== -1) {
-          db.attempt_answers[existingIdx] = {
-            ...db.attempt_answers[existingIdx],
-            selected_answer: sel,
-            is_correct: isCorrect,
-            updated_at: new Date().toISOString(),
-          };
-        } else {
-          db.attempt_answers.push({
-            id: crypto.randomUUID(),
-            attempt_id: attemptId,
-            question_id: q.id,
-            selected_answer: sel,
-            is_correct: isCorrect,
-            created_at: new Date().toISOString(),
-          });
-        }
-      } else if (q.question_type === "one_word") {
-        const userAns = String(sel || "")
-          .trim()
-          .toLowerCase();
-        const correctAns = String(q.correct_answer || "")
-          .trim()
-          .toLowerCase();
-        const isCorrect = userAns === correctAns;
-        if (isCorrect) {
-          correct += 1;
-          score += Number(q.marks || 0);
-        } else {
-          score -= negativeMarks;
-        }
+      const isCorrect = q.question_type === "mcq"
+        ? sel === q.correct_answer
+        : String(sel).trim().toLowerCase() === String(q.correct_answer).trim().toLowerCase();
 
-        const existingIdx = db.attempt_answers.findIndex(
-          (ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id,
-        );
-        if (existingIdx !== -1) {
-          db.attempt_answers[existingIdx] = {
-            ...db.attempt_answers[existingIdx],
-            selected_answer: sel,
-            is_correct: isCorrect,
-            updated_at: new Date().toISOString(),
-          };
-        } else {
-          db.attempt_answers.push({
-            id: crypto.randomUUID(),
-            attempt_id: attemptId,
-            question_id: q.id,
-            selected_answer: sel,
-            is_correct: isCorrect,
-            created_at: new Date().toISOString(),
-          });
-        }
+      if (isCorrect) {
+        correct += 1;
+        score += Number(q.marks || 0);
       } else {
-        const existingIdx = db.attempt_answers.findIndex(
-          (ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id,
-        );
-        if (existingIdx !== -1) {
-          db.attempt_answers[existingIdx] = {
-            ...db.attempt_answers[existingIdx],
-            selected_answer: sel,
-            updated_at: new Date().toISOString(),
-          };
-        } else {
-          db.attempt_answers.push({
-            id: crypto.randomUUID(),
-            attempt_id: attemptId,
-            question_id: q.id,
-            selected_answer: sel,
-            is_correct: null,
-            created_at: new Date().toISOString(),
-          });
-        }
+        score -= negativeMarks;
+      }
+
+      const existingIdx = db.attempt_answers.findIndex(
+        (ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id,
+      );
+
+      if (existingIdx !== -1) {
+        db.attempt_answers[existingIdx] = {
+          ...db.attempt_answers[existingIdx],
+          selected_answer: sel,
+          is_correct: isCorrect,
+          updated_at: new Date().toISOString(),
+        };
+      } else {
+        db.attempt_answers.push({
+          id: crypto.randomUUID(),
+          attempt_id: attemptId,
+          question_id: q.id,
+          selected_answer: sel,
+          is_correct: isCorrect,
+          created_at: new Date().toISOString(),
+        });
       }
     }
 
     if (score < 0) score = 0;
-
     attempt.status = auto ? "auto_submitted" : "submitted";
     attempt.submitted_at = new Date().toISOString();
     attempt.score = score;
@@ -412,4 +399,144 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
   }
 
   return { data: null, error: { message: `RPC method ${name} not implemented` } };
+}
+
+// Auto-Migration Sync Logic
+export async function runMigrationsIfNeeded() {
+  if (!supabase) return;
+  if (!fs.existsSync(DB_FILE)) return;
+
+  const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!hasServiceRoleKey) {
+    console.warn("[Migration] SUPABASE_SERVICE_ROLE_KEY is missing in env. Skipping auto-migration to prevent auth errors.");
+    return;
+  }
+
+  try {
+    const db = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+    console.log("[Migration] Found local db.json. Checking migration status...");
+
+    // Check if target database is already populated
+    const { data: existingQuizzes, error } = await supabase.from("quizzes").select("id").limit(1);
+    if (error) {
+      console.error("[Migration] Error checking database status:", error.message);
+      return;
+    }
+
+    if (!existingQuizzes || existingQuizzes.length === 0) {
+      console.log("[Migration] Supabase database is empty. Starting migration...");
+
+      const idMapping: Record<string, string> = {
+        "00000000-0000-4000-a000-000000000000": "00000000-0000-4000-a000-000000000000" // map default admin ID
+      };
+
+      // 1. Fetch existing users from Supabase to prevent duplicates
+      const { data: { users: existingUsers } } = await supabase.auth.admin.listUsers();
+      const existingUserEmails = new Set(existingUsers.map(u => u.email?.toLowerCase()));
+
+      for (const user of existingUsers) {
+        if (user.email) {
+          idMapping[user.email.toLowerCase()] = user.id;
+        }
+      }
+
+      // 2. Create Users in Supabase Auth
+      for (const u of db.users || []) {
+        const emailLower = u.email.toLowerCase();
+        let finalId = idMapping[emailLower];
+
+        if (!existingUserEmails.has(emailLower)) {
+          console.log(`[Migration] Creating auth user: ${u.email}`);
+          const { data: resUser, error: err } = await supabase.auth.admin.createUser({
+            email: u.email,
+            password: u.password,
+            email_confirm: true,
+            user_metadata: u.user_metadata,
+          });
+
+          if (err) {
+            console.error(`[Migration] Failed to create user ${u.email}:`, err.message);
+            continue;
+          }
+          if (resUser?.user) {
+            finalId = resUser.user.id;
+          }
+        }
+
+        if (finalId) {
+          idMapping[u.id] = finalId;
+        }
+      }
+
+      console.log("[Migration] User mappings generated:", idMapping);
+
+      // 3. Migrate Profiles
+      const profilesToInsert = (db.profiles || [])
+        .map((p: any) => {
+          const mappedId = idMapping[p.id];
+          if (!mappedId) return null;
+          return {
+            id: mappedId,
+            username: p.username,
+            display_name: p.display_name,
+            access_code: p.access_code,
+            member1_name: p.member1_name || null,
+            member2_name: p.member2_name || null,
+            created_at: p.created_at,
+          };
+        })
+        .filter(Boolean);
+
+      if (profilesToInsert.length > 0) {
+        console.log(`[Migration] Migrating ${profilesToInsert.length} profiles...`);
+        const { error: pErr } = await supabase.from("profiles").upsert(profilesToInsert);
+        if (pErr) console.error("[Migration] Profile insert error:", pErr.message);
+      }
+
+      // 4. Migrate User Roles
+      const rolesToInsert = (db.user_roles || [])
+        .map((r: any) => {
+          const mappedUserId = idMapping[r.user_id];
+          if (!mappedUserId) return null;
+          return {
+            user_id: mappedUserId,
+            role: r.role,
+          };
+        })
+        .filter(Boolean);
+
+      if (rolesToInsert.length > 0) {
+        console.log(`[Migration] Migrating ${rolesToInsert.length} user roles...`);
+        const { error: rErr } = await supabase.from("user_roles").upsert(rolesToInsert);
+        if (rErr) console.error("[Migration] User roles insert error:", rErr.message);
+      }
+
+      // 5. Migrate Quizzes
+      if (db.quizzes && db.quizzes.length > 0) {
+        console.log(`[Migration] Migrating ${db.quizzes.length} quizzes...`);
+        const { error: qErr } = await supabase.from("quizzes").upsert(db.quizzes);
+        if (qErr) console.error("[Migration] Quizzes insert error:", qErr.message);
+      }
+
+      // 6. Migrate Questions
+      if (db.questions && db.questions.length > 0) {
+        console.log(`[Migration] Migrating ${db.questions.length} questions...`);
+        const { error: questErr } = await supabase.from("questions").upsert(db.questions);
+        if (questErr) console.error("[Migration] Questions insert error:", questErr.message);
+      }
+
+      console.log("[Migration] Database migration completed successfully!");
+    } else {
+      console.log("[Migration] Supabase already has data. Skipping migration.");
+    }
+  } catch (error: any) {
+    console.error("[Migration] Migration exception occurred:", error.message || error);
+  }
+}
+
+// Trigger migration on backend boot
+if (typeof window === "undefined") {
+  setTimeout(() => {
+    runMigrationsIfNeeded().catch(console.error);
+  }, 2000);
 }
