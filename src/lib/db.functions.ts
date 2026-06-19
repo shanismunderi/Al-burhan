@@ -17,7 +17,7 @@ export const authSignIn = createServerFn({ method: "POST" })
     if (!user || user.password !== data.password_hash_or_code) {
       return { error: { message: "Invalid login credentials" } };
     }
-    
+
     // Generate a mock session
     const sessionToken = crypto.randomUUID();
     const session = {
@@ -30,13 +30,15 @@ export const authSignIn = createServerFn({ method: "POST" })
         email: user.email,
         user_metadata: user.user_metadata,
         created_at: user.created_at,
-      }
+      },
     };
     return { data: { session, user: session.user } };
   });
 
 export const authSignUp = createServerFn({ method: "POST" })
-  .inputValidator((d: any) => d as { email: string; password_hash_or_code: string; user_metadata?: any })
+  .inputValidator(
+    (d: any) => d as { email: string; password_hash_or_code: string; user_metadata?: any },
+  )
   .handler(async ({ data }) => {
     const db = readDb();
     const email = data.email.trim().toLowerCase();
@@ -49,7 +51,7 @@ export const authSignUp = createServerFn({ method: "POST" })
       email: data.email,
       password: data.password_hash_or_code,
       user_metadata: data.user_metadata || {},
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
     db.users.push(newUser);
     handleNewUserTrigger(db, newUser);
@@ -67,13 +69,15 @@ export const authSignUp = createServerFn({ method: "POST" })
         email: newUser.email,
         user_metadata: newUser.user_metadata,
         created_at: newUser.created_at,
-      }
+      },
     };
     return { data: { session, user: session.user } };
   });
 
 export const authAdminCreateUser = createServerFn({ method: "POST" })
-  .inputValidator((d: any) => d as { email: string; password_hash_or_code: string; user_metadata?: any })
+  .inputValidator(
+    (d: any) => d as { email: string; password_hash_or_code: string; user_metadata?: any },
+  )
   .handler(async ({ data }) => {
     const db = readDb();
     const email = data.email.trim().toLowerCase();
@@ -86,16 +90,22 @@ export const authAdminCreateUser = createServerFn({ method: "POST" })
       email: data.email,
       password: data.password_hash_or_code,
       user_metadata: data.user_metadata || {},
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
     db.users.push(newUser);
     handleNewUserTrigger(db, newUser);
     writeDb(db);
-    return { data: { user: { id: newUser.id, email: newUser.email, user_metadata: newUser.user_metadata } } };
+    return {
+      data: {
+        user: { id: newUser.id, email: newUser.email, user_metadata: newUser.user_metadata },
+      },
+    };
   });
 
 export const authAdminUpdateUserById = createServerFn({ method: "POST" })
-  .inputValidator((d: any) => d as { id: string; email?: string; password?: string; user_metadata?: any })
+  .inputValidator(
+    (d: any) => d as { id: string; email?: string; password?: string; user_metadata?: any },
+  )
   .handler(async ({ data }) => {
     const db = readDb();
     const index = db.users.findIndex((u: any) => u.id === data.id);
@@ -108,11 +118,13 @@ export const authAdminUpdateUserById = createServerFn({ method: "POST" })
     if (data.user_metadata) {
       user.user_metadata = {
         ...user.user_metadata,
-        ...data.user_metadata
+        ...data.user_metadata,
       };
     }
     writeDb(db);
-    return { data: { user: { id: user.id, email: user.email, user_metadata: user.user_metadata } } };
+    return {
+      data: { user: { id: user.id, email: user.email, user_metadata: user.user_metadata } },
+    };
   });
 
 export const authAdminDeleteUser = createServerFn({ method: "POST" })

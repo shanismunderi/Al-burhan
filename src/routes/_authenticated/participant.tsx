@@ -24,7 +24,13 @@ function ParticipantLayout() {
         <div className="flex items-center gap-2 sm:gap-3">
           <span className="hidden sm:inline text-sm text-muted-foreground">{username}</span>
           <ThemeToggle />
-          <Button variant="ghost" size="sm" onClick={() => { signOut().then(() => navigate({ to: "/" })); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              signOut().then(() => navigate({ to: "/" }));
+            }}
+          >
             <LogOut className="h-4 w-4 mr-1" /> Sign out
           </Button>
         </div>

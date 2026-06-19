@@ -75,16 +75,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Al-Burhan 2.0 — National Grand Quiz Competition" },
-      { name: "description", content: "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan." },
+      {
+        name: "description",
+        content:
+          "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan.",
+      },
       { name: "author", content: "Darul Hasanath Islamic College" },
       { property: "og:title", content: "Al-Burhan 2.0 — National Grand Quiz Competition" },
-      { property: "og:description", content: "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan." },
+      {
+        property: "og:description",
+        content:
+          "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Al-Burhan 2.0 — National Grand Quiz Competition" },
-      { name: "twitter:description", content: "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/eec4ff74-a77b-4b37-a66e-4ff8329e408a/id-preview-cd9bd56d--ff1e24cf-3f7c-480d-8780-e93fd2ffc9fc.lovable.app-1780894023079.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/eec4ff74-a77b-4b37-a66e-4ff8329e408a/id-preview-cd9bd56d--ff1e24cf-3f7c-480d-8780-e93fd2ffc9fc.lovable.app-1780894023079.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Darul Hasanath Islamic College's National Grand Quiz Competition on Islamic Civilization & Ihsan.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/eec4ff74-a77b-4b37-a66e-4ff8329e408a/id-preview-cd9bd56d--ff1e24cf-3f7c-480d-8780-e93fd2ffc9fc.lovable.app-1780894023079.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/eec4ff74-a77b-4b37-a66e-4ff8329e408a/id-preview-cd9bd56d--ff1e24cf-3f7c-480d-8780-e93fd2ffc9fc.lovable.app-1780894023079.png",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

@@ -5,7 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDisplayName(displayName: string | null | undefined, username?: string | null): string {
+export function formatDisplayName(
+  displayName: string | null | undefined,
+  username?: string | null,
+): string {
   if (!displayName) return username || "";
   const trimmed = displayName.trim();
   if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
@@ -25,4 +28,3 @@ export function formatDisplayName(displayName: string | null | undefined, userna
   }
   return displayName;
 }
-

@@ -5,7 +5,7 @@ import {
   authAdminCreateUser,
   authAdminUpdateUserById,
   authAdminDeleteUser,
-  executeDbRpc
+  executeDbRpc,
 } from "@/lib/db.functions";
 
 class MockQueryBuilder {
@@ -14,14 +14,14 @@ class MockQueryBuilder {
   constructor(table: string) {
     this.query = {
       table,
-      action: 'select',
-      filters: []
+      action: "select",
+      filters: [],
     };
   }
 
   select(columns?: string, options?: any) {
-    if (!['insert', 'update', 'delete', 'upsert'].includes(this.query.action)) {
-      this.query.action = 'select';
+    if (!["insert", "update", "delete", "upsert"].includes(this.query.action)) {
+      this.query.action = "select";
     }
     this.query.selectColumns = columns;
     this.query.selectOptions = options;
@@ -29,46 +29,46 @@ class MockQueryBuilder {
   }
 
   insert(data: any) {
-    this.query.action = 'insert';
+    this.query.action = "insert";
     this.query.data = data;
     return this;
   }
 
   update(data: any) {
-    this.query.action = 'update';
+    this.query.action = "update";
     this.query.data = data;
     return this;
   }
 
   delete() {
-    this.query.action = 'delete';
+    this.query.action = "delete";
     return this;
   }
 
   upsert(data: any, options?: any) {
-    this.query.action = 'upsert';
+    this.query.action = "upsert";
     this.query.data = data;
     this.query.upsertOptions = options;
     return this;
   }
 
   eq(column: string, value: any) {
-    this.query.filters.push({ type: 'eq', column, value });
+    this.query.filters.push({ type: "eq", column, value });
     return this;
   }
 
   neq(column: string, value: any) {
-    this.query.filters.push({ type: 'neq', column, value });
+    this.query.filters.push({ type: "neq", column, value });
     return this;
   }
 
   in(column: string, value: any) {
-    this.query.filters.push({ type: 'in', column, value });
+    this.query.filters.push({ type: "in", column, value });
     return this;
   }
 
   not(column: string, operator: string, value: any) {
-    this.query.filters.push({ type: 'not', column, operator, value });
+    this.query.filters.push({ type: "not", column, operator, value });
     return this;
   }
 
@@ -171,7 +171,7 @@ export const supabase = {
       },
       subscribe() {
         return this;
-      }
+      },
     };
   },
 
@@ -190,8 +190,8 @@ export const supabase = {
         const res = await authSignIn({
           data: {
             email: credentials.email,
-            password_hash_or_code: credentials.password
-          }
+            password_hash_or_code: credentials.password,
+          },
         });
         if (res.error) {
           return { data: { session: null, user: null }, error: res.error };
@@ -200,7 +200,10 @@ export const supabase = {
         triggerAuthChange("SIGNED_IN", res.data.session);
         return { data: res.data, error: null };
       } catch (err: any) {
-        return { data: { session: null, user: null }, error: { message: err?.message || "Sign in failed" } };
+        return {
+          data: { session: null, user: null },
+          error: { message: err?.message || "Sign in failed" },
+        };
       }
     },
 
@@ -210,8 +213,8 @@ export const supabase = {
           data: {
             email: credentials.email,
             password_hash_or_code: credentials.password,
-            options: credentials.options
-          }
+            options: credentials.options,
+          },
         });
         if (res.error) {
           return { data: { session: null, user: null }, error: res.error };
@@ -220,7 +223,10 @@ export const supabase = {
         triggerAuthChange("SIGNED_IN", res.data.session);
         return { data: res.data, error: null };
       } catch (err: any) {
-        return { data: { session: null, user: null }, error: { message: err?.message || "Sign up failed" } };
+        return {
+          data: { session: null, user: null },
+          error: { message: err?.message || "Sign up failed" },
+        };
       }
     },
 
@@ -241,9 +247,9 @@ export const supabase = {
           subscription: {
             unsubscribe() {
               authListeners.delete(callback);
-            }
-          }
-        }
+            },
+          },
+        },
       };
     },
 
@@ -254,8 +260,8 @@ export const supabase = {
             data: {
               email: userData.email,
               password_hash_or_code: userData.password,
-              user_metadata: userData.user_metadata || {}
-            }
+              user_metadata: userData.user_metadata || {},
+            },
           });
           if (res.error) return { data: { user: null }, error: res.error };
           return { data: res.data, error: null };
@@ -271,8 +277,8 @@ export const supabase = {
               id,
               email: userData.email,
               password: userData.password,
-              user_metadata: userData.user_metadata
-            }
+              user_metadata: userData.user_metadata,
+            },
           });
           if (res.error) return { data: { user: null }, error: res.error };
           return { data: res.data, error: null };
@@ -289,7 +295,7 @@ export const supabase = {
         } catch (err: any) {
           return { data: { user: null }, error: { message: err?.message || "Delete user failed" } };
         }
-      }
-    }
-  }
+      },
+    },
+  },
 };

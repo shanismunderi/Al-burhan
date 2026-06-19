@@ -29,23 +29,36 @@ function AdminLayout() {
   }, [loading, role, navigate]);
 
   // Close mobile drawer on route change
-  useEffect(() => { setOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
 
   if (loading || role !== "admin") {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+        Loading…
+      </div>
+    );
   }
 
   const NavContent = (
     <>
-      <div className="px-2 py-2"><Brand to="/admin/dashboard" /></div>
+      <div className="px-2 py-2">
+        <Brand to="/admin/dashboard" />
+      </div>
       <nav className="mt-6 space-y-1 flex-1">
         {NAV.map((n) => {
           const active = location.pathname.startsWith(n.to);
           return (
-            <Link key={n.to} to={n.to}
+            <Link
+              key={n.to}
+              to={n.to}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                active ? "bg-primary text-primary-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent"
-              }`}>
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent"
+              }`}
+            >
               <n.icon className="h-4 w-4" /> {n.label}
             </Link>
           );
@@ -55,7 +68,13 @@ function AdminLayout() {
         <div className="text-xs text-muted-foreground px-3">Signed in as</div>
         <div className="text-sm font-semibold px-3 truncate">{username}</div>
         <div className="flex items-center gap-1 mt-2">
-          <Button variant="ghost" className="flex-1 justify-start" onClick={() => { signOut().then(() => navigate({ to: "/" })); }}>
+          <Button
+            variant="ghost"
+            className="flex-1 justify-start"
+            onClick={() => {
+              signOut().then(() => navigate({ to: "/" }));
+            }}
+          >
             <LogOut className="h-4 w-4 mr-2" /> Sign out
           </Button>
           <ThemeToggle />

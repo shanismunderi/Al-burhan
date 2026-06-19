@@ -52,7 +52,11 @@ export function emailForCode(code: string) {
   return `code-${code.toLowerCase()}@quiz.local`;
 }
 
-const accessCodeSchema = z.string().min(4).max(16).regex(/^[A-Z0-9]+$/, "Use A–Z and 0–9 only");
+const accessCodeSchema = z
+  .string()
+  .min(4)
+  .max(16)
+  .regex(/^[A-Z0-9]+$/, "Use A–Z and 0–9 only");
 
 const createParticipantSchema = z.object({
   member1_name: z.string().min(1).max(120),
@@ -79,13 +83,19 @@ export const createParticipant = createServerFn({ method: "POST" })
         throw new Error(parsed.error.errors[0]?.message || "Invalid access code format");
       }
       const { data: clash } = await supabaseAdmin
-        .from("profiles").select("id").eq("access_code", code).maybeSingle();
+        .from("profiles")
+        .select("id")
+        .eq("access_code", code)
+        .maybeSingle();
       if (clash) throw new Error("That access code is already in use — pick another.");
     } else {
       code = generateCode();
       for (let i = 0; i < 5; i++) {
         const { data: clash } = await supabaseAdmin
-          .from("profiles").select("id").eq("access_code", code).maybeSingle();
+          .from("profiles")
+          .select("id")
+          .eq("access_code", code)
+          .maybeSingle();
         if (!clash) break;
         code = generateCode();
       }
@@ -104,7 +114,13 @@ export const createParticipant = createServerFn({ method: "POST" })
     }
     await supabaseAdmin
       .from("profiles")
-      .update({ access_code: code, display_name: teamName, username: code, member1_name: m1, member2_name: m2 })
+      .update({
+        access_code: code,
+        display_name: teamName,
+        username: code,
+        member1_name: m1,
+        member2_name: m2,
+      })
       .eq("id", created.user.id);
 
     return { ok: true, user_id: created.user.id, access_code: code, display_name: teamName };
@@ -112,7 +128,9 @@ export const createParticipant = createServerFn({ method: "POST" })
 
 export const updateAccessCode = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => {
-    const parsed = z.object({ user_id: z.string().uuid(), access_code: accessCodeSchema }).safeParse(d);
+    const parsed = z
+      .object({ user_id: z.string().uuid(), access_code: accessCodeSchema })
+      .safeParse(d);
     if (!parsed.success) {
       throw new Error(parsed.error.errors[0]?.message || "Invalid input data");
     }
@@ -121,7 +139,10 @@ export const updateAccessCode = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const code = data.access_code.toUpperCase();
     const { data: clash } = await supabaseAdmin
-      .from("profiles").select("id").eq("access_code", code).maybeSingle();
+      .from("profiles")
+      .select("id")
+      .eq("access_code", code)
+      .maybeSingle();
     if (clash && clash.id !== data.user_id) {
       throw new Error("That access code is already in use.");
     }
@@ -146,22 +167,22 @@ export const deleteParticipant = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // 1. Delete cheat events
     await supabaseAdmin.from("cheat_events").delete().eq("user_id", data.user_id);
-    
+
     // 2. Fetch attempts to delete attempt answers
     const { data: attempts } = await supabaseAdmin
       .from("quiz_attempts")
       .select("id")
       .eq("user_id", data.user_id);
-      
+
     if (attempts && attempts.length > 0) {
       const attemptIds = attempts.map((a: any) => a.id);
       await supabaseAdmin.from("attempt_answers").delete().in("attempt_id", attemptIds);
       await supabaseAdmin.from("quiz_attempts").delete().in("id", attemptIds);
     }
-    
+
     // 3. Delete user roles
     await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
-    
+
     // 4. Delete profile
     await supabaseAdmin.from("profiles").delete().eq("id", data.user_id);
 
@@ -174,10 +195,12 @@ export const deleteParticipant = createServerFn({ method: "POST" })
 // Manual grading for descriptive answers
 export const gradeAnswer = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({
-      answer_id: z.string().uuid(),
-      manual_score: z.number().min(0).max(1000),
-    }).parse(d),
+    z
+      .object({
+        answer_id: z.string().uuid(),
+        manual_score: z.number().min(0).max(1000),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin
@@ -209,7 +232,10 @@ export const gradeAnswer = createServerFn({ method: "POST" })
         const q = qMap[a.question_id];
         if (!q) return;
         if (q.question_type === "mcq" || q.question_type === "one_word") {
-          if (a.is_correct) { score += Number(q.marks); correct += 1; }
+          if (a.is_correct) {
+            score += Number(q.marks);
+            correct += 1;
+          }
         } else if (a.manual_score != null) {
           score += Number(a.manual_score);
           if (Number(a.manual_score) > 0) correct += 1;

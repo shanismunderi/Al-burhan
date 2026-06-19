@@ -59,10 +59,7 @@ function QuizSettingsPage() {
       q = created as Quiz;
     } else {
       // Cleanup: if multiple legacy quizzes exist, keep only the first
-      await supabase
-        .from("quizzes")
-        .delete()
-        .neq("id", q.id);
+      await supabase.from("quizzes").delete().neq("id", q.id);
     }
     setQuiz(q);
     const { count } = await supabase
@@ -73,7 +70,9 @@ function QuizSettingsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const save = async () => {
     if (!quiz) return;
@@ -107,7 +106,9 @@ function QuizSettingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Quiz settings</h1>
-          <p className="text-sm text-muted-foreground mt-1">Configure the single exam available to all candidates.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Configure the single exam available to all candidates.
+          </p>
         </div>
         <Button asChild variant="outline" className="w-full sm:w-auto">
           <Link to="/admin/questions/$quizId" params={{ quizId: quiz.id }}>
@@ -162,29 +163,44 @@ function QuizSettingsPage() {
         <div className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
           <div>
             <Label className="!m-0">Exam is active</Label>
-            <div className="text-xs text-muted-foreground mt-0.5">When off, candidates cannot start the exam.</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              When off, candidates cannot start the exam.
+            </div>
           </div>
-          <Switch checked={quiz.is_active} onCheckedChange={(v) => setQuiz({ ...quiz, is_active: v })} />
+          <Switch
+            checked={quiz.is_active}
+            onCheckedChange={(v) => setQuiz({ ...quiz, is_active: v })}
+          />
         </div>
 
         <div className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
           <div>
             <Label className="!m-0">Randomize question order</Label>
-            <div className="text-xs text-muted-foreground mt-0.5">Each candidate sees questions in a different order.</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Each candidate sees questions in a different order.
+            </div>
           </div>
-          <Switch checked={quiz.randomize} onCheckedChange={(v) => setQuiz({ ...quiz, randomize: v })} />
+          <Switch
+            checked={quiz.randomize}
+            onCheckedChange={(v) => setQuiz({ ...quiz, randomize: v })}
+          />
         </div>
 
         <div className="flex justify-end">
           <Button onClick={save} disabled={saving}>
-            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            {saving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
             Save changes
           </Button>
         </div>
       </div>
 
       <div className="mt-4 text-xs text-muted-foreground">
-        Each candidate may attempt this exam <b className="text-foreground">only once</b>. After submission they will see a confirmation message.
+        Each candidate may attempt this exam <b className="text-foreground">only once</b>. After
+        submission they will see a confirmation message.
       </div>
     </div>
   );

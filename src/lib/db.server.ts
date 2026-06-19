@@ -15,10 +15,10 @@ function getInitialDb() {
         password: "burhan@540",
         user_metadata: {
           username: "admin@burhan",
-          display_name: "Administrator"
+          display_name: "Administrator",
         },
-        created_at: new Date().toISOString()
-      }
+        created_at: new Date().toISOString(),
+      },
     ],
     profiles: [
       {
@@ -26,15 +26,15 @@ function getInitialDb() {
         username: "admin@burhan",
         display_name: "Administrator",
         access_code: null,
-        created_at: new Date().toISOString()
-      }
+        created_at: new Date().toISOString(),
+      },
     ],
     user_roles: [
       {
         id: crypto.randomUUID(),
         user_id: adminId,
-        role: "admin"
-      }
+        role: "admin",
+      },
     ],
     quizzes: [
       {
@@ -45,13 +45,13 @@ function getInitialDb() {
         negative_marks: 0,
         is_active: true,
         randomize: false,
-        created_at: new Date().toISOString()
-      }
+        created_at: new Date().toISOString(),
+      },
     ],
     questions: [],
     quiz_attempts: [],
     attempt_answers: [],
-    cheat_events: []
+    cheat_events: [],
   };
 }
 
@@ -90,26 +90,28 @@ export function handleNewUserTrigger(db: any, user: any) {
       username,
       display_name: displayName,
       access_code: user.user_metadata?.username || null,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     });
   }
 
-  const existingRole = db.user_roles.find((r: any) => r.user_id === profileId && r.role === "participant");
+  const existingRole = db.user_roles.find(
+    (r: any) => r.user_id === profileId && r.role === "participant",
+  );
   if (!existingRole) {
     db.user_roles.push({
       id: crypto.randomUUID(),
       user_id: profileId,
-      role: "participant"
+      role: "participant",
     });
   }
 }
 
 export interface DBQuery {
   table: string;
-  action: 'select' | 'insert' | 'update' | 'delete' | 'upsert';
+  action: "select" | "insert" | "update" | "delete" | "upsert";
   selectColumns?: string;
   selectOptions?: { count?: string; head?: boolean };
-  filters: Array<{ type: 'eq' | 'neq' | 'in'; column: string; value: any }>;
+  filters: Array<{ type: "eq" | "neq" | "in"; column: string; value: any }>;
   order?: { column: string; ascending: boolean };
   limit?: number;
   data?: any;
@@ -125,20 +127,20 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
   // Apply filters
   let filtered = [...rows];
   for (const filter of query.filters) {
-    if (filter.type === 'eq') {
-      filtered = filtered.filter(row => row[filter.column] === filter.value);
-    } else if (filter.type === 'neq') {
-      filtered = filtered.filter(row => row[filter.column] !== filter.value);
-    } else if (filter.type === 'in') {
+    if (filter.type === "eq") {
+      filtered = filtered.filter((row) => row[filter.column] === filter.value);
+    } else if (filter.type === "neq") {
+      filtered = filtered.filter((row) => row[filter.column] !== filter.value);
+    } else if (filter.type === "in") {
       if (Array.isArray(filter.value)) {
-        filtered = filtered.filter(row => filter.value.includes(row[filter.column]));
+        filtered = filtered.filter((row) => filter.value.includes(row[filter.column]));
       }
-    } else if (filter.type === 'not') {
+    } else if (filter.type === "not") {
       const { operator, value, column } = filter as any;
-      if (operator === 'is' && value === null) {
-        filtered = filtered.filter(row => row[column] !== null && row[column] !== undefined);
+      if (operator === "is" && value === null) {
+        filtered = filtered.filter((row) => row[column] !== null && row[column] !== undefined);
       } else {
-        filtered = filtered.filter(row => row[column] !== value);
+        filtered = filtered.filter((row) => row[column] !== value);
       }
     }
   }
@@ -152,7 +154,7 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
     filtered.sort((a, b) => {
       let valA = a[col];
       let valB = b[col];
-      
+
       if (valA === undefined || valA === null) return asc ? -1 : 1;
       if (valB === undefined || valB === null) return asc ? 1 : -1;
 
@@ -171,24 +173,24 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
     filtered = filtered.slice(0, query.limit);
   }
 
-  if (query.action === 'select') {
+  if (query.action === "select") {
     if (query.selectOptions?.head) {
       return { data: [], count: totalCount };
     }
-    if (query.selectOptions?.count === 'exact') {
+    if (query.selectOptions?.count === "exact") {
       return { data: filtered, count: totalCount };
     }
     return { data: filtered };
   }
 
-  if (query.action === 'insert') {
+  if (query.action === "insert") {
     const itemsToInsert = Array.isArray(query.data) ? query.data : [query.data];
     const inserted: any[] = [];
     for (const item of itemsToInsert) {
       const newItem = {
         id: item.id || crypto.randomUUID(),
         created_at: item.created_at || new Date().toISOString(),
-        ...item
+        ...item,
       };
       rows.push(newItem);
       inserted.push(newItem);
@@ -197,15 +199,15 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
     return { data: Array.isArray(query.data) ? inserted : inserted[0] };
   }
 
-  if (query.action === 'update') {
+  if (query.action === "update") {
     const updated: any[] = [];
-    const filterIds = filtered.map(row => row.id);
+    const filterIds = filtered.map((row) => row.id);
     for (let i = 0; i < rows.length; i++) {
       if (filterIds.includes(rows[i].id)) {
         rows[i] = {
           ...rows[i],
           ...query.data,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         };
         updated.push(rows[i]);
       }
@@ -214,8 +216,8 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
     return { data: updated };
   }
 
-  if (query.action === 'delete') {
-    const filterIds = filtered.map(row => row.id);
+  if (query.action === "delete") {
+    const filterIds = filtered.map((row) => row.id);
     const remaining = rows.filter((row: any) => !filterIds.includes(row.id));
     const deleted = rows.filter((row: any) => filterIds.includes(row.id));
     db[query.table] = remaining;
@@ -223,34 +225,36 @@ export function runQuery(query: DBQuery): { data: any; count?: number; error?: a
     return { data: deleted };
   }
 
-  if (query.action === 'upsert') {
+  if (query.action === "upsert") {
     const itemsToUpsert = Array.isArray(query.data) ? query.data : [query.data];
     const upserted: any[] = [];
     for (const item of itemsToUpsert) {
       let existingIndex = -1;
-      
+
       // Try finding by id
       if (item.id) {
         existingIndex = rows.findIndex((row: any) => row.id === item.id);
       }
-      
+
       // If not found and it's user_roles, try user_id + role unique constraint
-      if (existingIndex === -1 && query.table === 'user_roles' && item.user_id && item.role) {
-        existingIndex = rows.findIndex((row: any) => row.user_id === item.user_id && row.role === item.role);
+      if (existingIndex === -1 && query.table === "user_roles" && item.user_id && item.role) {
+        existingIndex = rows.findIndex(
+          (row: any) => row.user_id === item.user_id && row.role === item.role,
+        );
       }
 
       if (existingIndex !== -1) {
         rows[existingIndex] = {
           ...rows[existingIndex],
           ...item,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         };
         upserted.push(rows[existingIndex]);
       } else {
         const newItem = {
           id: item.id || crypto.randomUUID(),
           created_at: item.created_at || new Date().toISOString(),
-          ...item
+          ...item,
         };
         rows.push(newItem);
         upserted.push(newItem);
@@ -272,14 +276,14 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
     questions.sort((a: any, b: any) => (a.position || 0) - (b.position || 0));
     return { data: questions };
   }
-  
+
   if (name === "submit_quiz_attempt") {
     const attemptId = args?._attempt_id;
     const answers = args?._answers || {};
     const auto = !!args?._auto;
-    
+
     if (!attemptId) return { data: null, error: { message: "attempt_id required" } };
-    
+
     const attempts = db.quiz_attempts || [];
     const attemptIndex = attempts.findIndex((a: any) => a.id === attemptId);
     if (attemptIndex === -1) {
@@ -289,19 +293,19 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
     if (attempt.status !== "in_progress") {
       return { data: attemptId };
     }
-    
+
     const quiz = (db.quizzes || []).find((q: any) => q.id === attempt.quiz_id);
     const negativeMarks = quiz ? Number(quiz.negative_marks || 0) : 0;
-    
+
     const questions = (db.questions || []).filter((q: any) => q.quiz_id === attempt.quiz_id);
     let correct = 0;
     let score = 0;
     let total = 0;
-    
+
     if (!db.attempt_answers) {
       db.attempt_answers = [];
     }
-    
+
     for (const q of questions) {
       total += 1;
       const sel = answers[q.id];
@@ -316,14 +320,16 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
         } else {
           score -= negativeMarks;
         }
-        
-        const existingIdx = db.attempt_answers.findIndex((ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id);
+
+        const existingIdx = db.attempt_answers.findIndex(
+          (ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id,
+        );
         if (existingIdx !== -1) {
           db.attempt_answers[existingIdx] = {
             ...db.attempt_answers[existingIdx],
             selected_answer: sel,
             is_correct: isCorrect,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           };
         } else {
           db.attempt_answers.push({
@@ -332,12 +338,16 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
             question_id: q.id,
             selected_answer: sel,
             is_correct: isCorrect,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           });
         }
       } else if (q.question_type === "one_word") {
-        const userAns = String(sel || "").trim().toLowerCase();
-        const correctAns = String(q.correct_answer || "").trim().toLowerCase();
+        const userAns = String(sel || "")
+          .trim()
+          .toLowerCase();
+        const correctAns = String(q.correct_answer || "")
+          .trim()
+          .toLowerCase();
         const isCorrect = userAns === correctAns;
         if (isCorrect) {
           correct += 1;
@@ -345,14 +355,16 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
         } else {
           score -= negativeMarks;
         }
-        
-        const existingIdx = db.attempt_answers.findIndex((ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id);
+
+        const existingIdx = db.attempt_answers.findIndex(
+          (ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id,
+        );
         if (existingIdx !== -1) {
           db.attempt_answers[existingIdx] = {
             ...db.attempt_answers[existingIdx],
             selected_answer: sel,
             is_correct: isCorrect,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           };
         } else {
           db.attempt_answers.push({
@@ -361,16 +373,18 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
             question_id: q.id,
             selected_answer: sel,
             is_correct: isCorrect,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           });
         }
       } else {
-        const existingIdx = db.attempt_answers.findIndex((ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id);
+        const existingIdx = db.attempt_answers.findIndex(
+          (ans: any) => ans.attempt_id === attemptId && ans.question_id === q.id,
+        );
         if (existingIdx !== -1) {
           db.attempt_answers[existingIdx] = {
             ...db.attempt_answers[existingIdx],
             selected_answer: sel,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           };
         } else {
           db.attempt_answers.push({
@@ -379,23 +393,23 @@ export function runRpc(name: string, args?: any): { data: any; error?: any } {
             question_id: q.id,
             selected_answer: sel,
             is_correct: null,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
           });
         }
       }
     }
-    
+
     if (score < 0) score = 0;
-    
+
     attempt.status = auto ? "auto_submitted" : "submitted";
     attempt.submitted_at = new Date().toISOString();
     attempt.score = score;
     attempt.correct_count = correct;
     attempt.total_questions = Math.max(total, attempt.total_questions || 0);
-    
+
     writeDb(db);
     return { data: attemptId };
   }
-  
+
   return { data: null, error: { message: `RPC method ${name} not implemented` } };
 }

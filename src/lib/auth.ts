@@ -68,26 +68,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const handleUserChange = async (user: User | null) => {
       const uid = user?.id ?? null;
-      console.log("[AuthProvider] handleUserChange: uid =", uid, "current =", currentUserRef.current);
-      
+      console.log(
+        "[AuthProvider] handleUserChange: uid =",
+        uid,
+        "current =",
+        currentUserRef.current,
+      );
+
       // If the user hasn't changed, keep current state and avoid redundant loading
       if (uid && uid === currentUserRef.current) {
         console.log("[AuthProvider] handleUserChange: no change, returning");
         return;
       }
-      
+
       currentUserRef.current = uid;
-      
+
       if (uid) {
         setLoading(true);
         try {
           console.log("[AuthProvider] Fetching role and profile for uid:", uid);
           const [{ data: roles }, { data: profile }] = await Promise.all([
             supabase.from("user_roles").select("role").eq("user_id", uid),
-            supabase.from("profiles").select("username, display_name, member1_name, member2_name").eq("id", uid).maybeSingle(),
+            supabase
+              .from("profiles")
+              .select("username, display_name, member1_name, member2_name")
+              .eq("id", uid)
+              .maybeSingle(),
           ]);
           console.log("[AuthProvider] Fetched: roles =", roles, "profile =", profile);
-          
+
           if (!mounted) {
             console.log("[AuthProvider] handleUserChange: not mounted, returning");
             return;
@@ -96,8 +105,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log("[AuthProvider] handleUserChange: uid changed, returning");
             return;
           }
-          
-          const r = roles?.find((x: any) => x.role === "admin") ? "admin" : roles?.[0]?.role ?? null;
+
+          const r = roles?.find((x: any) => x.role === "admin")
+            ? "admin"
+            : (roles?.[0]?.role ?? null);
           console.log("[AuthProvider] Resolved role:", r);
           setRole((r as Role) ?? null);
           const p: any = profile;
@@ -141,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return createElement(
     AuthContext.Provider,
     { value: { session, user: session?.user ?? null, role, username, member1, member2, loading } },
-    children
+    children,
   );
 }
 

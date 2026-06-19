@@ -18,9 +18,7 @@ export const Route = createFileRoute("/")({
           "Darul Hasanath Islamic College's National Grand Quiz on Islamic Civilization & Ihsan. Cash prizes ₹6,666.",
       },
     ],
-    links: [
-      { rel: "preload", as: "image", href: logoHero, fetchPriority: "high" },
-    ],
+    links: [{ rel: "preload", as: "image", href: logoHero, fetchPriority: "high" }],
   }),
 });
 
@@ -92,10 +90,9 @@ function Landing() {
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 Organised by the Department of Civilizational Studies with{" "}
-                <b className="text-foreground">Book Plus Publishers</b>, Malabar. Compete as a
-                team of two. Win a share of ₹6,666.
+                <b className="text-foreground">Book Plus Publishers</b>, Malabar. Compete as a team
+                of two. Win a share of ₹6,666.
               </p>
-
 
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-1">
                 <Button asChild size="lg" className="w-full sm:w-auto">

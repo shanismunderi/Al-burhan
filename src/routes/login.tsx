@@ -45,13 +45,24 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--gradient-soft)" }}>
-      <div className="hidden lg:flex flex-1 p-12 flex-col justify-between" style={{ background: "var(--gradient-leaf)" }}>
+      <div
+        className="hidden lg:flex flex-1 p-12 flex-col justify-between"
+        style={{ background: "var(--gradient-leaf)" }}
+      >
         <Brand />
         <div className="text-primary-foreground max-w-md">
-          <h2 className="text-4xl font-bold leading-tight">Take your exam.<br />Stay focused.</h2>
-          <p className="mt-4 opacity-90">Enter the access code your administrator gave you. The exam starts in fullscreen mode.</p>
+          <h2 className="text-4xl font-bold leading-tight">
+            Take your exam.
+            <br />
+            Stay focused.
+          </h2>
+          <p className="mt-4 opacity-90">
+            Enter the access code your administrator gave you. The exam starts in fullscreen mode.
+          </p>
         </div>
-        <div className="text-primary-foreground/70 text-xs"> Powered by{" "}
+        <div className="text-primary-foreground/70 text-xs">
+          {" "}
+          Powered by{" "}
           <a
             href="https://instagram.com/flow.core__"
             target="_blank"
@@ -59,18 +70,29 @@ function LoginPage() {
             className="font-semibold text-foreground hover:text-primary transition-colors"
           >
             Flowcore
-          </a></div>
+          </a>
+        </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
-          <div className="lg:hidden mb-8"><Brand /></div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-sm"
+        >
+          <div className="lg:hidden mb-8">
+            <Brand />
+          </div>
           <div className="flex items-center gap-2 text-primary">
             <KeyRound className="h-5 w-5" />
-            <span className="text-xs font-semibold uppercase tracking-widest">Candidate access</span>
+            <span className="text-xs font-semibold uppercase tracking-widest">
+              Candidate access
+            </span>
           </div>
           <h1 className="mt-3 text-3xl font-bold text-foreground">Enter your access code</h1>
-          <p className="mt-2 text-sm text-muted-foreground">No username or password — just the code you were given.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            No username or password — just the code you were given.
+          </p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
             <div>
@@ -91,7 +113,10 @@ function LoginPage() {
             </Button>
           </form>
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            Are you an admin? <Link to="/admin/login" className="text-primary font-medium">Admin login</Link>
+            Are you an admin?{" "}
+            <Link to="/admin/login" className="text-primary font-medium">
+              Admin login
+            </Link>
           </div>
         </motion.div>
       </div>
