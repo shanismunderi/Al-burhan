@@ -23,7 +23,7 @@ export default defineConfig({
     transformer: "lightningcss",
   },
   ssr: {
-    noExternal: ["@supabase/supabase-js", "@supabase/auth-js", "tslib"],
+    noExternal: true,
   },
   server: {
     host: "::",
