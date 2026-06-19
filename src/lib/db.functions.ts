@@ -261,7 +261,8 @@ export const authAdminDeleteUser = createServerFn({ method: "POST" })
 
     try {
       if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        throw new Error("SUPABASE_SERVICE_ROLE_KEY is required to delete users.");
+        console.warn("[authAdminDeleteUser] SUPABASE_SERVICE_ROLE_KEY is missing. Skipping auth user deletion, database rows will still be deleted.");
+        return { data: { user: null } };
       }
 
       const { error } = await supabase.auth.admin.deleteUser(data.id);
