@@ -112,7 +112,7 @@ export const createParticipant = createServerFn({ method: "POST" })
     if (error || !created.user) {
       throw new Error(error?.message ?? "Failed to create team");
     }
-    await supabaseAdmin
+    const { error: updateError } = await supabaseAdmin
       .from("profiles")
       .update({
         access_code: code,
@@ -122,6 +122,10 @@ export const createParticipant = createServerFn({ method: "POST" })
         member2_name: m2,
       })
       .eq("id", created.user.id);
+
+    if (updateError) {
+      throw new Error(updateError.message ?? "Failed to update profile");
+    }
 
     return { ok: true, user_id: created.user.id, access_code: code, display_name: teamName };
   });

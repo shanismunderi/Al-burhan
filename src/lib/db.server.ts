@@ -4,8 +4,13 @@ import path from "path";
 import crypto from "crypto";
 import { getRequest } from "@tanstack/react-start/server";
 
-const supabaseUrl = process.env.SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "";
+let mockRequest: any = null;
+export function setMockRequest(req: any) {
+  mockRequest = req;
+}
+
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
 
 export const supabase = (supabaseUrl && supabaseKey)
   ? createClient(supabaseUrl, supabaseKey, {
@@ -19,17 +24,20 @@ export const supabase = (supabaseUrl && supabaseKey)
 function getClientForRequest() {
   if (!supabase) return null;
   const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  console.log(`[getClientForRequest] hasServiceRoleKey: ${hasServiceRoleKey}`);
   if (hasServiceRoleKey) {
     return supabase;
   }
 
   try {
-    const request = getRequest();
+    const request = mockRequest || getRequest();
     const authHeader = request?.headers?.get("authorization");
+    console.log(`[getClientForRequest] authHeader: ${authHeader ? authHeader.substring(0, 30) + '...' : 'none'}`);
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
       if (token) {
-        return createClient(supabaseUrl, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+        const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
+        return createClient(supabaseUrl, publishableKey, {
           global: {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -43,9 +51,11 @@ function getClientForRequest() {
       }
     }
   } catch (e) {
+    console.log(`[getClientForRequest] Failed to get request context:`, e);
     // getRequest can throw if called outside a request context (like startup migration)
   }
 
+  console.log(`[getClientForRequest] Falling back to global supabase client`);
   return supabase;
 }
 
@@ -140,6 +150,7 @@ export interface DBQuery {
 }
 
 export async function runQuery(query: DBQuery): Promise<{ data: any; count?: number; error?: any }> {
+  console.log(`[runQuery] Table: ${query.table}, Action: ${query.action}, Data:`, JSON.stringify(query.data));
   const client = getClientForRequest();
   if (!client) {
     console.warn("Supabase client not initialized. Falling back to local db.json.");
@@ -189,6 +200,7 @@ export async function runQuery(query: DBQuery): Promise<{ data: any; count?: num
       console.error(`Supabase error on ${query.action} ${query.table}:`, error);
       return { data: null, error };
     }
+    console.log(`[runQuery] Success! Returned rows:`, Array.isArray(data) ? data.length : (data ? 1 : 0));
 
     if ((query.action === "insert" || query.action === "update" || query.action === "upsert") && data) {
       return { data: Array.isArray(query.data) ? data : data[0] };
