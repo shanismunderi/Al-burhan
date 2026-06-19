@@ -4,7 +4,7 @@ import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/lib/auth";
-import { ArrowRight, Trophy, ScrollText, Clock } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import logoHero from "@/assets/logo-hero.png";
 
 export const Route = createFileRoute("/")({
@@ -96,24 +96,6 @@ function Landing() {
                 team of two. Win a share of ₹6,666.
               </p>
 
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                {[
-                  { icon: ScrollText, label: "Questions", value: "22" },
-                  { icon: Trophy, label: "Marks", value: "100" },
-                  { icon: Clock, label: "Duration", value: "30m" },
-                ].map((s) => (
-                  <div
-                    key={s.label}
-                    className="rounded-xl bg-card border border-border p-3 text-center"
-                  >
-                    <s.icon className="h-4 w-4 mx-auto text-primary" />
-                    <div className="mt-1 text-lg font-bold text-foreground">{s.value}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {s.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
 
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-1">
                 <Button asChild size="lg" className="w-full sm:w-auto">

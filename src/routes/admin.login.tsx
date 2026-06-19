@@ -19,7 +19,7 @@ function AdminLogin() {
   const { session, role, loading, username: displayName } = useAuth();
   const navigate = useNavigate();
   const seed = useServerFn(seedAdmin);
-  const [username, setUsername] = useState("admin@burhan");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const welcomedRef = useRef(false);
