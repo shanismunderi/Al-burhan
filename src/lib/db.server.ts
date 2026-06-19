@@ -10,10 +10,22 @@ export function setMockRequest(req: any) {
 }
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
+const supabaseAnonKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
-export const supabase = (supabaseUrl && supabaseKey)
-  ? createClient(supabaseUrl, supabaseKey, {
+// Standard client (used for sign-ins, queries, etc.)
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    })
+  : null;
+
+// Admin client (used ONLY for admin auth tasks like createUser, deleteUser)
+export const supabaseAdmin = (supabaseUrl && (supabaseServiceKey || supabaseAnonKey))
+  ? createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -26,7 +38,7 @@ function getClientForRequest() {
   const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
   console.log(`[getClientForRequest] hasServiceRoleKey: ${hasServiceRoleKey}`);
   if (hasServiceRoleKey) {
-    return supabase;
+    return supabaseAdmin;
   }
 
   try {

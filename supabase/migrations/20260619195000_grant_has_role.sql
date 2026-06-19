@@ -14,3 +14,22 @@ GRANT SELECT ON public.quizzes TO anon;
 GRANT SELECT ON public.questions TO anon;
 GRANT SELECT, INSERT ON public.profiles TO anon;
 
+-- Admin delete policies to allow deletion of candidates
+DROP POLICY IF EXISTS "profiles admin delete" ON public.profiles;
+CREATE POLICY "profiles admin delete" ON public.profiles FOR DELETE USING (public.has_role(auth.uid(), 'admin'::app_role));
+
+DROP POLICY IF EXISTS "attempts admin delete" ON public.quiz_attempts;
+CREATE POLICY "attempts admin delete" ON public.quiz_attempts FOR DELETE USING (public.has_role(auth.uid(), 'admin'::app_role));
+
+DROP POLICY IF EXISTS "answers admin delete" ON public.attempt_answers;
+CREATE POLICY "answers admin delete" ON public.attempt_answers FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM public.quiz_attempts a
+    WHERE a.id = attempt_id AND public.has_role(auth.uid(), 'admin'::app_role)
+  )
+);
+
+DROP POLICY IF EXISTS "cheat admin delete" ON public.cheat_events;
+CREATE POLICY "cheat admin delete" ON public.cheat_events FOR DELETE USING (public.has_role(auth.uid(), 'admin'::app_role));
+
+

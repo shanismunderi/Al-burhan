@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { runQuery, runRpc, supabase } from "./db.server";
+import { runQuery, runRpc, supabase, supabaseAdmin } from "./db.server";
 import crypto from "crypto";
 
 export const executeDbQuery = createServerFn({ method: "POST" })
@@ -184,7 +184,7 @@ export const authAdminCreateUser = createServerFn({ method: "POST" })
         return { data: authData };
       }
 
-      const { data: authData, error } = await supabase.auth.admin.createUser({
+      const { data: authData, error } = await supabaseAdmin.auth.admin.createUser({
         email: data.email,
         password: data.password_hash_or_code,
         user_metadata: data.user_metadata || {},
@@ -235,7 +235,7 @@ export const authAdminUpdateUserById = createServerFn({ method: "POST" })
       if (data.password) updateData.password = data.password;
       if (data.user_metadata) updateData.user_metadata = data.user_metadata;
 
-      const { data: authData, error } = await supabase.auth.admin.updateUserById(data.id, updateData);
+      const { data: authData, error } = await supabaseAdmin.auth.admin.updateUserById(data.id, updateData);
       if (error) {
         return { error: { message: error.message } };
       }
@@ -265,7 +265,7 @@ export const authAdminDeleteUser = createServerFn({ method: "POST" })
         return { data: { user: null } };
       }
 
-      const { error } = await supabase.auth.admin.deleteUser(data.id);
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(data.id);
       if (error) {
         return { error: { message: error.message } };
       }
