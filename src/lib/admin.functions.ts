@@ -169,30 +169,43 @@ export const updateAccessCode = createServerFn({ method: "POST" })
 export const deleteParticipant = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    // 1. Delete cheat events
-    await supabaseAdmin.from("cheat_events").delete().eq("user_id", data.user_id);
+    // 1. Attempt to delete the auth user first.
+    // If the service role key is present and valid, this will succeed and cascade delete everything.
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
 
-    // 2. Fetch attempts to delete attempt answers
-    const { data: attempts } = await supabaseAdmin
-      .from("quiz_attempts")
+    // Check if the user's profile still exists in profiles (meaning auth delete was skipped or failed)
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
       .select("id")
-      .eq("user_id", data.user_id);
+      .eq("id", data.user_id)
+      .maybeSingle();
 
-    if (attempts && attempts.length > 0) {
-      const attemptIds = attempts.map((a: any) => a.id);
-      await supabaseAdmin.from("attempt_answers").delete().in("attempt_id", attemptIds);
-      await supabaseAdmin.from("quiz_attempts").delete().in("id", attemptIds);
+    if (profile) {
+      // 2. Delete cheat events
+      const { error: cheatErr } = await supabaseAdmin.from("cheat_events").delete().eq("user_id", data.user_id);
+      if (cheatErr) console.warn("Failed to delete cheat events:", cheatErr.message);
+
+      // 3. Fetch and delete attempts and attempt answers
+      const { data: attempts } = await supabaseAdmin
+        .from("quiz_attempts")
+        .select("id")
+        .eq("user_id", data.user_id);
+
+      if (attempts && attempts.length > 0) {
+        const attemptIds = attempts.map((a: any) => a.id);
+        await supabaseAdmin.from("attempt_answers").delete().in("attempt_id", attemptIds);
+        await supabaseAdmin.from("quiz_attempts").delete().in("id", attemptIds);
+      }
+
+      // 4. Delete user roles
+      const { error: rolesErr } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
+      if (rolesErr) console.warn("Failed to delete user roles:", rolesErr.message);
+
+      // 5. Delete profile (this will trigger auth.users deletion via the DB trigger if using Supabase)
+      const { error: profileErr } = await supabaseAdmin.from("profiles").delete().eq("id", data.user_id);
+      if (profileErr) throw new Error(`Failed to delete profile: ${profileErr.message}`);
     }
 
-    // 3. Delete user roles
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
-
-    // 4. Delete profile
-    await supabaseAdmin.from("profiles").delete().eq("id", data.user_id);
-
-    // 5. Delete auth user
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
-    if (error) throw new Error(error.message);
     return { ok: true };
   });
 
