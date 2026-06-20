@@ -35,11 +35,6 @@ export const supabaseAdmin = (supabaseUrl && (supabaseServiceKey || supabaseAnon
 
 function getClientForRequest() {
   if (!supabase) return null;
-  const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-  console.log(`[getClientForRequest] hasServiceRoleKey: ${hasServiceRoleKey}`);
-  if (hasServiceRoleKey) {
-    return supabaseAdmin;
-  }
 
   try {
     const request = mockRequest || getRequest();
@@ -65,6 +60,13 @@ function getClientForRequest() {
   } catch (e) {
     console.log(`[getClientForRequest] Failed to get request context:`, e);
     // getRequest can throw if called outside a request context (like startup migration)
+  }
+
+  const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  console.log(`[getClientForRequest] hasServiceRoleKey: ${hasServiceRoleKey}`);
+  if (hasServiceRoleKey) {
+    console.log(`[getClientForRequest] Falling back to admin client (service role)`);
+    return supabaseAdmin;
   }
 
   console.log(`[getClientForRequest] Falling back to global supabase client`);
