@@ -9,6 +9,16 @@ import { Plus, Trash2, Users as UsersIcon, Copy, KeyRound, Pencil, Check, X } fr
 import { createParticipant, deleteParticipant, updateAccessCode } from "@/lib/admin.functions";
 import { formatDisplayName } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/admin/participants")({
   component: ParticipantsPage,
@@ -32,6 +42,7 @@ function ParticipantsPage() {
   const [busy, setBusy] = useState(false);
   const [lastCode, setLastCode] = useState<{ name: string; code: string } | null>(null);
   const [editing, setEditing] = useState<{ id: string; code: string } | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const create = useServerFn(createParticipant);
   const del = useServerFn(deleteParticipant);
   const updateCode = useServerFn(updateAccessCode);
@@ -84,10 +95,16 @@ function ParticipantsPage() {
     setBusy(false);
   };
 
-  const remove = async (id: string) => {
-    if (!confirm("Delete this candidate and all their attempts?")) return;
+  const remove = (id: string) => {
+    setDeleteTargetId(id);
+  };
+
+  const handleRemove = async () => {
+    if (!deleteTargetId) return;
+    const targetId = deleteTargetId;
+    setDeleteTargetId(null);
     try {
-      await del({ data: { user_id: id } });
+      await del({ data: { user_id: targetId } });
       toast.success("Candidate deleted successfully");
       load();
     } catch (e: any) {
@@ -347,6 +364,23 @@ function ParticipantsPage() {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Candidate</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this candidate and all their attempts? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

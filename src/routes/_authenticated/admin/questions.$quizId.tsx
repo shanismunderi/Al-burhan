@@ -15,6 +15,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/admin/questions/$quizId")({
   component: QuestionsPage,
@@ -79,6 +89,7 @@ function QuestionsPage() {
   const [list, setList] = useState<Q[]>([]);
   const [draft, setDraft] = useState<Q>(emptyMcq(quizId, 0));
   const [editingQuestion, setEditingQuestion] = useState<Q | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const startEdit = (q: Q) => {
     setEditingQuestion({ ...q });
@@ -174,10 +185,16 @@ function QuestionsPage() {
     load();
   };
 
-  const remove = async (id?: string) => {
+  const remove = (id?: string) => {
     if (!id) return;
-    if (!confirm("Are you sure you want to delete this question?")) return;
-    const { error } = await supabase.from("questions").delete().eq("id", id);
+    setDeleteTargetId(id);
+  };
+
+  const handleRemove = async () => {
+    if (!deleteTargetId) return;
+    const targetId = deleteTargetId;
+    setDeleteTargetId(null);
+    const { error } = await supabase.from("questions").delete().eq("id", targetId);
     if (error) {
       toast.error(error.message || "Failed to delete question");
       return;
@@ -696,6 +713,23 @@ function QuestionsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Question</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this question? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRemove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
