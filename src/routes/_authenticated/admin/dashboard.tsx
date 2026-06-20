@@ -47,6 +47,7 @@ function AdminCameraFeed({ attempt, isOnline }: AdminCameraFeedProps) {
   const [isLiveVideo, setIsLiveVideo] = useState(false);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
   useEffect(() => {
     if (!isOnline || attempt.status !== "in_progress" || attempt.camera_snapshot === "simulated") {
@@ -81,12 +82,21 @@ function AdminCameraFeed({ attempt, isOnline }: AdminCameraFeedProps) {
         if (event.streams && event.streams[0]) {
           setRemoteStream(event.streams[0]);
           setIsLiveVideo(true);
+        } else if (event.track) {
+          console.log("[WebRTC-Admin] No stream array, wrapping track in MediaStream");
+          const newStream = new MediaStream([event.track]);
+          setRemoteStream(newStream);
+          setIsLiveVideo(true);
         }
       };
 
       pc.oniceconnectionstatechange = () => {
         console.log("[WebRTC-Admin] ICE connection state change:", pc.iceConnectionState);
-        if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed" || pc.iceConnectionState === "closed") {
+        if (
+          pc.iceConnectionState === "disconnected" ||
+          pc.iceConnectionState === "failed" ||
+          pc.iceConnectionState === "closed"
+        ) {
           setIsLiveVideo(false);
         }
       };
@@ -122,6 +132,15 @@ function AdminCameraFeed({ attempt, isOnline }: AdminCameraFeedProps) {
             payload: { sdp: answer },
           });
           console.log("[WebRTC-Admin] Created and sent SDP Answer");
+
+          // Process queued candidates
+          console.log(`[WebRTC-Admin] Processing ${pendingCandidatesRef.current.length} queued ICE candidates`);
+          while (pendingCandidatesRef.current.length > 0) {
+            const candidate = pendingCandidatesRef.current.shift();
+            if (candidate) {
+              await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+          }
         } catch (err) {
           console.error("[WebRTC-Admin] Error handling offer:", err);
           setIsLiveVideo(false);
@@ -129,10 +148,15 @@ function AdminCameraFeed({ attempt, isOnline }: AdminCameraFeedProps) {
       })
       .on("broadcast", { event: "candidate" }, async ({ payload }) => {
         try {
-          if (peerConnectionRef.current && payload?.candidate) {
-            await peerConnectionRef.current.addIceCandidate(
-              new RTCIceCandidate(payload.candidate)
-            );
+          if (payload?.candidate) {
+            const pc = peerConnectionRef.current;
+            if (pc) {
+              if (pc.remoteDescription) {
+                await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+              } else {
+                pendingCandidatesRef.current.push(payload.candidate);
+              }
+            }
           }
         } catch (err) {
           console.warn("[WebRTC-Admin] Error adding ICE candidate:", err);
@@ -155,10 +179,19 @@ function AdminCameraFeed({ attempt, isOnline }: AdminCameraFeedProps) {
       }
     });
 
-    // Re-request stream periodically if not connected yet
+    // Re-request stream periodically if not connected or connecting yet
     const interval = setInterval(() => {
-      if (peerConnectionRef.current && (peerConnectionRef.current.iceConnectionState === "connected" || peerConnectionRef.current.iceConnectionState === "completed")) {
-        return;
+      const pc = peerConnectionRef.current;
+      if (pc) {
+        const state = pc.iceConnectionState;
+        if (
+          state === "connected" ||
+          state === "completed" ||
+          state === "checking" ||
+          state === "new"
+        ) {
+          return; // Already connecting or connected, don't interrupt
+        }
       }
       console.log("[WebRTC-Admin] Retrying stream request...");
       channel.send({
@@ -185,6 +218,11 @@ function AdminCameraFeed({ attempt, isOnline }: AdminCameraFeedProps) {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.srcObject = remoteStream;
+      if (remoteStream) {
+        videoRef.current.play().catch((err) =>
+          console.warn("[WebRTC-Admin] Autoplay stream failed:", err)
+        );
+      }
     }
   }, [remoteStream]);
 
@@ -204,6 +242,7 @@ function AdminCameraFeed({ attempt, isOnline }: AdminCameraFeedProps) {
               ref={videoRef}
               autoPlay
               playsInline
+              muted
               className="w-full h-full object-cover scale-x-[-1] transition-all duration-300"
             />
           </div>

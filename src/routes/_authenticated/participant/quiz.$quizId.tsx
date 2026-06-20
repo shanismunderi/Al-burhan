@@ -56,6 +56,7 @@ const activeAttemptPromises = new Map<
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const intervalRef = useRef<any>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
   const videoRefCallback = useCallback(
     (el: HTMLVideoElement | null) => {
@@ -137,10 +138,17 @@ const activeAttemptPromises = new Map<
       .on("broadcast", { event: "answer" }, async ({ payload }) => {
         console.log("[WebRTC] Received SDP Answer from admin");
         try {
-          if (peerConnectionRef.current && payload?.sdp) {
-            await peerConnectionRef.current.setRemoteDescription(
-              new RTCSessionDescription(payload.sdp)
-            );
+          const pc = peerConnectionRef.current;
+          if (pc && payload?.sdp) {
+            await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+            // Process queued candidates
+            console.log(`[WebRTC] Processing ${pendingCandidatesRef.current.length} queued ICE candidates`);
+            while (pendingCandidatesRef.current.length > 0) {
+              const candidate = pendingCandidatesRef.current.shift();
+              if (candidate) {
+                await pc.addIceCandidate(new RTCIceCandidate(candidate));
+              }
+            }
           }
         } catch (err) {
           console.error("[WebRTC] Error setting remote description (answer):", err);
@@ -148,15 +156,22 @@ const activeAttemptPromises = new Map<
       })
       .on("broadcast", { event: "candidate" }, async ({ payload }) => {
         try {
-          if (peerConnectionRef.current && payload?.candidate) {
-            await peerConnectionRef.current.addIceCandidate(
-              new RTCIceCandidate(payload.candidate)
-            );
+          if (payload?.candidate) {
+            const pc = peerConnectionRef.current;
+            if (pc) {
+              if (pc.remoteDescription) {
+                await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+              } else {
+                pendingCandidatesRef.current.push(payload.candidate);
+              }
+            }
           }
         } catch (err) {
           console.warn("[WebRTC] Error adding ICE candidate:", err);
         }
       });
+
+
 
     channel.subscribe((status) => {
       console.log(`[WebRTC] Channel subscription status: ${status}`);
