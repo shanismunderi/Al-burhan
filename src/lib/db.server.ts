@@ -176,13 +176,29 @@ export async function runQuery(query: DBQuery): Promise<{ data: any; count?: num
     if (query.action === "select") {
       builder = q.select(query.selectColumns || "*", query.selectOptions);
     } else if (query.action === "insert") {
-      builder = q.insert(query.data).select();
+      if (query.table === "questions") {
+        builder = q.insert(query.data).select("id, quiz_id, question_text, question_type, option_a, option_b, option_c, option_d, marks, position, created_at");
+      } else {
+        builder = q.insert(query.data).select();
+      }
     } else if (query.action === "update") {
-      builder = q.update(query.data).select();
+      if (query.table === "questions") {
+        builder = q.update(query.data).select("id, quiz_id, question_text, question_type, option_a, option_b, option_c, option_d, marks, position, created_at");
+      } else {
+        builder = q.update(query.data).select();
+      }
     } else if (query.action === "delete") {
-      builder = q.delete().select();
+      if (query.table === "questions") {
+        builder = q.delete().select("id, quiz_id, question_text, question_type, option_a, option_b, option_c, option_d, marks, position, created_at");
+      } else {
+        builder = q.delete().select();
+      }
     } else if (query.action === "upsert") {
-      builder = q.upsert(query.data, query.upsertOptions).select();
+      if (query.table === "questions") {
+        builder = q.upsert(query.data, query.upsertOptions).select("id, quiz_id, question_text, question_type, option_a, option_b, option_c, option_d, marks, position, created_at");
+      } else {
+        builder = q.upsert(query.data, query.upsertOptions).select();
+      }
     }
 
     if (query.filters) {

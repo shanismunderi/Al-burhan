@@ -1,1 +1,0 @@
-import{u as o,a,r,j as n,O as i}from"./index-DI1ZNy6Z.js";function c(){const{session:t,loading:e}=o(),s=a();return r.useEffect(()=>{!e&&!t&&s({to:"/login"})},[e,t,s]),e||!t?n.jsx("div",{className:"min-h-screen flex items-center justify-center text-muted-foreground",children:"Loading…"}):n.jsx(i,{})}export{c as component};

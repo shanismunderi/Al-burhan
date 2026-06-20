@@ -96,20 +96,27 @@ function QuestionsPage() {
   };
 
   const load = async () => {
-    const [{ data: quiz }, { data: qs }] = await Promise.all([
-      supabase.from("quizzes").select("title").eq("id", quizId).maybeSingle(),
-      supabase.rpc("admin_get_questions", { _quiz_id: quizId }),
-    ]);
-    setQuizTitle(quiz?.title ?? "");
-    const items = (qs as Q[]) ?? [];
-    setList(items);
-    setDraft((d) =>
-      (d.question_type === "descriptive"
-        ? emptyDesc
-        : d.question_type === "one_word"
-          ? emptyOneWord
-          : emptyMcq)(quizId, items.length),
-    );
+    try {
+      const [{ data: quiz, error: quizErr }, { data: qs, error: qsErr }] = await Promise.all([
+        supabase.from("quizzes").select("title").eq("id", quizId).maybeSingle(),
+        supabase.rpc("admin_get_questions", { _quiz_id: quizId }),
+      ]);
+      if (quizErr) throw quizErr;
+      if (qsErr) throw qsErr;
+      setQuizTitle(quiz?.title ?? "");
+      const items = (qs as Q[]) ?? [];
+      setList(items);
+      setDraft((d) =>
+        (d.question_type === "descriptive"
+          ? emptyDesc
+          : d.question_type === "one_word"
+            ? emptyOneWord
+            : emptyMcq)(quizId, items.length),
+      );
+    } catch (err: any) {
+      console.error("Failed to load questions:", err);
+      toast.error("Failed to load questions: " + (err.message || "Unknown error"));
+    }
   };
   useEffect(() => {
     load();
@@ -182,6 +189,15 @@ function QuestionsPage() {
       return;
     }
     toast.success("Question added successfully");
+    
+    // Reset draft/form inputs
+    setDraft((d) =>
+      (d.question_type === "descriptive"
+        ? emptyDesc
+        : d.question_type === "one_word"
+          ? emptyOneWord
+          : emptyMcq)(quizId, list.length + 1),
+    );
     load();
   };
 
