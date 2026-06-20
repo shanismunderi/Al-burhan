@@ -43,9 +43,7 @@ const MAX_WARNINGS = 3;
 const activeAttemptPromises = new Map<
   string,
   Promise<{ attempt: Attempt; answers: Record<string, string> }>
->();
-
-function ProctorCameraFeed({
+>();function ProctorCameraFeed({
   attemptId,
   initialStream,
 }: {
@@ -57,6 +55,7 @@ function ProctorCameraFeed({
   const [isSimulated, setIsSimulated] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const intervalRef = useRef<any>(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
 
   const videoRefCallback = useCallback(
     (el: HTMLVideoElement | null) => {
@@ -69,18 +68,110 @@ function ProctorCameraFeed({
     [stream],
   );
 
-  // Handler for mock snapshot updates if camera is blocked/unavailable
   const updateMockSnapshot = useCallback(async () => {
-    // We send a tiny indicator that mock is active
-    await supabase
-      .from("quiz_attempts")
-      .update({
-        camera_snapshot: "simulated",
-        camera_active: true,
-        camera_updated_at: new Date().toISOString(),
-      })
-      .eq("id", attemptId);
+    try {
+      await supabase
+        .from("quiz_attempts")
+        .update({
+          camera_snapshot: "simulated",
+          camera_active: true,
+          camera_updated_at: new Date().toISOString(),
+        })
+        .eq("id", attemptId);
+    } catch (e) {
+      console.error("Mock snapshot update error:", e);
+    }
   }, [attemptId]);
+
+  // WebRTC signaling
+  useEffect(() => {
+    if (!attemptId || !stream) return;
+
+    console.log("[WebRTC] Initializing signaling channel for attempt:", attemptId);
+    const channel = supabase.channel(`proctor-stream:${attemptId}`);
+
+    channel
+      .on("broadcast", { event: "request-stream" }, async () => {
+        console.log("[WebRTC] Received stream request from admin");
+        try {
+          if (peerConnectionRef.current) {
+            peerConnectionRef.current.close();
+          }
+
+          const pc = new RTCPeerConnection({
+            iceServers: [
+              { urls: "stun:stun.l.google.com:19302" },
+              { urls: "stun:stun1.l.google.com:19302" },
+            ],
+          });
+          peerConnectionRef.current = pc;
+
+          // Add local tracks
+          stream.getTracks().forEach((track) => {
+            pc.addTrack(track, stream);
+          });
+
+          pc.onicecandidate = (event) => {
+            if (event.candidate) {
+              channel.send({
+                type: "broadcast",
+                event: "candidate",
+                payload: { candidate: event.candidate },
+              });
+            }
+          };
+
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+
+          channel.send({
+            type: "broadcast",
+            event: "offer",
+            payload: { sdp: offer },
+          });
+          console.log("[WebRTC] Created and sent SDP Offer");
+        } catch (err) {
+          console.error("[WebRTC] Error in request-stream handler:", err);
+        }
+      })
+      .on("broadcast", { event: "answer" }, async ({ payload }) => {
+        console.log("[WebRTC] Received SDP Answer from admin");
+        try {
+          if (peerConnectionRef.current && payload?.sdp) {
+            await peerConnectionRef.current.setRemoteDescription(
+              new RTCSessionDescription(payload.sdp)
+            );
+          }
+        } catch (err) {
+          console.error("[WebRTC] Error setting remote description (answer):", err);
+        }
+      })
+      .on("broadcast", { event: "candidate" }, async ({ payload }) => {
+        try {
+          if (peerConnectionRef.current && payload?.candidate) {
+            await peerConnectionRef.current.addIceCandidate(
+              new RTCIceCandidate(payload.candidate)
+            );
+          }
+        } catch (err) {
+          console.warn("[WebRTC] Error adding ICE candidate:", err);
+        }
+      });
+
+    channel.subscribe((status) => {
+      console.log(`[WebRTC] Channel subscription status: ${status}`);
+    });
+
+    return () => {
+      console.log("[WebRTC] Cleaning up signaling for attempt:", attemptId);
+      channel.unsubscribe();
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+    };
+  }, [attemptId, stream]);
+
 
   // Initialize camera
   useEffect(() => {

@@ -1,5 +1,7 @@
+
+
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Activity, AlertTriangle, CheckCircle2, Clock, Users, VideoOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,6 +35,308 @@ interface CheatRow {
   event_type: string;
   occurred_at: string;
   candidate?: string;
+}
+
+interface AdminCameraFeedProps {
+  attempt: AttemptRow;
+  isOnline: boolean;
+}
+
+function AdminCameraFeed({ attempt, isOnline }: AdminCameraFeedProps) {
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [isLiveVideo, setIsLiveVideo] = useState(false);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (!isOnline || attempt.status !== "in_progress" || attempt.camera_snapshot === "simulated") {
+      // Clean up connection if student is offline, not in progress, or simulated
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+      setRemoteStream(null);
+      setIsLiveVideo(false);
+      return;
+    }
+
+    console.log(`[WebRTC-Admin] Initializing WebRTC for attempt: ${attempt.id}`);
+    const channel = supabase.channel(`proctor-stream:${attempt.id}`);
+
+    // Create RTCPeerConnection helper
+    const initPeerConnection = () => {
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+      }
+
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+        ],
+      });
+
+      pc.ontrack = (event) => {
+        console.log("[WebRTC-Admin] Received remote track", event.streams);
+        if (event.streams && event.streams[0]) {
+          setRemoteStream(event.streams[0]);
+          setIsLiveVideo(true);
+        }
+      };
+
+      pc.oniceconnectionstatechange = () => {
+        console.log("[WebRTC-Admin] ICE connection state change:", pc.iceConnectionState);
+        if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed" || pc.iceConnectionState === "closed") {
+          setIsLiveVideo(false);
+        }
+      };
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          channel.send({
+            type: "broadcast",
+            event: "candidate",
+            payload: { candidate: event.candidate },
+          });
+        }
+      };
+
+      peerConnectionRef.current = pc;
+      return pc;
+    };
+
+    channel
+      .on("broadcast", { event: "offer" }, async ({ payload }) => {
+        console.log("[WebRTC-Admin] Received SDP Offer from student");
+        try {
+          if (!payload?.sdp) return;
+          const pc = initPeerConnection();
+
+          await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          channel.send({
+            type: "broadcast",
+            event: "answer",
+            payload: { sdp: answer },
+          });
+          console.log("[WebRTC-Admin] Created and sent SDP Answer");
+        } catch (err) {
+          console.error("[WebRTC-Admin] Error handling offer:", err);
+          setIsLiveVideo(false);
+        }
+      })
+      .on("broadcast", { event: "candidate" }, async ({ payload }) => {
+        try {
+          if (peerConnectionRef.current && payload?.candidate) {
+            await peerConnectionRef.current.addIceCandidate(
+              new RTCIceCandidate(payload.candidate)
+            );
+          }
+        } catch (err) {
+          console.warn("[WebRTC-Admin] Error adding ICE candidate:", err);
+        }
+      });
+
+    // Subscribe to channel and send stream request
+    channel.subscribe((status) => {
+      console.log(`[WebRTC-Admin] Channel subscribe status: ${status}`);
+      if (status === "SUBSCRIBED") {
+        console.log("[WebRTC-Admin] Requesting stream from student...");
+        // Wait briefly for candidate subscription to be ready
+        setTimeout(() => {
+          channel.send({
+            type: "broadcast",
+            event: "request-stream",
+            payload: {},
+          });
+        }, 500);
+      }
+    });
+
+    // Re-request stream periodically if not connected yet
+    const interval = setInterval(() => {
+      if (peerConnectionRef.current && (peerConnectionRef.current.iceConnectionState === "connected" || peerConnectionRef.current.iceConnectionState === "completed")) {
+        return;
+      }
+      console.log("[WebRTC-Admin] Retrying stream request...");
+      channel.send({
+        type: "broadcast",
+        event: "request-stream",
+        payload: {},
+      });
+    }, 5000);
+
+    return () => {
+      console.log(`[WebRTC-Admin] Cleaning up for attempt: ${attempt.id}`);
+      clearInterval(interval);
+      channel.unsubscribe();
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+      setRemoteStream(null);
+      setIsLiveVideo(false);
+    };
+  }, [attempt.id, isOnline, attempt.status, attempt.camera_snapshot]);
+
+  // Bind video element srcObject
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
+
+  return (
+    <div
+      className={`rounded-2xl border ${
+        attempt.warnings >= 2
+          ? "border-destructive bg-destructive/5"
+          : "border-border bg-card"
+      } overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col`}
+    >
+      {/* Camera Screen container */}
+      <div className="aspect-video bg-zinc-950 relative overflow-hidden flex items-center justify-center">
+        {isLiveVideo && remoteStream ? (
+          <div className="w-full h-full relative">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover scale-x-[-1] transition-all duration-300"
+            />
+          </div>
+        ) : attempt.camera_snapshot && attempt.camera_snapshot !== "simulated" ? (
+          <div className="w-full h-full relative">
+            <img
+              src={attempt.camera_snapshot}
+              className={`w-full h-full object-cover scale-x-[-1] transition-all duration-300 ${
+                !isOnline ? "opacity-40 blur-[2px]" : "opacity-100"
+              }`}
+              alt="Candidate Proctor Snapshot"
+            />
+            {!isOnline && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[1px] z-20">
+                <VideoOff className="h-6 w-6 text-destructive/80 animate-pulse mb-1.5" />
+                <span className="text-[9px] font-bold text-destructive uppercase tracking-widest">
+                  FEED DISCONNECTED
+                </span>
+                <span className="text-[7px] text-muted-foreground mt-0.5 font-mono">
+                  Last updated:{" "}
+                  {attempt.camera_updated_at
+                    ? new Date(attempt.camera_updated_at).toLocaleTimeString()
+                    : "never"}
+                </span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center p-3 relative w-full h-full flex flex-col justify-center items-center">
+            {/* Biometric dynamic backdrop */}
+            <div className="absolute inset-0 opacity-10 flex flex-wrap gap-1 items-center justify-center text-[5px] font-mono select-none pointer-events-none">
+              {Array.from({ length: 48 }).map((_, i) => (
+                <span key={i} className={i % 4 === 0 ? "text-emerald-500" : ""}>
+                  {Math.random() > 0.5 ? "1" : "0"}
+                </span>
+              ))}
+            </div>
+            <Activity className="h-7 w-7 text-emerald-400 animate-pulse mb-2 z-10" />
+            <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest z-10">
+              {attempt.camera_snapshot === "simulated"
+                ? "SECURE FEED ACTIVE"
+                : "SIGNALING TUNNEL..."}
+            </div>
+            <div className="text-[8px] text-muted-foreground mt-0.5 z-10">
+              {attempt.camera_snapshot === "simulated"
+                ? "Face scanning & tracking simulated"
+                : "Waiting for student camera feed..."}
+            </div>
+            {/* Scanning bar for mock proctoring */}
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-primary/25 shadow-[0_0_6px_#3b82f6] animate-[scan_3s_linear_infinite]" />
+          </div>
+        )}
+
+        {/* CRT scanline overlay effect */}
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,rgba(255,255,255,0),rgba(255,255,255,0)_50%,rgba(0,0,0,0.15)_50%,rgba(0,0,0,0.15))] bg-[length:100%_4px] z-10" />
+
+        {/* Overlay header controls */}
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 bg-black/60 px-2 py-0.5 rounded-md text-[8px] font-bold z-20">
+          {isLiveVideo && remoteStream ? (
+            <>
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+              <span className="text-emerald-400 font-black">LIVE VIDEO</span>
+              <span className="text-zinc-500">|</span>
+              <span className="text-emerald-400 font-mono">1080p</span>
+            </>
+          ) : isOnline ? (
+            <>
+              <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-ping" />
+              <span className="text-destructive font-black">REC</span>
+              <span className="text-zinc-500">|</span>
+              <span className="text-emerald-400">SNAPSHOT</span>
+            </>
+          ) : (
+            <>
+              <span className="h-1.5 w-1.5 rounded-full bg-zinc-500" />
+              <span className="text-zinc-400 font-bold">OFFLINE</span>
+            </>
+          )}
+        </div>
+
+        {attempt.warnings > 0 && (
+          <div className="absolute top-2.5 right-2.5 bg-destructive/95 text-destructive-foreground px-2 py-0.5 rounded-md text-[8px] font-bold flex items-center gap-1 z-20 animate-bounce">
+            <AlertTriangle className="h-2.5 w-2.5" /> {attempt.warnings} WARN
+          </div>
+        )}
+
+        {/* Center face recognition guide overlay */}
+        <div className="absolute inset-0 border border-emerald-500/20 m-4 pointer-events-none z-10">
+          <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-emerald-500/50" />
+          <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-emerald-500/50" />
+          <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-emerald-500/50" />
+          <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-emerald-500/50" />
+          <div className="absolute inset-0 m-auto w-16 h-20 border border-dashed border-emerald-500/30 rounded-[50%] flex items-center justify-center">
+            <span className="text-[6px] text-emerald-400/30 tracking-widest font-mono">
+              LOCK-ON
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Proctor info bar */}
+      <div className="p-4 flex-1 flex flex-col justify-between bg-muted/20">
+        <div>
+          <div className="flex items-center justify-between">
+            <div className="font-semibold text-sm truncate max-w-[130px]">
+              {attempt.candidate}
+            </div>
+            <span className="font-mono text-[9px] bg-muted px-1.5 py-0.5 rounded border border-border text-muted-foreground">
+              {attempt.access_code || "no code"}
+            </span>
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
+            {attempt.quiz_title}
+          </div>
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-[9px] font-mono">
+          <span className="flex items-center gap-1">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${attempt.status === "in_progress" ? "bg-emerald-400 animate-pulse" : "bg-zinc-400"}`}
+            />
+            {attempt.status.toUpperCase().replace("_", " ")}
+          </span>
+          <span>
+            EYES:{" "}
+            <b className={attempt.warnings >= 2 ? "text-destructive" : "text-emerald-400"}>
+              {attempt.warnings >= 2 ? "UNSTEADY" : "LOCKED"}
+            </b>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function LiveDashboard() {
@@ -169,138 +473,7 @@ function LiveDashboard() {
                 </div>
               )}
               {attempts.map((a) => (
-                <div
-                  key={a.id}
-                  className={`rounded-2xl border ${
-                    a.warnings >= 2
-                      ? "border-destructive bg-destructive/5"
-                      : "border-border bg-card"
-                  } overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col`}
-                >
-                  {/* Camera Screen container */}
-                  <div className="aspect-video bg-zinc-950 relative overflow-hidden flex items-center justify-center">
-                    {a.camera_snapshot && a.camera_snapshot !== "simulated" ? (
-                      <div className="w-full h-full relative">
-                        <img
-                          src={a.camera_snapshot}
-                          className={`w-full h-full object-cover scale-x-[-1] transition-all duration-300 ${
-                            !isCameraOnline(a) ? "opacity-40 blur-[2px]" : "opacity-100"
-                          }`}
-                          alt="Candidate Proctor Snapshot"
-                        />
-                        {!isCameraOnline(a) && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[1px] z-20">
-                            <VideoOff className="h-6 w-6 text-destructive/80 animate-pulse mb-1.5" />
-                            <span className="text-[9px] font-bold text-destructive uppercase tracking-widest">
-                              FEED DISCONNECTED
-                            </span>
-                            <span className="text-[7px] text-muted-foreground mt-0.5 font-mono">
-                              Last updated:{" "}
-                              {a.camera_updated_at
-                                ? new Date(a.camera_updated_at).toLocaleTimeString()
-                                : "never"}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center p-3 relative w-full h-full flex flex-col justify-center items-center">
-                        {/* Biometric dynamic backdrop */}
-                        <div className="absolute inset-0 opacity-10 flex flex-wrap gap-1 items-center justify-center text-[5px] font-mono select-none pointer-events-none">
-                          {Array.from({ length: 48 }).map((_, i) => (
-                            <span key={i} className={i % 4 === 0 ? "text-emerald-500" : ""}>
-                              {Math.random() > 0.5 ? "1" : "0"}
-                            </span>
-                          ))}
-                        </div>
-                        <Activity className="h-7 w-7 text-emerald-400 animate-pulse mb-2 z-10" />
-                        <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest z-10">
-                          {a.camera_snapshot === "simulated"
-                            ? "SECURE FEED ACTIVE"
-                            : "SIGNALING TUNNEL..."}
-                        </div>
-                        <div className="text-[8px] text-muted-foreground mt-0.5 z-10">
-                          {a.camera_snapshot === "simulated"
-                            ? "Face scanning & tracking simulated"
-                            : "Waiting for student camera feed..."}
-                        </div>
-                        {/* Scanning bar for mock proctoring */}
-                        <div className="absolute inset-x-0 top-0 h-0.5 bg-primary/25 shadow-[0_0_6px_#3b82f6] animate-[scan_3s_linear_infinite]" />
-                      </div>
-                    )}
-
-                    {/* CRT scanline overlay effect */}
-                    <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,rgba(255,255,255,0),rgba(255,255,255,0)_50%,rgba(0,0,0,0.15)_50%,rgba(0,0,0,0.15))] bg-[length:100%_4px] z-10" />
-
-                    {/* Overlay header controls */}
-                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 bg-black/60 px-2 py-0.5 rounded-md text-[8px] font-bold z-20">
-                      {isCameraOnline(a) ? (
-                        <>
-                          <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-ping" />
-                          <span className="text-destructive font-black">REC</span>
-                          <span className="text-zinc-500">|</span>
-                          <span className="text-emerald-400">LIVE</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="h-1.5 w-1.5 rounded-full bg-zinc-500" />
-                          <span className="text-zinc-400 font-bold">OFFLINE</span>
-                        </>
-                      )}
-                    </div>
-
-                    {a.warnings > 0 && (
-                      <div className="absolute top-2.5 right-2.5 bg-destructive/95 text-destructive-foreground px-2 py-0.5 rounded-md text-[8px] font-bold flex items-center gap-1 z-20 animate-bounce">
-                        <AlertTriangle className="h-2.5 w-2.5" /> {a.warnings} WARN
-                      </div>
-                    )}
-
-                    {/* Center face recognition guide overlay */}
-                    <div className="absolute inset-0 border border-emerald-500/20 m-4 pointer-events-none z-10">
-                      <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-emerald-500/50" />
-                      <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t-2 border-r-2 border-emerald-500/50" />
-                      <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b-2 border-l-2 border-emerald-500/50" />
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b-2 border-r-2 border-emerald-500/50" />
-                      <div className="absolute inset-0 m-auto w-16 h-20 border border-dashed border-emerald-500/30 rounded-[50%] flex items-center justify-center">
-                        <span className="text-[6px] text-emerald-400/30 tracking-widest font-mono">
-                          LOCK-ON
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Proctor info bar */}
-                  <div className="p-4 flex-1 flex flex-col justify-between bg-muted/20">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <div className="font-semibold text-sm truncate max-w-[130px]">
-                          {a.candidate}
-                        </div>
-                        <span className="font-mono text-[9px] bg-muted px-1.5 py-0.5 rounded border border-border text-muted-foreground">
-                          {a.access_code || "no code"}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
-                        {a.quiz_title}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-[9px] font-mono">
-                      <span className="flex items-center gap-1">
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${a.status === "in_progress" ? "bg-emerald-400 animate-pulse" : "bg-zinc-400"}`}
-                        />
-                        {a.status.toUpperCase().replace("_", " ")}
-                      </span>
-                      <span>
-                        EYES:{" "}
-                        <b className={a.warnings >= 2 ? "text-destructive" : "text-emerald-400"}>
-                          {a.warnings >= 2 ? "UNSTEADY" : "LOCKED"}
-                        </b>
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <AdminCameraFeed key={a.id} attempt={a} isOnline={isCameraOnline(a)} />
               ))}
               <style>{`
                 @keyframes scan {
