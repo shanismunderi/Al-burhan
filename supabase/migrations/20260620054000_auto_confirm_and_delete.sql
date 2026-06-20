@@ -3,7 +3,6 @@ CREATE OR REPLACE FUNCTION public.auto_confirm_user_email()
 RETURNS TRIGGER AS $$
 BEGIN
   NEW.email_confirmed_at = COALESCE(NEW.email_confirmed_at, now());
-  NEW.confirmed_at = COALESCE(NEW.confirmed_at, now());
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -31,5 +30,5 @@ CREATE TRIGGER on_profile_deleted
 
 -- 3. Confirm any existing unconfirmed users
 UPDATE auth.users
-SET email_confirmed_at = NOW(), confirmed_at = NOW()
+SET email_confirmed_at = NOW()
 WHERE email_confirmed_at IS NULL;
